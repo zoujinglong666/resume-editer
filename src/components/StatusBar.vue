@@ -1,0 +1,44 @@
+<template>
+  <div class="app-statusbar no-print shrink-0">
+    <!-- Left -->
+    <div class="flex items-center gap-4">
+      <span>完成度 {{ store.overallCompletion }}%</span>
+      <span class="save-status-dot" :class="store.saveStatus" style="display: inline-block;" />
+    </div>
+
+    <!-- Center -->
+    <div class="flex items-center gap-3">
+      <template v-for="(phase, idx) in phases" :key="phase.key">
+        <span class="flex items-center gap-1.5">
+          <span
+            class="inline-block w-2 h-2 rounded-full"
+            :class="{
+              'bg-green-500': phaseOrder.indexOf(store.currentPhase) > idx,
+              'bg-[var(--primary-500)]': store.currentPhase === phase.key,
+              'bg-gray-600': phaseOrder.indexOf(store.currentPhase) < idx
+            }"
+          />
+          {{ phase.label }}
+        </span>
+        <span v-if="idx < phases.length - 1" style="color: var(--sidebar-border);">·</span>
+      </template>
+    </div>
+
+    <!-- Right -->
+    <span>模块 {{ store.modules.length }} · {{ charCount }} 字符</span>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useResumeStore } from '../stores/resume'
+
+defineProps<{ charCount: number }>()
+const store = useResumeStore()
+
+const phases = [
+  { key: 'fill' as const, label: '填写' },
+  { key: 'style' as const, label: '定制' },
+  { key: 'export' as const, label: '导出' },
+]
+const phaseOrder = phases.map(p => p.key)
+</script>
