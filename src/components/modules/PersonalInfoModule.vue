@@ -85,7 +85,8 @@
         :data-placeholder="'个人简介，简要介绍你的背景和优势...'"
         @blur="updateField(item.id, 'summary', $event)"
         @paste="onPaste"
-      >{{ item.summary }}</div>
+        v-sync-html="item.summary"
+      ></div>
     </div>
   </div>
 </template>
@@ -97,8 +98,18 @@ import type { ResumeModule } from '../../types'
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
 
+const RICH_FIELDS = ['description', 'summary', 'content']
+
+function normalizeHtml(html: string): string {
+  if (!html || html === '<br>' || html === '<div><br></div>' || html === '<p><br></p>') return ''
+  return html
+}
+
 function updateField(itemId: string, field: string, e: FocusEvent) {
-  const value = (e.target as HTMLElement).innerText
+  const target = e.target as HTMLElement
+  const isRich = RICH_FIELDS.includes(field)
+  const raw = isRich ? target.innerHTML : target.innerText
+  const value = isRich ? normalizeHtml(raw) : raw
   store.updateItem(props.module.id, itemId, field, value)
 }
 

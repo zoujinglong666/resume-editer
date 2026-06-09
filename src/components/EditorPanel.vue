@@ -93,15 +93,12 @@
                 :class="{ 'field-required': isRequired(store.selectedModule!.type, key) }"
               >
                 <span class="editor-label">{{ getFieldLabel(store.selectedModule!.type, key) }}</span>
-                <textarea
+                <RichTextEditor
                   v-if="isLongField(key)"
-                  :value="val"
-                  rows="3"
-                  @input="store.updateItem(store.selectedModule!.id, item.id, key, ($event.target as HTMLTextAreaElement).value)"
-                  class="editor-input editor-textarea"
-                  :class="{ 'field-input-error': isRequired(store.selectedModule!.type, key) && !val.trim() }"
+                  :model-value="val"
                   :placeholder="getFieldPlaceholder(store.selectedModule!.type, key)"
-                ></textarea>
+                  @update:model-value="store.updateItem(store.selectedModule!.id, item.id, key, $event)"
+                />
                 <input
                   v-else
                   type="text"
@@ -155,6 +152,7 @@ import { useResumeStore } from '../stores/resume'
 import type { ModuleType } from '../types'
 import ContextMenu from './ContextMenu.vue'
 import type { ContextMenuItem } from './ContextMenu.vue'
+import RichTextEditor from './RichTextEditor.vue'
 
 const store = useResumeStore()
 

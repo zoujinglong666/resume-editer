@@ -15,7 +15,8 @@
         :data-placeholder="'支持富文本内容...'"
         @blur="updateField(item.id, 'content', $event)"
         @paste="onPaste"
-      >{{ item.content }}</div>
+        v-sync-html="item.content"
+      ></div>
     </div>
 
     <!-- Item Context Menu -->
@@ -116,8 +117,18 @@ function onItemMenuClose() {
 }
 
 // ---- Field Update ----
+const RICH_FIELDS = ['description', 'summary', 'content']
+
+function normalizeHtml(html: string): string {
+  if (!html || html === '<br>' || html === '<div><br></div>' || html === '<p><br></p>') return ''
+  return html
+}
+
 function updateField(itemId: string, field: string, e: FocusEvent) {
-  const value = (e.target as HTMLElement).innerText
+  const target = e.target as HTMLElement
+  const isRich = RICH_FIELDS.includes(field)
+  const raw = isRich ? target.innerHTML : target.innerText
+  const value = isRich ? normalizeHtml(raw) : raw
   store.updateItem(props.module.id, itemId, field, value)
 }
 

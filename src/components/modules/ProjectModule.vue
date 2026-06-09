@@ -38,21 +38,26 @@
         :data-placeholder="'项目简介和技术栈...'"
         @blur="updateField(item.id, 'description', $event)"
         @paste="onPaste"
-      >{{ item.description }}</div>
+        v-sync-html="item.description"
+      ></div>
 
       <div class="mt-1">
-        <span
+        <a
           v-if="item.link"
-          class="text-sm text-[var(--accent-color)]"
-        >🔗 {{ item.link }}</span>
+          :href="String(item.link)"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="item-link"
+        >🔗 {{ item.link }}</a>
+        <!-- 编辑态占位符：仅在编辑模式下显示，导出时隐藏 -->
         <span
           v-else
-          class="item-date text-sm opacity-50"
+          class="item-date text-sm opacity-50 no-print"
           contenteditable="true"
           :data-placeholder="'项目链接（可选）'"
           @blur="updateField(item.id, 'link', $event)"
           @paste="onPaste"
-        >{{ item.link }}</span>
+        ></span>
       </div>
     </div>
 
@@ -154,8 +159,18 @@ function onItemMenuClose() {
 }
 
 // ---- Field Update ----
+const RICH_FIELDS = ['description', 'summary', 'content']
+
+function normalizeHtml(html: string): string {
+  if (!html || html === '<br>' || html === '<div><br></div>' || html === '<p><br></p>') return ''
+  return html
+}
+
 function updateField(itemId: string, field: string, e: FocusEvent) {
-  const value = (e.target as HTMLElement).innerText
+  const target = e.target as HTMLElement
+  const isRich = RICH_FIELDS.includes(field)
+  const raw = isRich ? target.innerHTML : target.innerText
+  const value = isRich ? normalizeHtml(raw) : raw
   store.updateItem(props.module.id, itemId, field, value)
 }
 

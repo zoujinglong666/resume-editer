@@ -435,12 +435,11 @@ html, body, #app {
 .a4-canvas [contenteditable="true"],
 .a4-canvas .project-desc,
 .a4-canvas .exp-description {
-  overflow-wrap: anywhere;
-  word-break: break-all;
-  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  white-space: normal;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
 }
 
 .a4-canvas .module-title,
@@ -623,6 +622,20 @@ html, body, #app {
   margin-top: var(--space-2);
 }
 
+.a4-canvas .item-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--primary-500);
+  text-decoration: none;
+  margin-top: var(--space-1);
+  word-break: break-all;
+}
+.a4-canvas .item-link:hover {
+  text-decoration: underline;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Personal Info Section (A4)
    ═══════════════════════════════════════════════════════════════ */
@@ -692,6 +705,59 @@ html, body, #app {
   color: var(--text-secondary);
   line-height: var(--line-height-relaxed);
   margin-top: var(--space-3);
+}
+
+/* Rich text content — ensure formatted text renders correctly on canvas */
+.a4-canvas .item-desc b,
+.a4-canvas .item-desc strong,
+.a4-canvas .personal-summary b,
+.a4-canvas .personal-summary strong,
+.a4-canvas .custom-content b,
+.a4-canvas .custom-content strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.a4-canvas .item-desc i,
+.a4-canvas .item-desc em,
+.a4-canvas .personal-summary i,
+.a4-canvas .personal-summary em,
+.a4-canvas .custom-content i,
+.a4-canvas .custom-content em {
+  font-style: italic;
+}
+.a4-canvas .item-desc u,
+.a4-canvas .personal-summary u,
+.a4-canvas .custom-content u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.a4-canvas .item-desc s,
+.a4-canvas .item-desc strike,
+.a4-canvas .personal-summary s,
+.a4-canvas .personal-summary strike,
+.a4-canvas .custom-content s,
+.a4-canvas .custom-content strike {
+  text-decoration: line-through;
+}
+.a4-canvas .item-desc a,
+.a4-canvas .personal-summary a,
+.a4-canvas .custom-content a {
+  color: var(--primary-500);
+  text-decoration: underline;
+}
+.a4-canvas .item-desc ul,
+.a4-canvas .item-desc ol,
+.a4-canvas .personal-summary ul,
+.a4-canvas .personal-summary ol,
+.a4-canvas .custom-content ul,
+.a4-canvas .custom-content ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+.a4-canvas .item-desc li,
+.a4-canvas .personal-summary li,
+.a4-canvas .custom-content li {
+  margin: 3px 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1486,9 +1552,9 @@ html, body, #app {
 .export-clean .custom-content,
 .export-clean .project-desc,
 .export-clean .exp-description {
-  overflow-wrap: anywhere !important;
-  word-break: break-all !important;
-  white-space: pre-wrap !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+  white-space: normal !important;
   overflow: visible !important;
   width: 100% !important;
 }
@@ -1517,6 +1583,50 @@ html, body, #app {
 .export-clean .personal-contact-item {
   white-space: nowrap !important;
   overflow: visible !important;
+}
+
+/* Rich text in export */
+.export-clean .item-desc b,
+.export-clean .item-desc strong,
+.export-clean .personal-summary b,
+.export-clean .personal-summary strong,
+.export-clean .custom-content b,
+.export-clean .custom-content strong {
+  font-weight: 600;
+}
+.export-clean .item-desc i,
+.export-clean .item-desc em,
+.export-clean .personal-summary i,
+.export-clean .personal-summary em,
+.export-clean .custom-content i,
+.export-clean .custom-content em {
+  font-style: italic;
+}
+.export-clean .item-desc u,
+.export-clean .personal-summary u,
+.export-clean .custom-content u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.export-clean .item-desc a,
+.export-clean .personal-summary a,
+.export-clean .custom-content a {
+  color: inherit;
+  text-decoration: underline;
+}
+.export-clean .item-desc ul,
+.export-clean .item-desc ol,
+.export-clean .personal-summary ul,
+.export-clean .personal-summary ol,
+.export-clean .custom-content ul,
+.export-clean .custom-content ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.export-clean .item-desc li,
+.export-clean .personal-summary li,
+.export-clean .custom-content li {
+  margin: 2px 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
