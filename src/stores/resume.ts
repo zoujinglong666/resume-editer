@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import type { ResumeData, ResumeModule, ResumeConfig, AvatarConfig, ThemePreset } from '../types'
+import type { ResumeData, ResumeModule, ResumeConfig, AvatarConfig, ThemePreset, ModuleItem, ModuleType } from '../types'
 
 // ===== Helper: generate UUID =====
 function uuid(): string {
