@@ -101,7 +101,7 @@
 import { ref, watch, nextTick } from 'vue'
 import draggable from 'vuedraggable'
 import { useResumeStore } from '../stores/resume'
-import type { ResumeModule } from '../types'
+// ResumeModule type not used directly in template
 import PersonalInfoModule from './modules/PersonalInfoModule.vue'
 import EducationModule from './modules/EducationModule.vue'
 import ExperienceModule from './modules/ExperienceModule.vue'

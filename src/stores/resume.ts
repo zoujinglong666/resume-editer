@@ -531,6 +531,7 @@ export const useResumeStore = defineStore('resume', () => {
     canUndo, canRedo,
     selectModule, setPhase, markSaving,
     applyTheme, applyCssVars, applyCssVarsFromConfig, setPrimaryColor, setTitleStyle,
+    updateModule, updateItem, addItem, removeItem,
     duplicateItem, moveItem, removeModule, addModule,
     toggleModuleVisibility, reorderModules, setAvatar,
     undo, redo,
