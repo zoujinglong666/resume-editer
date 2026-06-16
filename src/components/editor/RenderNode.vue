@@ -124,7 +124,8 @@
             <!-- Skill -->
             <template v-else-if="element.moduleType === 'skill'">
               <div v-if="item.content" class="skill-list-row">
-                <strong>{{ item.name }}</strong>：{{ item.content }}
+                <strong>{{ item.name }}</strong>：
+                <span v-html="formatDesc(item.content)"></span>
               </div>
               <div v-else class="skill-compact">{{ item.name }}</div>
             </template>
@@ -411,21 +412,58 @@ function formatDesc(text: string): string {
   }
   // Convert markdown bold **text** to <strong>text</strong>
   let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-  // Detect numbered/bulleted lines and convert to HTML lists
+  // Split into lines and detect numbered/bulleted sections
   const lines = html.split(/\n/).map(l => l.trim()).filter(Boolean)
   if (lines.length >= 2) {
     const numberedRe = /^\s*[\(（]?\d{1,3}[\)）]?\s*[.、．。\)）]\s*/
     const bulletRe = /^\s*[•\-*·●◦▪▸►]\s*/
+    // Find contiguous list item lines (allow 1 non-list gap for section headers like "主要工作：")
+    let listStart = -1
+    let listEnd = -1
+    let isNumberedList = false
+    for (let i = 0; i < lines.length; i++) {
+      if (numberedRe.test(lines[i])) {
+        if (listStart === -1) listStart = i
+        listEnd = i
+        isNumberedList = true
+      } else if (bulletRe.test(lines[i])) {
+        if (listStart === -1) listStart = i
+        listEnd = i
+      }
+    }
+    // Count list vs non-list lines
     const numCount = lines.filter(l => numberedRe.test(l)).length
     const bulCount = lines.filter(l => bulletRe.test(l)).length
-    const ratio = Math.max(numCount, bulCount) / lines.length
-    if (ratio >= 0.5) {
+    const listCount = numCount + bulCount
+    // If majority of lines are list items, convert all (old behavior)
+    if (listCount / lines.length >= 0.5) {
       const strip = (l: string) => l.replace(numberedRe, '').replace(bulletRe, '').trim()
       if (numCount >= bulCount) {
         return `<ol>${lines.map(l => `<li>${strip(l)}</li>`).join('')}</ol>`
       } else {
         return `<ul>${lines.map(l => `<li>${strip(l)}</li>`).join('')}</ul>`
       }
+    }
+    // Mixed content: intro paragraphs + list section
+    if (listStart !== -1 && listCount >= 2) {
+      const introLines = lines.slice(0, listStart)
+      const listLines = lines.slice(listStart, listEnd + 1)
+      const strip = (l: string) => l.replace(numberedRe, '').replace(bulletRe, '').trim()
+      let result = ''
+      if (introLines.length > 0) {
+        result += `<p>${introLines.join('<br/>')}</p>`
+      }
+      if (isNumberedList && numCount >= bulCount) {
+        result += `<ol>${listLines.map(l => `<li>${strip(l)}</li>`).join('')}</ol>`
+      } else {
+        result += `<ul>${listLines.map(l => `<li>${strip(l)}</li>`).join('')}</ul>`
+      }
+      // Any trailing lines after list
+      const trailing = lines.slice(listEnd + 1)
+      if (trailing.length > 0) {
+        result += `<p>${trailing.join('<br/>')}</p>`
+      }
+      return result
     }
   }
   // Fallback: convert newlines to <br/>
@@ -708,6 +746,10 @@ function onItemInput(_e: InputEvent) {
   color: var(--text-primary, #333333);
   font-weight: 600;
 }
+.item-desc :deep(p) {
+  margin: 4px 0 8px;
+  line-height: 1.7;
+}
 
 /* Link styling */
 .item-link {
@@ -790,6 +832,25 @@ function onItemInput(_e: InputEvent) {
 .skill-list-row strong {
   color: var(--text-primary, #333333);
   font-weight: 600;
+}
+.skill-list-row :deep(ol),
+.skill-list-row :deep(ul) {
+  margin: 2px 0;
+  padding-left: 1.4em;
+}
+.skill-list-row :deep(li) {
+  margin-bottom: 2px;
+  line-height: 1.7;
+}
+.skill-list-row :deep(li:last-child) {
+  margin-bottom: 0;
+}
+.skill-list-row :deep(ol > li)::marker {
+  color: var(--primary-color, #4f46e5);
+  font-weight: 600;
+}
+.skill-list-row :deep(p) {
+  margin: 2px 0;
 }
 
 /* Strength module (能力标签：量化事实) */

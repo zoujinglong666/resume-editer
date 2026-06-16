@@ -216,5 +216,6 @@ function skillWidth(level: string | boolean | undefined): string {
 
 .skill-list-keywords {
   color: var(--text-secondary);
+  white-space: pre-wrap;
 }
 </style>

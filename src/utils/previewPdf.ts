@@ -6,6 +6,58 @@ import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import type { ResumeModule, AvatarConfig, ResumeConfig } from '../types'
 
+/** Format plain text description: detect numbered/bulleted lines and convert to HTML lists */
+function formatDesc(text: string): string {
+  if (!text) return ''
+  if (/<[uo]l[\s>]/i.test(text)) return text
+  let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+  const lines = html.split(/\n/).map(l => l.trim()).filter(Boolean)
+  if (lines.length >= 2) {
+    const numberedRe = /^\s*[\(（]?\d{1,3}[\)）]?\s*[.、．。\)）]\s*/
+    const bulletRe = /^\s*[•\-*·●◦▪▸►]\s*/
+    let listStart = -1
+    let listEnd = -1
+    let isNumberedList = false
+    for (let i = 0; i < lines.length; i++) {
+      if (numberedRe.test(lines[i])) {
+        if (listStart === -1) listStart = i
+        listEnd = i
+        isNumberedList = true
+      } else if (bulletRe.test(lines[i])) {
+        if (listStart === -1) listStart = i
+        listEnd = i
+      }
+    }
+    const numCount = lines.filter(l => numberedRe.test(l)).length
+    const bulCount = lines.filter(l => bulletRe.test(l)).length
+    const listCount = numCount + bulCount
+    if (listCount / lines.length >= 0.5) {
+      const strip = (l: string) => l.replace(numberedRe, '').replace(bulletRe, '').trim()
+      if (numCount >= bulCount) {
+        return `<ol>${lines.map(l => `<li>${strip(l)}</li>`).join('')}</ol>`
+      } else {
+        return `<ul>${lines.map(l => `<li>${strip(l)}</li>`).join('')}</ul>`
+      }
+    }
+    if (listStart !== -1 && listCount >= 2) {
+      const introLines = lines.slice(0, listStart)
+      const listLines = lines.slice(listStart, listEnd + 1)
+      const strip = (l: string) => l.replace(numberedRe, '').replace(bulletRe, '').trim()
+      let result = ''
+      if (introLines.length > 0) result += `<p>${introLines.join('<br/>')}</p>`
+      if (isNumberedList && numCount >= bulCount) {
+        result += `<ol>${listLines.map(l => `<li>${strip(l)}</li>`).join('')}</ol>`
+      } else {
+        result += `<ul>${listLines.map(l => `<li>${strip(l)}</li>`).join('')}</ul>`
+      }
+      const trailing = lines.slice(listEnd + 1)
+      if (trailing.length > 0) result += `<p>${trailing.join('<br/>')}</p>`
+      return result
+    }
+  }
+  return html.replace(/\n/g, '<br/>')
+}
+
 function renderItemHtml(type: string, item: any): string {
   switch (type) {
     case 'personal': {
@@ -30,7 +82,7 @@ function renderItemHtml(type: string, item: any): string {
       h += `</div>`
       const sub = [item.degree, item.major].filter(Boolean).join(' · ')
       if (sub) h += `<div class="preview-item-sub">${sub}</div>`
-      if (item.description) h += `<div class="preview-item-desc">${item.description}</div>`
+      if (item.description) h += `<div class="preview-item-desc">${formatDesc(item.description)}</div>`
       return h + '</div>'
     }
     case 'experience': {
@@ -40,7 +92,7 @@ function renderItemHtml(type: string, item: any): string {
       if (item.dateRange) h += `<span class="preview-item-date">${item.dateRange}</span>`
       h += `</div>`
       if (item.position) h += `<div class="preview-item-sub">${item.position}</div>`
-      if (item.description) h += `<div class="preview-item-desc">${item.description}</div>`
+      if (item.description) h += `<div class="preview-item-desc">${formatDesc(item.description)}</div>`
       return h + '</div>'
     }
     case 'project': {
@@ -50,7 +102,7 @@ function renderItemHtml(type: string, item: any): string {
       if (item.dateRange) h += `<span class="preview-item-date">${item.dateRange}</span>`
       h += `</div>`
       if (item.role) h += `<div class="preview-item-sub">${item.role}</div>`
-      if (item.description) h += `<div class="preview-item-desc">${item.description}</div>`
+      if (item.description) h += `<div class="preview-item-desc">${formatDesc(item.description)}</div>`
       if (item.link) h += `<div class="preview-item-link">🔗 ${item.link}</div>`
       return h + '</div>'
     }
@@ -58,7 +110,7 @@ function renderItemHtml(type: string, item: any): string {
       let h = '<div class="preview-item">'
       if (item.name) {
         h += `<span class="preview-skill-name">${item.name}</span>`
-        if (item.content) h += `<span class="preview-skill-sep">：</span><span class="preview-skill-content">${item.content}</span>`
+        if (item.content) h += `<span class="preview-skill-sep">：</span><span class="preview-skill-content">${formatDesc(item.content)}</span>`
       }
       if (item.level && !item.content) h += `<span class="preview-skill-level">${item.level}</span>`
       return h + '</div>'
@@ -72,7 +124,7 @@ function renderItemHtml(type: string, item: any): string {
     default: {
       let h = '<div class="preview-item">'
       if (item.title) h += `<div class="preview-item-title">${item.title}</div>`
-      if (item.content || item.description) h += `<div class="preview-item-desc">${item.content || item.description}</div>`
+      if (item.content || item.description) h += `<div class="preview-item-desc">${formatDesc(item.content || item.description || '')}</div>`
       return h + '</div>'
     }
   }

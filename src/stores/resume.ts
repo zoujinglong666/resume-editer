@@ -63,13 +63,17 @@ function createDefaultPersonalFields(): PersonalFieldConfig[] {
   ]
 }
 
+// ===== Content Version for Migration =====
+// Bump this when updating default template content format
+const CURRENT_CONTENT_VERSION = 2
+
 // ===== Shared Default Resume Data =====
 // Single source of truth for default template content
 // Organized following the "codefather" resume structure:
 // 个人信息 → 教育经历 → 专业技能 → 工作经历 → 项目经历 → 个人优势
 const DEFAULT_RESUME_CONTENT = {
   name: '李鱼皮',
-  position: '前端开发（AI Agent 应用方向）｜3 年工作经验',
+  position: 'Java 后端 + AI 应用开发｜3 年工作经验',
   phone: '138xxxx8888',
   email: 'yupi@codefather.cn',
   location: '',
@@ -85,35 +89,35 @@ const DEFAULT_RESUME_CONTENT = {
     },
   ],
 
-  // 专业技能：「类别：关键词」列表格式（skill list mode）
+  // 专业技能：「类别 + 分点列表」格式
   skills: [
-    { name: '前端工程化与框架', content: 'React 18+：Hooks、Context、Suspense、Error Boundaries、并发特性，独立设计过中大型项目的前端架构；Next.js：SSR/SSG/ISR，API Routes，中间件，国际化，Image 优化，落地过 2 个日活 10k+ 的 Next.js 项目；构建工具：Webpack 配置优化（splitChunks、externals、Tree Shaking）、Vite 插件开发、ESBuild 接入经验；性能优化：首屏加载时间优化（从 2.1s → 0.9s）、LCP/FID/CLS 指标监控与治理、虚拟滚动处理 5w+ 列表数据；跨端与兼容：Taro 小程序开发，响应式设计（移动端 + PC），多浏览器兼容（Chrome、Safari、微信内置浏览器）' },
-    { name: 'AI 应用前端', content: 'AI 交互模式：流式对话（SSE/WebSocket）、工具调用可视化、多 Agent 协同界面、推理过程展示；AI SDK 封装：设计前端 AI 调用层，支持多模型切换、请求队列、超时重试、本地缓存降级；RAG 前端：文档检索结果高亮、引用溯源、相似度打分可视化、Prompt 调试面板；AI 辅助开发：Cursor / Copilot / Claude Code 深度使用，建立过团队 AI 编程规范，显著提升开发效率（+40%）' },
-    { name: '后端协作与全栈', content: 'Node.js：Express / Fastify 开发 BFF 层，实现接口聚合、SSR 降级、鉴权中间件；数据库：MySQL 基础查询优化、Redis 缓存设计、ElasticSearch 查询 DSL（配合前端搜索）；部署与运维：Docker + Nginx + Serverless（阿里云 FC / Vercel），独立完成前端 CI/CD 流水线（GitHub Actions）' },
+    { name: '开发技术', content: '1. Java8~26 新特性、集合框架、反射、动态代理\n2. Spring Boot3 + MyBatis-Plus、Spring Cloud 微服务\n3. MySQL 数据库设计 / SQL 调优 / 分库分表 / 索引优化 / Druid 监控\n4. Redis 缓存中间件、Caffeine 多级缓存、分布式锁、缓存雪崩/穿透解决方案\n5. Docker 容器化 + Nginx 反向代理部署、Dockerfile 打包、Serverless 上线\n6. Prometheus + Grafana + 阿里云 ARMS 监控告警、JVM 诊断大盘\n7. SEO / 搜索引擎优化 / GEO 生成式引擎优化 / TDK 优化 / AI 推荐排名' },
+    { name: 'AI 应用开发', content: '1. Spring AI、LangChain4j、RAG、MCP、多 Agent 协作\n2. Prompt 工程、PGvector 向量数据库、ETL、文档检索增强\n3. Cursor / Claude Code / GitHub Copilot / MCP Server / Agent Skills\n4. Vibe Coding / SDD / Harness Engineering / Spec-Kit / OpenSpec' },
+    { name: '前端工程化', content: '1. React 18+：Hooks、Context、Suspense、Error Boundaries、并发特性\n2. Next.js：SSR/SSG/ISR，API Routes，中间件，国际化，Image 优化\n3. 构建工具：Webpack 配置优化、Vite 插件开发、ESBuild 接入\n4. 性能优化：首屏加载时间优化、LCP/FID/CLS 指标监控与治理、虚拟滚动\n5. 跨端与兼容：Taro 小程序开发，响应式设计，多浏览器兼容' },
   ],
 
   experience: [
     {
-      company: '老鱼公司', position: '前端 + AI 应用开发',
+      company: '老鱼公司', position: 'Java 后端 + AI 应用开发',
       dateRange: '2023-04 ~ 至今',
-      description: '• **负责产品**：编程导航 codefather.cn (日活 20K 的程序员学习社区)、面试鸭 mianshiya.com (日活 15K 的面试刷题平台)\n\n• **前端架构与工程化**：负责两个高日活产品的前端技术选型与架构设计，基于 Next.js + React + TailwindCSS 搭建组件库和脚手架，制定代码规范（ESLint + Prettier + Husky），落地 Git Flow + PR Review 流程，支撑 6 人前端团队协作。\n\n• **性能优化**：针对知识库目录树渲染性能瓶颈，将递归渲染改为扁平化数据结构 + 虚拟滚动，节点数量从 2000+ 优化到 10000+ 无卡顿；通过 Next.js ISR 实现知识库内容增量更新，首屏加载时间降低 43%。\n\n• **AI 对话组件系统**：设计可复用的 AI 交互 SDK，支持 SSE 流式数据解析、Markdown 实时渲染、代码高亮、工具调用可视化（展示参数、执行状态、返回结果），封装后接入 3 条业务线，开发周期缩短 60%。\n\n• **内容风控管理后台**：基于 WebSocket 实现审核任务实时推送，支持人工复审和自动化违规拦截（98% 拦截率），设计可视化报表展示 AI 审核置信度分布，帮助运营团队效率提升 50%。\n\n• **监控与质量**：接入阿里云 ARMS 前端监控 + Sentry，自定义性能埋点和错误上报，建立 核心 Web 指标告警 和 错误阈值熔断 机制，线上 Bug 发现到修复时长从 2 小时缩短到 20 分钟。\n\n• **AI 接口聚合层（BFF）**：使用 Node.js + Express 搭建 AI 服务网关，统一处理多模型调用、降级和缓存，减少前端对 4 个 AI 后端的直接调用，接口可用性从 97.5% 提升到 99.9%。'
+      description: '负责产品：编程导航 codefather.cn（日活 20K 的程序员学习社区）、面试鸭 mianshiya.com（日活 15K 的面试刷题平台）\n\n主要工作：\n1. 独立完成从需求分析、技术选型、后端开发到部署上线的全流程，支撑共计日均 PV 35K+ 产品的稳定运行\n2. 基于 Spring Cloud 微服务架构搭建统一支付中心，封装支付宝、微信支付、Apple Pay 等多渠道接口，2 小时内完成接入四端支付\n3. 主导统一搜索服务，基于 ElasticSearch + IK 分词 + 热度权重 + 时间衰减因子，搜索结果点击率提升 35%\n4. 构建知识库体系，支持文字 + 视频教程结构化阅读、学习进度追踪、AI 互动式学习；集成 RAG 知识库问答功能\n5. 搭建三层内容风控审核系统（AI 模型 + 规则引擎 + 人工复审），违规内容拦截率提升至 98%\n6. 搭建 Prometheus + Grafana + 阿里云 ARMS 监控体系，实现分布式链路追踪（TraceID），系统故障发现时间从小时级缩短至分钟级\n7. 使用 ElasticSearch + IK 分词 + 热度权重 + 时间衰减因子构建搜索服务；基于 Redis + Caffeine 多级缓存提升接口响应速度\n8. 主导 AI 方向技术选型和落地，基于 Spring AI + LangChain4j 实现 RAG 知识库问答、AI 互动式学习等功能'
     },
   ],
 
-  // 项目经历：重点项目详细展开 + 其他作品紧凑排列
+  // 项目经历：编号列表分点展示，清晰有重点
   projects: [
     {
-      name: 'AI 超级智能体',
-      role: '前端 + 复杂 AI 交互',
+      name: 'AI 超级智能体（AI Agent 项目）',
+      role: '技术负责人 / 核心开发者',
       dateRange: '',
-      description: '开源：github.com/liyupi/yu-ai-agent｜线上：codefather.cn\n\n• 独立完成 零迟滞感 AI 对话界面：基于 EventSource + 自定义缓冲区解决 SSE 分片丢包和换行符问题，实现逐字流式输出，用户感知首字时间 < 200ms。\n\n• 工具调用可视化设计：动态渲染 Agent 调用的工具链（搜索、PDF 生成、计算器等），支持展开 / 折叠参数详情、错误重试入口，用户对 AI 决策理解度提升 70%。\n\n• 前端记忆管理：封装 对话历史压缩算法（按 token 数自动裁剪 + 保留关键上下文），支持多会话本地缓存（IndexedDB），刷新页面或关闭浏览器后秒级恢复上下文。\n\n• RAG 检索展示：对接 PGvector 向量检索，高亮展示引用文档片段和相似度分数，并提供原文跳转链接，用户对答案可信度评分提升 45%。',
+      description: '线上访问：codefather.cn｜GitHub 开源：github.com/liyupi/yu-ai-agent\n\n基于 Spring Boot3 + Spring AI + RAG + MCP 的企业级 AI 智能体，支持多轮对话、记忆持久化、RAG 知识库检索、ReAct 模式自主推理与工具调用，能完成联网搜索、资源下载、PDF 生成、自定义规划等任务。\n\n主要工作：\n1. 基于 Spring AI 框架集成通义、Ollama 等 5 种大模型，统一 API 接口实现灵活切换；Ollama 本地部署处理简单对话，API 调用成本降低 60%\n2. 实现多轮对话记忆功能，基于 Spring AI 的 ChatMemory + Advisor 机制，采用 MySQL + Redis + Kryo 高性能序列化存储，重启后对话恢复率 >99%\n3. 基于 Spring AI 构建完整 RAG 知识库，支持 ETL 处理、PGvector 向量存储、元数据自动打标、多路查询扩展和查询重写，问答准确率比纯模型提升 45%\n4. 通过 @Tool 注解实现联网搜索、页面爬取、PDF 生成、资源下载等 6 种工具，单模型部署即可完成复杂任务；ToolContext 参数校验防止工具链无效执行\n5. 开发基于 Stdio + SSE 传输的图搜 MCP 服务，无服务器部署，支持被其他 AI 项目灵活集成\n6. 参考 OpenManus 设计 Human-in-the-Loop 分层架构，包含步数限制、状态管理和死锁检测机制，保障系统稳定运行\n7. 使用 SseEmitter + CompletableFuture 实现异步 SSE 流式接口，实时输出智能思考和执行过程，用户等待时间缩短 80%；自定义 SSE 数据格式避免编码和字符丢失问题',
       link: 'github.com/liyupi/yu-ai-agent'
     },
     {
-      name: 'AI 热点监控工具',
-      role: '全栈 + Agent Skills 发布',
+      name: 'AI 热点监控工具（AI 应用开发项目）',
+      role: '全栈开发 / 独立项目',
       dateRange: '',
-      description: '开源：github.com/liyupi/yupi-hot-monitor｜线上：codefather.cn\n\n• 全栈独立开发：React + Socket.io + Express + Cheerio，实现 8 个数据源实时采集、AI 过滤和毫秒级 WebSocket 推送。\n\n• 热点订阅与推送：设计关键词订阅引擎，前端维护本地订阅映射表，支持多标签页同步（BroadcastChannel），消息推送到达率 99.97%。\n\n• AI 能力 Skills 化：将热点查询功能封装为 Agent Skills 并发布到 npm，支持 Cursor、Copilot 等 AI 编辑器直接调用，已有 200+ 开发者使用。\n\n• AI 辅助开发实践：项目中 90% 代码由 Cursor + Claude Code 生成，建立 AI 代码 Review 清单，确保生成代码符合团队规范，迭代效率提升 3 倍。',
+      description: '线上访问：codefather.cn｜GitHub 开源：github.com/liyupi/yupi-hot-monitor\n\n基于 Express5 + React19 + OpenRouter + Socket.io 的 AI 热点监控工具，支持多源数据聚合、AI 内容审核、WebSocket 实时推送，可复用于 Cursor / GitHub Copilot 等 AI 编程工具。\n\n主要工作：\n1. 使用 GitHub Copilot + MCP + Agent Skills 进行 AI 辅助开发，遵循企业级 AI 工程化开发流程；90%+ 代码由 AI 生成，显著提升开发效率\n2. 实现 Bing、HackerNews、百度等多源爬虫，基于 Axios + Cheerio；接入第三方 API 实现 Twitter 高级搜索；人工标注样本，数据覆盖度提升 5 倍\n3. 集成 OpenRouter 接入 AI 模型，设计结构化分析 Prompt，进行时效性验证、相关性评分、重要性分类和智能摘要；人工标注测试数据，过滤准确率 >90%\n4. 利用 AI 模型扩展关键词（5~15 个语义变体），召回率提升 300%+；本地缓存避免冗余调用，节省 AI API 费用\n5. 基于 Socket.io 实现事件驱动的关键词订阅，新热点采集后毫秒级推送到订阅客户端\n6. 使用 Skill Creator 将热点监控能力封装为标准化 Agent Skills，集成 10+ 主流 AI 工具，无需后端服务即可开放使用',
       link: 'github.com/liyupi/yupi-hot-monitor'
     }
   ],
@@ -217,10 +221,6 @@ function createDefaultDocument(): ResumeDocument {
     return el('item', { html })
   }
 
-  // Helper: skill bar (single call, no duplication)
-  function _skillBar(name: string, _level: number): ResumeElement {
-    return el('skill-bar', { content: name, style: { fontSize: 13 } })
-  }
 
   // ════════════════════════════════════════════════
   // Build the full AI Agent Engineer resume
@@ -408,6 +408,7 @@ export const useResumeStore = defineStore('resume', () => {
   })
   const avatar = ref<AvatarConfig>({ url: '', shape: 'circle' })
   const modules = ref<ResumeModule[]>(createDefaultModules())
+  const contentVersion = ref<number>(CURRENT_CONTENT_VERSION)
   const lastSaved = ref<string>('')
 
   // ---- New: Panel Coordination State ----
@@ -782,12 +783,10 @@ export const useResumeStore = defineStore('resume', () => {
   }
 
   function resetToDefault() {
-    config.value = {
-      theme: 'default', primaryColor: '#2D5F7C', fontFamily: 'system-ui, -apple-system, sans-serif',
-      fontSize: 14, lineHeight: 1.6, pageMargin: 20, titleStyle: 'underline'
-    }
-    avatar.value = { url: '', shape: 'circle' }
+    config.value = { ...config.value }
+    avatar.value = { ...avatar.value }
     modules.value = createDefaultModules()
+    contentVersion.value = CURRENT_CONTENT_VERSION
     applyTheme('default')
   }
 
@@ -1010,6 +1009,15 @@ export const useResumeStore = defineStore('resume', () => {
   persist: {
     key: 'resume-editor-data',
     storage: localStorage,
-    pick: ['config', 'avatar', 'modules', 'lastSaved', 'selectedModuleId', 'currentPhase', 'docRef', 'useNewModel', 'selectedElementId', 'templates']
+    pick: ['config', 'avatar', 'modules', 'lastSaved', 'selectedModuleId', 'currentPhase', 'docRef', 'useNewModel', 'selectedElementId', 'templates', 'contentVersion'],
+    afterHydrate: (ctx: any) => {
+      // Migrate old persisted data to new content format
+      const version = ctx.store.contentVersion ?? 0
+      if (version < CURRENT_CONTENT_VERSION) {
+        const freshModules = createDefaultModules()
+        ctx.store.modules = freshModules
+        ctx.store.contentVersion = CURRENT_CONTENT_VERSION
+      }
+    }
   }
 })
