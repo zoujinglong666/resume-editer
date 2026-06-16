@@ -280,7 +280,7 @@
 import { ref, computed } from 'vue'
 import draggable from 'vuedraggable'
 import { useResumeStore } from '../stores/resume'
-import type { ModuleType, PersonalFieldConfig } from '../types'
+import type { ModuleType } from '../types'
 import ContextMenu from './ContextMenu.vue'
 import type { ContextMenuItem } from './ContextMenu.vue'
 import RichTextEditor from './RichTextEditor.vue'

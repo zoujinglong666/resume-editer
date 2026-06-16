@@ -41,7 +41,7 @@
       <!-- Preview Area -->
       <div class="resume-preview-scroll" ref="scrollArea">
         <div class="resume-preview-page-wrapper" :style="{ transform: `scale(${zoom})`, transformOrigin: 'top center' }">
-          <div class="resume-preview-page" ref="previewPage">
+          <div class="resume-preview-page">
             <!-- Clone of the actual resume canvas -->
             <div
               class="resume-canvas-preview"
@@ -70,7 +70,6 @@ defineEmits(['close', 'export'])
 const store = useResumeStore()
 const zoom = ref(0.85)
 const scrollArea = ref<HTMLElement | null>(null)
-const previewPage = ref<HTMLElement | null>(null)
 const isExporting = ref(false)
 
 const canvasStyle = computed(() => ({

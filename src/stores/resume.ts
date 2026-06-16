@@ -218,7 +218,7 @@ function createDefaultDocument(): ResumeDocument {
   }
 
   // Helper: skill bar (single call, no duplication)
-  function skillBar(name: string, _level: number): ResumeElement {
+  function _skillBar(name: string, _level: number): ResumeElement {
     return el('skill-bar', { content: name, style: { fontSize: 13 } })
   }
 

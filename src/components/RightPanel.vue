@@ -143,7 +143,7 @@ function getFieldPlaceholder(type: ModuleType, key: string): string {
 function getModuleTypeName(type: ModuleType): string {
   const names: Record<ModuleType, string> = {
     personal: '', education: '教育', experience: '工作',
-    project: '项目', skill: '技能', custom: ''
+    project: '项目', skill: '技能', strength: '优势', custom: ''
   }
   return names[type] || ''
 }
