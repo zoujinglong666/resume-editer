@@ -50,6 +50,14 @@
 
       <!-- Phase 3: Export actions -->
       <template v-if="store.currentPhase === 'export'">
+        <button class="header-btn header-btn--primary" @click="$emit('preview')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          预览
+        </button>
+        <button class="header-btn header-btn--green" @click="$emit('quick-export-pdf')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13h6"/><path d="M9 17h3"/></svg>
+          预览PDF
+        </button>
         <button class="header-btn header-btn--primary" @click="$emit('export-pdf')">
           导出
         </button>
@@ -81,7 +89,7 @@ import { useResumeStore } from '../stores/resume'
 
 const store = useResumeStore()
 
-defineEmits(['export-pdf', 'import-json', 'export-json', 'reset'])
+defineEmits(['export-pdf', 'import-json', 'export-json', 'reset', 'preview', 'quick-export-pdf'])
 
 const phases = [
   { key: 'fill' as const, label: '填写信息' },

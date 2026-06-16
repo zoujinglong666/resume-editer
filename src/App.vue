@@ -6,6 +6,8 @@
       @import-json="handleImport"
       @export-json="handleExport"
       @reset="handleReset"
+      @preview="showPreview = true"
+      @quick-export-pdf="handleQuickExportPdf"
     />
 
     <!-- Main Content -->
@@ -25,6 +27,13 @@
     <!-- PDF Export Dialog -->
     <PdfExportDialog v-if="showPdfDialog" :canvas-ref="canvasRef" @close="showPdfDialog = false" />
 
+    <!-- Resume Preview Dialog -->
+    <ResumePreviewDialog
+      v-if="showPreview"
+      @close="showPreview = false"
+      @export="showPreview = false; showPdfDialog = true"
+    />
+
     <!-- Hidden file input -->
     <input ref="fileInputRef" type="file" accept=".json" class="hidden" @change="onFileSelected" />
   </div>
@@ -39,10 +48,13 @@ import Canvas from './components/Canvas.vue'
 import EditorPanel from './components/EditorPanel.vue'
 import StatusBar from './components/StatusBar.vue'
 import PdfExportDialog from './components/PdfExportDialog.vue'
+import ResumePreviewDialog from './components/ResumePreviewDialog.vue'
+import { exportPreviewPdf } from './utils/previewPdf'
 
 const store = useResumeStore()
 const canvasRef = ref<InstanceType<typeof Canvas> | null>(null)
 const showPdfDialog = ref(false)
+const showPreview = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
 // Initialize CSS vars from persisted config
@@ -113,6 +125,20 @@ function handleExport() {
 function handleReset() {
   if (confirm('确定要重置所有内容吗？此操作不可撤销。')) {
     store.resetToDefault()
+  }
+}
+
+const isQuickExporting = ref(false)
+async function handleQuickExportPdf() {
+  if (isQuickExporting.value) return
+  isQuickExporting.value = true
+  try {
+    await exportPreviewPdf(store.modules, store.avatar, store.config)
+  } catch (err) {
+    console.error('Quick PDF export failed:', err)
+    alert('导出失败，请重试')
+  } finally {
+    isQuickExporting.value = false
   }
 }
 </script>
