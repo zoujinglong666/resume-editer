@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Avatar Preview -->
-    <div v-if="store.avatar.url" class="mb-3 flex items-center gap-3">
+    <div v-if="store.avatar.url" class="flex items-center" style="margin-bottom: var(--normal-gap); gap: var(--normal-gap);">
       <div
         class="avatar-container"
         :class="store.avatar.shape === 'circle' ? 'avatar-circle' : 'avatar-rounded'"
@@ -28,7 +28,7 @@
     </label>
 
     <!-- Shape Toggle -->
-    <div v-if="store.avatar.url" class="mt-2.5 flex items-center gap-2">
+    <div v-if="store.avatar.url" class="flex items-center" style="margin-top: var(--space-2_5); gap: var(--tight-gap);">
       <span class="avatar-shape-label">形状</span>
       <button
         @click="setShape('circle')"

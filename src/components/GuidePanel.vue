@@ -12,25 +12,25 @@
 
       <div class="panel-section">
         <div class="panel-section-title">填写提示</div>
-        <div class="text-xs space-y-2 leading-relaxed" style="color: var(--sidebar-muted);">
+        <div class="text-xs leading-relaxed" style="color: var(--sidebar-muted); display: flex; flex-direction: column; gap: var(--normal-gap);">
           <p>点击左侧模块列表，或直接在画布上点击要编辑的模块。</p>
           <p>标题带 <span style="color: #f87171;">*</span> 的字段建议必填。</p>
-          <p class="flex items-center gap-1">
+          <p class="flex items-center" style="gap: var(--tight-gap);">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
             拖拽模块可调整顺序
           </p>
-          <p>快捷键：<kbd style="padding: 1px 5px; background: rgba(255,255,255,0.08); border-radius: 3px; font-size: 11px; font-family: var(--font-mono);">Ctrl+Z</kbd> 撤销，<kbd style="padding: 1px 5px; background: rgba(255,255,255,0.08); border-radius: 3px; font-size: 11px; font-family: var(--font-mono);">Ctrl+Y</kbd> 重做</p>
+          <p>快捷键：<kbd style="padding: var(--space-0_5) var(--space-1); background: rgba(255,255,255,0.08); border-radius: 3px; font-size: 11px; font-family: var(--font-mono);">Ctrl+Z</kbd> 撤销，<kbd style="padding: var(--space-0_5) var(--space-1); background: rgba(255,255,255,0.08); border-radius: 3px; font-size: 11px; font-family: var(--font-mono);">Ctrl+Y</kbd> 重做</p>
         </div>
       </div>
 
       <div class="panel-section" style="border-bottom: none;">
         <div class="panel-section-title">模块填写状态</div>
-        <div class="space-y-0.5">
+        <div style="display: flex; flex-direction: column; gap: var(--space-0_5);">
           <div
             v-for="mod in store.modules"
             :key="mod.id"
-            class="flex items-center justify-between text-xs cursor-pointer rounded px-2 py-1.5 transition-all"
-            style="color: var(--sidebar-text);"
+            class="flex items-center justify-between text-xs cursor-pointer rounded transition-all"
+            style="padding: var(--list-item-padding-y) var(--list-item-padding-x); color: var(--sidebar-text);"
             :style="store.selectedModuleId === mod.id ? 'background: rgba(99,102,241,0.12);' : ''"
             @mouseenter="($event.target as HTMLElement).style.background = store.selectedModuleId === mod.id ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.04)'"
             @mouseleave="($event.target as HTMLElement).style.background = store.selectedModuleId === mod.id ? 'rgba(99,102,241,0.12)' : ''"
@@ -54,7 +54,7 @@
       <!-- Theme -->
       <div class="panel-section">
         <div class="panel-section-title">主题</div>
-        <div class="flex gap-2.5 flex-wrap">
+        <div class="flex flex-wrap" style="gap: var(--normal-gap);">
           <button
             v-for="theme in themes" :key="theme.id"
             class="theme-dot"
@@ -97,9 +97,24 @@
 
       <!-- Typography -->
       <div class="panel-section">
-        <div class="panel-section-title">字体</div>
-        <label class="block mb-4">
-          <span class="sidebar-label">字体族</span>
+        <div class="panel-section-title">字体排版</div>
+
+        <!-- Live Font Preview -->
+        <div class="font-live-preview" :style="previewStyle">
+          <div class="font-preview-heading">简历标题示例</div>
+          <div class="font-preview-body">
+            <span class="font-preview-bold">工作经历</span> 中的正文内容展示。
+            负责前端开发，使用 Vue.js 构建用户界面。
+          </div>
+          <div class="font-preview-contact">138xxxx8888 | yupi@mail.com</div>
+        </div>
+
+        <!-- Font Family -->
+        <label class="block font-control-group">
+          <div class="font-control-header">
+            <span class="sidebar-label">字体族</span>
+            <span class="font-control-hint">影响全文文字</span>
+          </div>
           <div class="sidebar-select-wrapper">
             <select
               :value="store.config.fontFamily"
@@ -115,32 +130,55 @@
             <svg class="sidebar-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </label>
-        <label class="block mb-4">
-          <div class="sidebar-slider-label">
-            <span class="sidebar-label" style="margin-bottom: 0;">字号</span>
-            <span class="sidebar-slider-value">{{ store.config.fontSize }} px</span>
+
+        <!-- Font Size with Quick Presets -->
+        <div class="font-control-group">
+          <div class="font-control-header">
+            <span class="sidebar-label">字号</span>
+            <span class="font-control-hint">正文文字大小</span>
+          </div>
+          <div class="font-size-presets">
+            <button
+              v-for="size in fontSizePresets"
+              :key="size"
+              class="font-preset-btn"
+              :class="{ active: store.config.fontSize === size }"
+              @click="updateFontSize(size)"
+            >{{ size }}</button>
           </div>
           <input type="range" min="10" max="20" step="1" :value="store.config.fontSize"
             @input="updateFontSize(Number(($event.target as HTMLInputElement).value))"
             class="sidebar-slider" />
           <div class="sidebar-slider-hints">
-            <span>10</span>
-            <span>20</span>
+            <span>紧凑 10</span>
+            <span class="sidebar-slider-current">{{ store.config.fontSize }}px</span>
+            <span>宽松 20</span>
           </div>
-        </label>
-        <label class="block">
-          <div class="sidebar-slider-label">
-            <span class="sidebar-label" style="margin-bottom: 0;">行高</span>
-            <span class="sidebar-slider-value">{{ store.config.lineHeight }}</span>
+        </div>
+
+        <!-- Line Height with Visual Indicator -->
+        <div class="font-control-group">
+          <div class="font-control-header">
+            <span class="sidebar-label">行高</span>
+            <span class="font-control-hint">段落行间距</span>
+          </div>
+          <div class="font-lh-visual">
+            <div class="font-lh-visual-lines" :style="{ lineHeight: store.config.lineHeight }">
+              <div class="font-lh-line" />
+              <div class="font-lh-line" />
+              <div class="font-lh-line" />
+            </div>
+            <span class="font-lh-value">{{ store.config.lineHeight }}</span>
           </div>
           <input type="range" min="1.2" max="2.0" step="0.1" :value="store.config.lineHeight"
             @input="updateLineHeight(Number(($event.target as HTMLInputElement).value))"
             class="sidebar-slider" />
           <div class="sidebar-slider-hints">
-            <span>1.2</span>
-            <span>2.0</span>
+            <span>紧凑 1.2</span>
+            <span class="sidebar-slider-current">{{ store.config.lineHeight }}</span>
+            <span>宽松 2.0</span>
           </div>
-        </label>
+        </div>
       </div>
 
       <!-- Spacing -->
@@ -172,7 +210,7 @@
     <template v-if="store.currentPhase === 'export'">
       <div class="panel-section">
         <div class="panel-section-title">导出选项</div>
-        <div class="space-y-2.5">
+        <div style="display: flex; flex-direction: column; gap: var(--tight-gap);">
           <div
             class="export-option-card"
             :class="{ active: hoverExportCard === 'pdf' }"
@@ -210,7 +248,7 @@
 
       <div class="panel-section" style="border-bottom: none;">
         <div class="panel-section-title">简历概览</div>
-        <div class="text-xs space-y-1.5" style="color: var(--sidebar-muted);">
+        <div class="text-xs" style="color: var(--sidebar-muted); display: flex; flex-direction: column; gap: var(--list-gap);">
           <div class="flex justify-between">
             <span>总字符数</span>
             <span style="font-family: var(--font-mono); color: var(--sidebar-text);">{{ store.charCount }}</span>
@@ -233,7 +271,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useResumeStore, THEME_PRESETS } from '../stores/resume'
 import AvatarUpload from './AvatarUpload.vue'
 import ProgressRing from './ProgressRing.vue'
@@ -242,9 +280,19 @@ const store = useResumeStore()
 const themes = THEME_PRESETS
 const hoverExportCard = ref<string | null>(null)
 
+// Font size quick presets
+const fontSizePresets = [12, 13, 14, 15, 16]
+
+// Live preview style computed from current config
+const previewStyle = computed(() => ({
+  fontFamily: store.config.fontFamily,
+  fontSize: `${store.config.fontSize}px`,
+  lineHeight: String(store.config.lineHeight),
+}))
+
 const themeNames: Record<string, string> = {
-  default: '经典蓝', green: '森林绿', wine: '酒红', dark: '深空灰', orange: '暖橙',
-  indigo: '靛紫', teal: '薄荷青', rose: '玫瑰粉', navy: '午夜蓝', brown: '焦糖棕'
+  default: '青瓦', green: '松烟', wine: '朱砂', dark: '墨石', orange: '暮橘',
+  indigo: '鸢尾', teal: '竹青', rose: '胭脂', navy: '藏蓝', brown: '檀木'
 }
 
 const titleStyles = [
@@ -254,6 +302,12 @@ const titleStyles = [
   { id: 'centerline', name: '中线' },
   { id: 'dots', name: '圆点' },
   { id: 'minimal', name: '极简' },
+  { id: 'grad-underline', name: '渐变线' },
+  { id: 'grad-leftbar', name: '渐变条' },
+  { id: 'grad-dual', name: '短线' },
+  { id: 'grad-pill', name: '渐变胶囊' },
+  { id: 'grad-shadow', name: '阴影' },
+  { id: 'grad-fade', name: '渐变字' },
 ]
 
 defineEmits(['export-pdf', 'export-json', 'import-json'])

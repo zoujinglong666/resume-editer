@@ -3,11 +3,12 @@
     <!-- Module List -->
     <div class="panel-section">
       <div class="panel-section-title">📋 模块列表</div>
-      <div class="space-y-1">
+      <div style="display: flex; flex-direction: column; gap: var(--space-1);">
         <div
           v-for="mod in store.modules"
           :key="mod.id"
-          class="flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-all hover:bg-gray-50"
+          class="flex items-center rounded-md cursor-pointer transition-all hover:bg-gray-50"
+          style="gap: var(--tight-gap); padding: var(--list-item-padding-y) var(--list-item-padding-x);"
           :class="{ 'bg-blue-50': selectedModuleId === mod.id }"
           @click="selectedModuleId = mod.id"
         >
@@ -30,37 +31,40 @@
       <div class="panel-section-title">✏️ 编辑: {{ selectedModule.title }}</div>
 
       <!-- Module Title Edit -->
-      <label class="block mb-3">
-        <span class="text-xs text-gray-500 block mb-1">模块标题</span>
+      <label class="block" style="margin-bottom: var(--normal-gap);">
+        <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">模块标题</span>
         <input
           type="text"
           :value="selectedModule.title"
           @input="store.updateModule(selectedModule.id, { title: ($event.target as HTMLInputElement).value })"
-          class="w-full px-2 py-1.5 text-sm border border-[var(--border-color)] rounded-md"
+          class="w-full text-sm border border-[var(--border-color)] rounded-md"
+          style="padding: var(--space-1_5) var(--space-2);"
         />
       </label>
 
       <!-- Items Editor -->
-      <div v-if="selectedModule.items.length > 0" class="space-y-3">
-        <div v-for="(item, idx) in selectedModule.items" :key="item.id" class="border border-[var(--border-color)] rounded-md p-3 relative group/item">
-          <div class="flex items-center justify-between mb-2">
+      <div v-if="selectedModule.items.length > 0" style="display: flex; flex-direction: column; gap: var(--normal-gap);">
+        <div v-for="(item, idx) in selectedModule.items" :key="item.id"
+          class="border border-[var(--border-color)] rounded-md relative group/item"
+          style="padding: var(--normal-gap);">
+          <div class="flex items-center justify-between" style="margin-bottom: var(--tight-gap);">
             <span class="text-xs font-medium text-[var(--primary-color)]">条目 {{ idx + 1 }}</span>
             <button
-              v-if="selectedModule.type !== 'personal'"
               class="text-xs text-red-400 hover:text-red-600 opacity-0 group-hover/item:opacity-100 transition-all"
               @click="store.removeItem(selectedModule.id, item.id)"
             >删除</button>
           </div>
-          <div class="space-y-2">
+          <div style="display: flex; flex-direction: column; gap: var(--tight-gap);">
             <template v-for="(val, key) in item" :key="key">
               <label v-if="key !== 'id' && typeof val === 'string'" class="block">
-                <span class="text-xs text-gray-500 block mb-0.5">{{ getFieldLabel(selectedModule.type, key) }}</span>
+                <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">{{ getFieldLabel(selectedModule.type, key) }}</span>
                 <textarea
                   v-if="isLongField(key)"
                   :value="val"
                   rows="3"
                   @input="store.updateItem(selectedModule.id, item.id, key, ($event.target as HTMLTextAreaElement).value)"
-                  class="w-full px-2 py-1.5 text-sm border border-[var(--border-color)] rounded-md resize-y"
+                  class="w-full text-sm border border-[var(--border-color)] rounded-md resize-y"
+                  style="padding: var(--space-1_5) var(--space-2);"
                   :placeholder="getFieldPlaceholder(selectedModule.type, key)"
                 ></textarea>
                 <input
@@ -68,7 +72,8 @@
                   type="text"
                   :value="val"
                   @input="store.updateItem(selectedModule.id, item.id, key, ($event.target as HTMLInputElement).value)"
-                  class="w-full px-2 py-1.5 text-sm border border-[var(--border-color)] rounded-md"
+                  class="w-full text-sm border border-[var(--border-color)] rounded-md"
+                  style="padding: var(--space-1_5) var(--space-2);"
                   :placeholder="getFieldPlaceholder(selectedModule.type, key)"
                 />
               </label>
@@ -80,7 +85,8 @@
       <!-- Add Item Button -->
       <button
         v-if="selectedModule.type !== 'personal'"
-        class="mt-3 w-full py-2 text-sm border border-dashed border-[var(--border-color)] rounded-md text-[var(--text-secondary)] hover:border-[var(--primary-color)] hover:text-[var(--primary-color)] transition-all"
+        class="w-full text-sm border border-dashed border-[var(--border-color)] rounded-md text-[var(--text-secondary)] hover:border-[var(--primary-color)] hover:text-[var(--primary-color)] transition-all"
+        style="margin-top: var(--normal-gap); padding: var(--tight-gap);"
         @click="store.addItem(selectedModule.id)"
       >
         + 添加{{ getModuleTypeName(selectedModule.type) }}条目

@@ -1,69 +1,32 @@
 <template>
   <div>
-    <!-- Mode: List (类别：关键词) -->
-    <template v-if="isListMode">
-      <div
-        v-for="item in module.items"
-        :key="item.id"
-        class="skill-list-item"
-        @contextmenu.prevent="onItemContextMenu($event, item.id)"
-      >
-        <span
-          class="skill-list-category"
-          contenteditable="true"
-          :data-placeholder="'技术类别'"
-          @blur="updateField(item.id, 'name', $event)"
-          @paste="onPaste"
-        >{{ item.name }}</span>
-        <span class="skill-list-sep">：</span>
-        <span
-          class="skill-list-keywords"
-          contenteditable="true"
-          :data-placeholder="'关键词1、关键词2、关键词3'"
-          @blur="updateField(item.id, 'content', $event)"
-          @paste="onPaste"
-        >{{ item.content }}</span>
-      </div>
-    </template>
-
-    <!-- Mode: Bars (progress bars) -->
-    <template v-else>
-      <div
-        v-for="item in module.items"
-        :key="item.id"
-        class="skill-bar-container"
-        @contextmenu.prevent="onItemContextMenu($event, item.id)"
-      >
-        <span
-          class="skill-bar-label font-medium text-[var(--text-primary)]"
-          contenteditable="true"
-          :data-placeholder="'技能名称'"
-          @blur="updateField(item.id, 'name', $event)"
-          @paste="onPaste"
-        >{{ item.name }}</span>
-        <div>
-          <div class="skill-bar-track">
-            <div
-              class="skill-bar-fill"
-              :style="{ width: skillWidth(item.level) }"
-            ></div>
-          </div>
-          <div class="text-right mt-1">
-            <span
-              class="text-xs text-[var(--text-muted)]"
-              contenteditable="true"
-              :data-placeholder="'熟练度'"
-              @blur="updateField(item.id, 'level', $event)"
-              @paste="onPaste"
-            >{{ item.level }}</span>
-          </div>
-        </div>
-      </div>
-    </template>
+    <!-- Strength List -->
+    <div
+      v-for="item in module.items"
+      :key="item.id"
+      class="strength-item"
+      @contextmenu.prevent="onItemContextMenu($event, item.id)"
+    >
+      <span
+        class="strength-label"
+        contenteditable="true"
+        :data-placeholder="'能力标签'"
+        @blur="updateField(item.id, 'title', $event)"
+        @paste="onPaste"
+      >{{ item.title }}</span>
+      <span class="strength-sep">：</span>
+      <span
+        class="strength-fact"
+        contenteditable="true"
+        :data-placeholder="'量化事实或证据'"
+        @blur="updateField(item.id, 'content', $event)"
+        @paste="onPaste"
+      >{{ item.content }}</span>
+    </div>
 
     <!-- Empty state -->
     <div v-if="module.items.length === 0" class="text-sm text-[var(--text-muted)] py-3 text-center">
-      点击 "+ 添加{{ isListMode ? '技能' : '技能' }}" 开始填写
+      点击 "+ 添加优势" 开始填写
     </div>
 
     <!-- Item Context Menu -->
@@ -79,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useResumeStore } from '../../stores/resume'
 import type { ResumeModule } from '../../types'
 import ContextMenu from '../ContextMenu.vue'
@@ -87,8 +50,6 @@ import type { ContextMenuItem } from '../ContextMenu.vue'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
-
-const isListMode = computed(() => props.module.displayMode === 'list')
 
 // ---- Item Context Menu ---
 const itemMenuVisible = ref(false)
@@ -109,14 +70,14 @@ function onItemContextMenu(e: MouseEvent, itemId: string) {
   const items: ContextMenuItem[] = []
 
   items.push({
-    label: '复制技能',
+    label: '复制优势',
     icon: '📋',
     shortcut: 'Ctrl+D',
     action: () => store.duplicateItem(props.module.id, itemId)
   })
 
   items.push({
-    label: '删除技能',
+    label: '删除优势',
     icon: '🗑️',
     danger: true,
     action: () => store.removeItem(props.module.id, itemId)
@@ -126,14 +87,14 @@ function onItemContextMenu(e: MouseEvent, itemId: string) {
 
   if (!isFirst) {
     items.push({
-      label: '上移技能',
+      label: '上移优势',
       icon: '⬆️',
       action: () => store.moveItem(props.module.id, itemId, 'up')
     })
   }
   if (!isLast) {
     items.push({
-      label: '下移技能',
+      label: '下移优势',
       icon: '⬇️',
       action: () => store.moveItem(props.module.id, itemId, 'down')
     })
@@ -176,23 +137,10 @@ function onPaste(e: ClipboardEvent) {
   const text = e.clipboardData?.getData('text/plain') || ''
   document.execCommand('insertText', false, text)
 }
-
-function skillWidth(level: string | boolean | undefined): string {
-  const map: Record<string, string> = {
-    '入门': '20%',
-    '了解': '30%',
-    '熟悉': '50%',
-    '掌握': '65%',
-    '熟练': '75%',
-    '精通': '88%',
-    '专家': '96%'
-  }
-  return map[String(level)] || '50%'
-}
 </script>
 
 <style scoped>
-.skill-list-item {
+.strength-item {
   font-size: var(--font-size-sm);
   line-height: var(--line-height-relaxed);
   color: var(--text-secondary);
@@ -203,18 +151,18 @@ function skillWidth(level: string | boolean | undefined): string {
   gap: 0;
 }
 
-.skill-list-category {
+.strength-label {
   font-weight: 600;
   color: var(--text-primary);
   flex-shrink: 0;
 }
 
-.skill-list-sep {
+.strength-sep {
   color: var(--text-primary);
   flex-shrink: 0;
 }
 
-.skill-list-keywords {
+.strength-fact {
   color: var(--text-secondary);
 }
 </style>

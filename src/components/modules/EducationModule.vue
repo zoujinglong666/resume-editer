@@ -9,10 +9,65 @@
           @blur="updateField(item.id, 'school', $event)"
           @paste="onPaste"
         >{{ item.school }}</span>
-        <span class="item-date">{{ item.dateRange }}</span>
+        <!-- Clickable Date with Picker -->
+        <span class="item-date-picker-wrap">
+          <span
+            class="item-date item-date-clickable"
+            @click.stop="toggleDatePicker(item.id)"
+            :title="'点击编辑日期'"
+          >{{ item.dateRange || '点击设置时间' }}</span>
+
+          <!-- Date Picker Popup -->
+          <Teleport to="body">
+            <div
+              v-if="datePickerItemId === item.id"
+              class="date-picker-popup"
+              :style="datePickerStyle"
+              @click.stop
+            >
+              <div class="date-picker-header">
+                <span>选择时间范围</span>
+                <button class="date-picker-close" @click="datePickerItemId = null">×</button>
+              </div>
+              <div class="date-picker-body">
+                <div class="date-picker-field">
+                  <label>开始时间</label>
+                  <input
+                    type="month"
+                    class="date-picker-input"
+                    :value="getStartMonth(item.dateRange)"
+                    @change="onStartDateChange(item.id, ($event.target as HTMLInputElement).value)"
+                  />
+                </div>
+                <span class="date-picker-sep">~</span>
+                <div class="date-picker-field">
+                  <label>
+                    <span>结束时间</span>
+                    <label class="date-picker-present">
+                      <input
+                        type="checkbox"
+                        :checked="isPresent(item.dateRange)"
+                        @change="onPresentToggle(item.id, ($event.target as HTMLInputElement).checked)"
+                      />
+                      <span>至今</span>
+                    </label>
+                  </label>
+                  <input
+                    v-if="!isPresent(item.dateRange)"
+                    type="month"
+                    class="date-picker-input"
+                    :value="getEndMonth(item.dateRange)"
+                    @change="onEndDateChange(item.id, ($event.target as HTMLInputElement).value)"
+                  />
+                  <div v-else class="date-picker-present-label">至今</div>
+                </div>
+              </div>
+            </div>
+          </Teleport>
+        </span>
       </div>
 
-      <div class="flex items-center gap-2 mb-1">
+      <div class="flex items-center" style="gap: var(--tight-gap);">
         <span
           class="item-subtitle"
           contenteditable="true"
@@ -31,22 +86,13 @@
         >{{ item.major }}</span>
       </div>
 
-      <div class="mb-2">
-        <span
-          class="item-date"
-          contenteditable="true"
-          :data-placeholder="'2018.09 - 2022.06'"
-          @blur="updateField(item.id, 'dateRange', $event)"
-          @paste="onPaste"
-        >{{ item.dateRange }}</span>
-      </div>
-
       <div
         class="item-desc"
         contenteditable="true"
         :data-placeholder="'主修课程、荣誉奖项、GPA等...'"
         @blur="updateField(item.id, 'description', $event)"
         @paste="onPaste"
+        @keydown="onKeydown"
         v-sync-html="item.description"
       ></div>
     </div>
@@ -64,11 +110,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useResumeStore } from '../../stores/resume'
 import type { ResumeModule } from '../../types'
 import ContextMenu from '../ContextMenu.vue'
 import type { ContextMenuItem } from '../ContextMenu.vue'
+import { smartPasteText, handleListEnter } from '../../utils/smartPaste'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
@@ -167,6 +214,93 @@ function updateField(itemId: string, field: string, e: FocusEvent) {
 function onPaste(e: ClipboardEvent) {
   e.preventDefault()
   const text = e.clipboardData?.getData('text/plain') || ''
-  document.execCommand('insertText', false, text)
+  const html = smartPasteText(text)
+  if (html) {
+    document.execCommand('insertHTML', false, html)
+  } else {
+    document.execCommand('insertText', false, text)
+  }
 }
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    handleListEnter(e)
+  }
+}
+
+// ---- Date Picker ----
+const datePickerItemId = ref<string | null>(null)
+const datePickerStyle = ref<Record<string, string>>({})
+
+function toggleDatePicker(itemId: string) {
+  if (datePickerItemId.value === itemId) {
+    datePickerItemId.value = null
+    return
+  }
+  // Position the popup near the clicked element
+  const el = document.querySelector(`.item-date-clickable`) as HTMLElement
+  if (el) {
+    const rect = el.getBoundingClientRect()
+    const top = rect.bottom + 6
+    const right = window.innerWidth - rect.right
+    datePickerStyle.value = {
+      position: 'fixed',
+      top: `${top}px`,
+      right: `${right}px`,
+      zIndex: '1000',
+    }
+  }
+  datePickerItemId.value = itemId
+}
+
+function getStartMonth(dateRange?: string): string {
+  if (!dateRange) return ''
+  return dateRange.split(' ~ ')[0] || ''
+}
+
+function getEndMonth(dateRange?: string): string {
+  if (!dateRange) return ''
+  const parts = dateRange.split(' ~ ')
+  if (!parts[1] || parts[1] === '至今') return ''
+  return parts[1]
+}
+
+function isPresent(dateRange?: string): boolean {
+  if (!dateRange) return true
+  return dateRange.includes('至今') || !dateRange.includes(' ~ ')
+}
+
+function onStartDateChange(itemId: string, value: string) {
+  const item = props.module.items.find(i => i.id === itemId)
+  if (!item) return
+  const end = isPresent(item.dateRange) ? '至今' : (getEndMonth(item.dateRange) || '')
+  store.updateItem(props.module.id, itemId, 'dateRange', `${value} ~ ${end}`)
+}
+
+function onEndDateChange(itemId: string, value: string) {
+  const item = props.module.items.find(i => i.id === itemId)
+  if (!item) return
+  const start = getStartMonth(item.dateRange) || ''
+  store.updateItem(props.module.id, itemId, 'dateRange', `${start} ~ ${value}`)
+}
+
+function onPresentToggle(itemId: string, checked: boolean) {
+  const item = props.module.items.find(i => i.id === itemId)
+  if (!item) return
+  const start = getStartMonth(item.dateRange) || ''
+  if (checked) {
+    store.updateItem(props.module.id, itemId, 'dateRange', `${start} ~ 至今`)
+  } else {
+    store.updateItem(props.module.id, itemId, 'dateRange', `${start} ~ `)
+  }
+}
+
+// Close date picker on outside click
+function onDocClick() {
+  if (datePickerItemId.value) {
+    datePickerItemId.value = null
+  }
+}
+onMounted(() => document.addEventListener('click', onDocClick))
+onUnmounted(() => document.removeEventListener('click', onDocClick))
 </script>

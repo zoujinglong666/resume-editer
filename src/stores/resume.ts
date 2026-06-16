@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import type { ResumeData, ResumeModule, ResumeConfig, AvatarConfig, ThemePreset, ModuleItem, ModuleType } from '../types'
+import type {
+  ResumeData, ResumeModule, ResumeConfig, AvatarConfig, ThemePreset, ModuleItem, ModuleType,
+  ResumeDocument, ResumePage, ResumeElement, ElementType, ResumeTemplate, PersonalFieldConfig,
+} from '../types'
+import { migrateResumeDataToDocument } from '../types'
 
 // ===== Helper: generate UUID =====
 function uuid(): string {
@@ -46,127 +50,346 @@ function generateColorScale(baseColor: string): Record<string, string> {
   }
 }
 
-// ===== Default Module Items (AI Agent Engineer Template) =====
+// ===== Default Personal Fields Config =====
+function createDefaultPersonalFields(): PersonalFieldConfig[] {
+  return [
+    { id: 'pf_name',     key: 'name',     label: '姓名',   icon: '',            visible: true,  order: 0, isBuiltin: true },
+    { id: 'pf_position', key: 'position', label: '职位',   icon: 'Briefcase',   visible: true,  order: 1, isBuiltin: true },
+    { id: 'pf_phone',    key: 'phone',    label: '电话',   icon: 'Phone',       visible: true,  order: 2, isBuiltin: true },
+    { id: 'pf_email',    key: 'email',    label: '邮箱',   icon: 'Mail',        visible: true,  order: 3, isBuiltin: true },
+    { id: 'pf_location', key: 'location', label: '所在地', icon: 'MapPin',      visible: true,  order: 4, isBuiltin: false },
+    { id: 'pf_link',     key: 'link',     label: '个人网站', icon: 'Globe',     visible: true,  order: 5, isBuiltin: false },
+    { id: 'pf_summary',  key: 'summary',  label: '个人简介', icon: '',          visible: true,  order: 6, isBuiltin: true },
+  ]
+}
+
+// ===== Shared Default Resume Data =====
+// Single source of truth for default template content
+// Organized following the "codefather" resume structure:
+// 个人信息 → 教育经历 → 专业技能 → 工作经历 → 项目经历 → 个人优势
+const DEFAULT_RESUME_CONTENT = {
+  name: '李鱼皮',
+  position: '前端开发（AI Agent 应用方向）｜3 年工作经验',
+  phone: '138xxxx8888',
+  email: 'yupi@codefather.cn',
+  location: '',
+  portfolio: 'dogyupi.com',
+  github: 'github.com/liyupi',
+  summary: '男｜24岁｜微信：xxxxxx｜个人博客（作品集）：dogyupi.com｜GitHub：github.com/liyupi',
+
+  education: [
+    {
+      school: 'XX大学', degree: '本科', major: '软件工程',
+      dateRange: '2019-09 ~ 2023-06',
+      description: '• 排名：前5%，通过 CET-6\n• 上海市挑战杯特等奖\n• 上海市优秀毕业生\n• 国家级创新创业项目负责人\n• 蓝桥杯 Java 组省一等奖\n• 软件设计师认证'
+    },
+  ],
+
+  // 专业技能：「类别：关键词」列表格式（skill list mode）
+  skills: [
+    { name: '前端工程化与框架', content: 'React 18+：Hooks、Context、Suspense、Error Boundaries、并发特性，独立设计过中大型项目的前端架构；Next.js：SSR/SSG/ISR，API Routes，中间件，国际化，Image 优化，落地过 2 个日活 10k+ 的 Next.js 项目；构建工具：Webpack 配置优化（splitChunks、externals、Tree Shaking）、Vite 插件开发、ESBuild 接入经验；性能优化：首屏加载时间优化（从 2.1s → 0.9s）、LCP/FID/CLS 指标监控与治理、虚拟滚动处理 5w+ 列表数据；跨端与兼容：Taro 小程序开发，响应式设计（移动端 + PC），多浏览器兼容（Chrome、Safari、微信内置浏览器）' },
+    { name: 'AI 应用前端', content: 'AI 交互模式：流式对话（SSE/WebSocket）、工具调用可视化、多 Agent 协同界面、推理过程展示；AI SDK 封装：设计前端 AI 调用层，支持多模型切换、请求队列、超时重试、本地缓存降级；RAG 前端：文档检索结果高亮、引用溯源、相似度打分可视化、Prompt 调试面板；AI 辅助开发：Cursor / Copilot / Claude Code 深度使用，建立过团队 AI 编程规范，显著提升开发效率（+40%）' },
+    { name: '后端协作与全栈', content: 'Node.js：Express / Fastify 开发 BFF 层，实现接口聚合、SSR 降级、鉴权中间件；数据库：MySQL 基础查询优化、Redis 缓存设计、ElasticSearch 查询 DSL（配合前端搜索）；部署与运维：Docker + Nginx + Serverless（阿里云 FC / Vercel），独立完成前端 CI/CD 流水线（GitHub Actions）' },
+  ],
+
+  experience: [
+    {
+      company: '老鱼公司', position: '前端 + AI 应用开发',
+      dateRange: '2023-04 ~ 至今',
+      description: '• **负责产品**：编程导航 codefather.cn (日活 20K 的程序员学习社区)、面试鸭 mianshiya.com (日活 15K 的面试刷题平台)\n\n• **前端架构与工程化**：负责两个高日活产品的前端技术选型与架构设计，基于 Next.js + React + TailwindCSS 搭建组件库和脚手架，制定代码规范（ESLint + Prettier + Husky），落地 Git Flow + PR Review 流程，支撑 6 人前端团队协作。\n\n• **性能优化**：针对知识库目录树渲染性能瓶颈，将递归渲染改为扁平化数据结构 + 虚拟滚动，节点数量从 2000+ 优化到 10000+ 无卡顿；通过 Next.js ISR 实现知识库内容增量更新，首屏加载时间降低 43%。\n\n• **AI 对话组件系统**：设计可复用的 AI 交互 SDK，支持 SSE 流式数据解析、Markdown 实时渲染、代码高亮、工具调用可视化（展示参数、执行状态、返回结果），封装后接入 3 条业务线，开发周期缩短 60%。\n\n• **内容风控管理后台**：基于 WebSocket 实现审核任务实时推送，支持人工复审和自动化违规拦截（98% 拦截率），设计可视化报表展示 AI 审核置信度分布，帮助运营团队效率提升 50%。\n\n• **监控与质量**：接入阿里云 ARMS 前端监控 + Sentry，自定义性能埋点和错误上报，建立 核心 Web 指标告警 和 错误阈值熔断 机制，线上 Bug 发现到修复时长从 2 小时缩短到 20 分钟。\n\n• **AI 接口聚合层（BFF）**：使用 Node.js + Express 搭建 AI 服务网关，统一处理多模型调用、降级和缓存，减少前端对 4 个 AI 后端的直接调用，接口可用性从 97.5% 提升到 99.9%。'
+    },
+  ],
+
+  // 项目经历：重点项目详细展开 + 其他作品紧凑排列
+  projects: [
+    {
+      name: 'AI 超级智能体',
+      role: '前端 + 复杂 AI 交互',
+      dateRange: '',
+      description: '开源：github.com/liyupi/yu-ai-agent｜线上：codefather.cn\n\n• 独立完成 零迟滞感 AI 对话界面：基于 EventSource + 自定义缓冲区解决 SSE 分片丢包和换行符问题，实现逐字流式输出，用户感知首字时间 < 200ms。\n\n• 工具调用可视化设计：动态渲染 Agent 调用的工具链（搜索、PDF 生成、计算器等），支持展开 / 折叠参数详情、错误重试入口，用户对 AI 决策理解度提升 70%。\n\n• 前端记忆管理：封装 对话历史压缩算法（按 token 数自动裁剪 + 保留关键上下文），支持多会话本地缓存（IndexedDB），刷新页面或关闭浏览器后秒级恢复上下文。\n\n• RAG 检索展示：对接 PGvector 向量检索，高亮展示引用文档片段和相似度分数，并提供原文跳转链接，用户对答案可信度评分提升 45%。',
+      link: 'github.com/liyupi/yu-ai-agent'
+    },
+    {
+      name: 'AI 热点监控工具',
+      role: '全栈 + Agent Skills 发布',
+      dateRange: '',
+      description: '开源：github.com/liyupi/yupi-hot-monitor｜线上：codefather.cn\n\n• 全栈独立开发：React + Socket.io + Express + Cheerio，实现 8 个数据源实时采集、AI 过滤和毫秒级 WebSocket 推送。\n\n• 热点订阅与推送：设计关键词订阅引擎，前端维护本地订阅映射表，支持多标签页同步（BroadcastChannel），消息推送到达率 99.97%。\n\n• AI 能力 Skills 化：将热点查询功能封装为 Agent Skills 并发布到 npm，支持 Cursor、Copilot 等 AI 编辑器直接调用，已有 200+ 开发者使用。\n\n• AI 辅助开发实践：项目中 90% 代码由 Cursor + Claude Code 生成，建立 AI 代码 Review 清单，确保生成代码符合团队规范，迭代效率提升 3 倍。',
+      link: 'github.com/liyupi/yupi-hot-monitor'
+    }
+  ],
+
+  // 其他作品（紧凑列表）
+  otherWorks: [
+    { name: 'AI 万能视频下载总结器', content: 'Next.js + Stripe + DeepSeek，实现支付 → 下载 → 总结全流程，月活 3000+ 独立用户，支付转化率 5.2%' },
+    { name: 'AI 零代码应用生成平台', content: 'React Flow + LangGraph.js，可视化编排多 Agent 工作流，自动生成前后端代码，已生成 200+ 应用' },
+    { name: '手写 RPC 框架可视化面板', content: '展示调用链、负载均衡状态、SPI 加载过程，作为技术教程 Demo 被多个高校课程引用' },
+  ],
+
+  // 个人优势：「能力标签：量化事实」格式
+  strengths: [
+    { title: '大厂匹配度', content: '具备高日活产品（20K+ DAU）的前端架构和性能优化经验，熟悉监控、工程化、跨端、CI/CD 等大厂必备能力' },
+    { title: 'AI 应用落地', content: '不只是 demo，而是将 AI 对话、RAG、工具调用、Agent Skills 真正融入业务，产生可量化的业务价值（拦截率 98%、效率提升 50% 等）' },
+    { title: '开源影响力', content: 'GitHub 2 万+ Followers，ai-guide 仓库 1 万+ Star，多次上榜 GitHub Trending，具备技术社区认可' },
+    { title: '快速学习与输出', content: '持续跟进 Vercel AI SDK、LangChain.js、Copilot Kit 等前沿技术，撰写过 15+ 篇 AI 前端技术文章，累计阅读 30w+' },
+  ]
+}
+
+// ===== Default Module Items (codefather-style resume) =====
 function createDefaultModules(): ResumeModule[] {
+  const d = DEFAULT_RESUME_CONTENT
   return [
     {
       id: `mod_personal_001`, type: 'personal', title: '个人信息',
       visible: true, order: 0,
-      items: [{ id: `item_p_001`, name: '林逸辰', phone: '138-0000-8888', email: 'yichen.lin@example.com', location: '北京市海淀区', position: 'AI Agent 工程师 / 高级算法工程师', summary: '5 年 AI 工程经验，专注大模型应用与智能体（Agent）系统研发。主导过多个从 0 到 1 的 Agent 产品落地，擅长 RAG、Function Calling、多 Agent 协作、Tool Use 等核心技术栈。对 LLM 的工程化落地有深入理解，追求「让 AI 真正可用」的产品体验。' }]
+      items: [{ id: `item_p_001`, name: d.name, phone: d.phone, email: d.email, location: d.location, position: d.position, link: d.portfolio, summary: d.summary, personalFields: createDefaultPersonalFields() }]
     },
     {
       id: `mod_edu_001`, type: 'education', title: '教育经历',
       visible: true, order: 1,
-      items: [
-        { id: `item_e_001`, school: '浙江大学', degree: '硕士', major: '计算机科学与技术 · 人工智能方向', dateRange: '2019.09 - 2022.06', description: '• GPA：3.8/4.0，研究方向：知识图谱与大语言模型的结合\n• 发表 CCF-B 论文 1 篇，核心贡献：基于图神经网络的文档级实体关系抽取\n• 主导实验室「智能问答系统」项目，服务校内 20000+ 师生\n• 获得国家奖学金、浙江省优秀毕业生' },
-        { id: `item_e_002`, school: '华中科技大学', degree: '本科', major: '软件工程', dateRange: '2015.09 - 2019.06', description: '• GPA：3.7/4.0，专业排名前 10%\n• ACM 校队成员，获区域赛银牌\n• 毕业设计：基于深度学习的代码自动补全系统' }
-      ]
+      items: d.education.map((edu, i) => ({ id: `item_e_00${i + 1}`, ...edu }))
+    },
+    {
+      id: `mod_skill_001`, type: 'skill', title: '专业技能',
+      visible: true, order: 2,
+      displayMode: 'list',
+      items: d.skills.map((sk, i) => ({ id: `item_sk_00${i + 1}`, name: sk.name, content: sk.content }))
     },
     {
       id: `mod_exp_001`, type: 'experience', title: '工作经历',
-      visible: true, order: 2,
-      items: [
-        { id: `item_xp_001`, company: '字节跳动', position: '高级 AI Agent 工程师', dateRange: '2023.07 - 至今', description: '• **AI 助手平台架构**：负责公司内部 AI Agent 开发平台的底层架构设计，支持 50+ 业务线接入，日均调用量超 500 万次。自研 Agent Runtime 引擎，实现 Tool Registration → Planning → Execution → Reflection 全链路闭环。\n\n• **Multi-Agent 协作系统**：设计并实现了基于「角色分工 + 消息总线」的多 Agent 协作框架，支持 Manager-Agent-Worker 三层编排模式。在客服自动化场景中，将复杂问题解决率从 42% 提升至 78%。\n\n• **RAG 体系优化**：重构检索增强生成管线，引入 Hybrid Retrieval（BM25 + Dense）+ Re-ranking + Citation 机制，文档问答准确率提升 35%，幻觉率降低至 <3%。\n\n• **Function Calling 引擎**：从零搭建参数提取与工具调度引擎，支持 200+ 内部 API 自动注册与调用，端到端延迟控制在 800ms 以内（P99）。' },
-        { id: `item_xp_002`, company: '阿里巴巴 · 达摩院', position: '算法工程师（大模型方向）', dateRange: '2022.07 - 2023.06', description: '• **通义千问应用落地**：参与通义千问大模型在企业场景的适配与微调工作，负责 Prompt Engineering 规范制定和 Evaluation Framework 搭建。\n\n• **智能客服 Agent**：主导开发基于 LLM 的智能客服系统，集成意图识别、知识库检索、多轮对话管理三大模块。上线后人工转接率下降 45%，客户满意度（CSAT）提升 18 个百分点。\n\n• **SFT 数据工程**：构建高质量指令微调数据流水线，含数据清洗、去重、质量评分、格式标准化全流程，累计处理 50 万+ 高质量 SFT 样本。' }
-      ]
+      visible: true, order: 3,
+      items: d.experience.map((exp, i) => ({ id: `item_xp_00${i + 1}`, ...exp }))
     },
     {
       id: `mod_proj_001`, type: 'project', title: '项目经历',
-      visible: true, order: 3,
-      items: [
-        { id: `item_prj_001`, name: 'AutoCode — AI 编程助手 Agent', role: '技术负责人 / 核心开发者', dateRange: '2024.03 - 至今', description: '一款面向企业研发团队的 AI 编程助手，集成了代码理解、生成、审查、重构等能力。\n\n**技术栈**：LangChain + OpenAI API / 自研模型 + AST 解析 + Vector DB (Milvus) + Git 集成\n\n**核心成果**：\n• 设计了 Code Context Engine，通过 AST 分析 + 语义索引实现精准的代码上下文构建，代码生成采纳率达 38%（行业平均 ~20%）\n• 实现了 Multi-file Editing Agent，支持跨文件代码修改的一致性校验与自动修复\n• 接入 15 个研发团队，日均活跃用户 1200+，人均编码效率提升约 30%', link: '' },
-        { id: `item_prj_002`, name: 'DocMind — 企业知识库智能问答系统', role: '后端负责人', dateRange: '2023.01 - 2023.10', description: '基于 RAG 架构的企业级文档智能问答平台，支持 PDF/Word/Markdown 等多格式文档 ingestion 与语义检索。\n\n**技术栈**：Python + FastAPI + LangChain + Elasticsearch + PostgreSQL + Redis + Docker/K8s\n\n**核心成果**：\n• 设计了 Chunking Strategy Pipeline（按标题/段落/语义自适应分块），检索召回率相比固定窗口提升 28%\n• 实现了 Query Rewriting + HyDE 双路查询增强，复杂问题回答准确率达到 85%\n• 支持多租户隔离，已部署服务于 5 家企业客户，累计处理文档 10 万+ 份', link: '' },
-        { id: `item_prj_003`, name: 'AgentBench — 大模型 Agent 能力评测框架（开源）', role: '核心贡献者', dateRange: '2023.06 - 2023.08', description: '开源的大语言模型 Agent 能力基准测试框架，GitHub Star 3000+。\n\n**技术栈**：Python + Pytest + Docker + React Dashboard\n\n**核心成果**：\n• 设计了涵盖 Tool Use、Code Execution、Web Browsing、Math Reasoning 等 8 个维度的评测体系\n• 实现了可扩展的 Evaluator 插件机制，支持自定义评测指标与权重配置\n• 已被 3 篇学术论文引用作为基线评测工具', link: 'https://github.com/example/agentbench' }
-      ]
-    },
-    {
-      id: `mod_skill_001`, type: 'skill', title: '技能特长',
       visible: true, order: 4,
-      items: [
-        { id: `item_sk_001`, name: '大语言模型 & Agent', level: 'expert' },
-        { id: `item_sk_002`, name: 'LangChain / LangGraph / CrewAI', level: 'expert' },
-        { id: `item_sk_003`, name: 'RAG（检索增强生成）', level: 'expert' },
-        { id: `item_sk_004`, name: 'Prompt Engineering & SFT', level: 'expert' },
-        { id: `item_sk_005`, name: 'Python / TypeScript', level: 'advanced' },
-        { id: `item_sk_006`, name: 'FastAPI / Node.js', level: 'advanced' },
-        { id: `item_sk_007`, name: 'Vector DB（Milvus / Pinecone / ES）', level: 'advanced' },
-        { id: `item_sk_008`, name: 'Docker / K8s / CI/CD', level: 'intermediate' },
-        { id: `item_sk_009`, name: 'PyTorch / HuggingFace Transformers', level: 'advanced' },
-        { id: `item_sk_010`, name: 'System Design & 分布式系统', level: 'intermediate' }
-      ]
+      items: d.projects.map((prj, i) => ({ id: `item_prj_00${i + 1}`, ...prj }))
     },
     {
-      id: `mod_custom_001`, type: 'custom', title: '荣誉奖项 & 其他',
+      id: `mod_work_001`, type: 'custom', title: '其他个人作品',
       visible: true, order: 5,
-      items: [
-        { id: `item_cust_001`, title: '🏆 荣誉奖项', content: '• 国家奖学金（硕士研究生）\n• 浙江省优秀毕业生\n• ACM-ICPC 亚洲区域赛银牌\n• 字节跳动 2024 Q1 优秀项目奖（AI 助手平台）\n• 开源项目 AgentBench GitHub Star 3000+' },
-        { id: `item_cust_002`, title: '🌐 开源 & 社区', content: '• GitHub：github.com/yichenlin （关注 AI Agent / LLM 应用方向）\n• 技术博客：定期分享 Agent 工程实践与 LLM 落地心得\n• 语言能力：英语 CET-6（550+），可流畅阅读英文论文与技术文档' }
-      ]
+      items: d.otherWorks.map((w, i) => ({ id: `item_ow_00${i + 1}`, title: w.name, content: w.content }))
+    },
+    {
+      id: `mod_str_001`, type: 'strength', title: '个人优势',
+      visible: true, order: 6,
+      items: d.strengths.map((s, i) => ({ id: `item_str_00${i + 1}`, title: s.title, content: s.content }))
     },
   ]
 }
 
-// ===== Theme Presets =====
+// ===== Default Document for New Model (AI Agent Engineer Template) =====
+// Uses DEFAULT_RESUME_CONTENT as single source of truth
+function createDefaultDocument(): ResumeDocument {
+  const now = Date.now()
+  let order = 0
+  const d = DEFAULT_RESUME_CONTENT
+
+  // Helper to create an element
+  function el(type: ElementType, opts: Partial<ResumeElement> = {}): ResumeElement {
+    return {
+      id: `el_${now}_${order.toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+      type,
+      parentId: null,
+      order: order++,
+      visible: true,
+      layout: { mode: 'flow' },
+      style: {},
+      ...opts,
+    }
+  }
+
+  // Helper to create a module with child items
+  function mod(title: string, moduleType: ModuleType, children: ResumeElement[]): ResumeElement[] {
+    const moduleId = `mod_${now}_${Math.random().toString(36).slice(2, 6)}`
+    const moduleEl = el('module', {
+      id: moduleId,
+      content: title,
+      title: title,
+      moduleType,
+    })
+    // Assign parentId for children
+    children.forEach(c => { c.parentId = moduleId })
+    return [moduleEl, ...children]
+  }
+
+  // Helper: item with HTML content
+  function itemHtml(html: string): ResumeElement {
+    return el('item', { html })
+  }
+
+  // Helper: skill bar (single call, no duplication)
+  function skillBar(name: string, _level: number): ResumeElement {
+    return el('skill-bar', { content: name, style: { fontSize: 13 } })
+  }
+
+  // ════════════════════════════════════════════════
+  // Build the full AI Agent Engineer resume
+  // ════════════════════════════════════════════════
+
+  const elements: ResumeElement[] = [
+    // ── Name & Position (Heading) ──
+    el('heading', {
+      content: d.name,
+      style: { fontSize: 28, fontWeight: 'bold', color: '#1a1a2e', marginBottom: 0 },
+    }),
+    el('text', {
+      content: d.position,
+      style: { fontSize: 16, color: '#6366f1', marginTop: 4, marginBottom: 12 },
+    }),
+
+    // ── Contact Info ──
+    el('text', {
+      content: `📱 ${d.phone}  |  ✉️ ${d.email}  |  📍 ${d.location}`,
+      style: { fontSize: 12, color: '#666', marginBottom: 16 },
+    }),
+
+    // ── Divider ──
+    el('divider'),
+
+    // ── Personal Summary ──
+    ...mod('个人总结', 'custom', [
+      itemHtml(`<div style="font-size:14px;line-height:1.7;color:#444">${d.summary}</div>`),
+    ]),
+
+    // ── Education ──
+    ...mod('教育经历', 'education', d.education.map(edu => itemHtml(
+      `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <strong style="font-size:15px;color:#1a1a2e">${edu.school}</strong>
+          <span style="font-size:12px;color:#888">${edu.dateRange}</span>
+        </div>
+        <div style="font-size:13px;color:#555;margin:2px 0">${edu.degree} · ${edu.major}</div>
+        <ul style="font-size:13px;color:#555;line-height:1.7;margin-top:6px;padding-left:18px">
+          ${edu.description.split('\n').map(line => `<li>${line.replace(/^•\s*/, '')}</li>`).join('')}
+        </ul>
+      </div>`
+    ))),
+
+    // ── Work Experience ──
+    ...mod('工作经历', 'experience', d.experience.map(exp => itemHtml(
+      `<div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <div><strong style="font-size:15px;color:#1a1a2e">${exp.company}</strong><span style="font-size:13px;color:#666;margin-left:8px">${exp.position}</span></div>
+          <span style="font-size:12px;color:#888">${exp.dateRange}</span>
+        </div>
+        <ul style="font-size:13px;color:#444;line-height:1.75;margin-top:8px;padding-left:18px">
+          ${exp.description.split('\n\n').map(block => `<li>${block.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}
+        </ul>
+      </div>`
+    ))),
+
+    // ── Projects ──
+    ...mod('项目经历', 'project', d.projects.map(prj => itemHtml(
+      `<div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <strong style="font-size:15px;color:#1a1a2e">${prj.name}</strong>
+          <span style="font-size:12px;color:#888">${prj.dateRange}</span>
+        </div>
+        <div style="font-size:12px;color:#6366f1;margin:2px 0">${prj.role}</div>
+        <ul style="font-size:13px;color:#444;line-height:1.7;margin-top:6px;padding-left:18px">
+          ${prj.description.split('\n\n').pop()?.split('\n').map(line => line.startsWith('•') ? `<li>${line.slice(1).trim()}</li>` : '').filter(Boolean).join('') || ''}
+        </ul>
+      </div>`
+    ))),
+
+    // ── Skills (list mode: 类别：关键词) ──
+    ...mod('专业技能', 'skill', d.skills.map(sk => itemHtml(
+      `<div style="font-size:13px;line-height:1.7;color:#444;margin-bottom:4px">
+        <strong style="color:#1a1a2e">${sk.name}：</strong>${sk.content}
+      </div>`
+    ))),
+
+    // ── Other Works (compact list) ──
+    ...mod('其他个人作品', 'custom', d.otherWorks.map(w => itemHtml(
+      `<div style="font-size:13px;line-height:1.7;color:#444;margin-bottom:3px">
+        <strong style="color:#1a1a2e">${w.name}</strong> · ${w.content}
+      </div>`
+    ))),
+
+    // ── Strengths (能力标签：量化事实) ──
+    ...mod('个人优势', 'strength', d.strengths.map(s => itemHtml(
+      `<div style="font-size:13px;line-height:1.7;color:#444;margin-bottom:4px">
+        <strong style="color:#1a1a2e">${s.title}：</strong>${s.content}
+      </div>`
+    ))),
+  ]
+
+  return {
+    meta: { version: '2.0', lastSaved: new Date().toISOString() },
+    pages: [{
+      id: 'page-1',
+      elements,
+      config: {
+        width: 210, height: 297,
+        marginTop: 12, marginRight: 12, marginBottom: 12, marginLeft: 12,
+        background: '#ffffff',
+      },
+    }],
+    theme: { id: 'indigo', name: 'Indigo', primaryColor: '#312E81', accentColor: '#6366F1' },
+    globals: { elementDefaults: {} },
+    schemaVersion: 2,
+  }
+}
 export const THEME_PRESETS: ThemePreset[] = [
   {
-    name: '经典蓝', id: 'default',
-    primaryColor: '#2C3E50', accentColor: '#3498DB',
-    bgColor: '#F5F7FA', surfaceColor: '#FFFFFF',
-    textPrimary: '#2C3E50', textSecondary: '#7F8C8D', borderColor: '#E1E8ED'
+    name: '青瓦', id: 'default',
+    primaryColor: '#2D5F7C', accentColor: '#4A90B8',
+    bgColor: '#F5F8FA', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6B7B8D', borderColor: '#D8E2EA'
   },
   {
-    name: '森林绿', id: 'green',
-    primaryColor: '#1B4332', accentColor: '#2D6A4F',
-    bgColor: '#F0F4F0', surfaceColor: '#FFFFFF',
-    textPrimary: '#1B4332', textSecondary: '#52796F', borderColor: '#C8D5C1'
+    name: '松烟', id: 'green',
+    primaryColor: '#3A6B52', accentColor: '#5A9A78',
+    bgColor: '#F4F8F5', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6A7F72', borderColor: '#CDD9D2'
   },
   {
-    name: '酒红', id: 'wine',
-    primaryColor: '#6B2737', accentColor: '#A23B52',
-    bgColor: '#FDF2F4', surfaceColor: '#FFFFFF',
-    textPrimary: '#6B2737', textSecondary: '#9A6B73', borderColor: '#EDCDD3'
+    name: '朱砂', id: 'wine',
+    primaryColor: '#9B3A4A', accentColor: '#C25A6A',
+    bgColor: '#FAF5F6', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#7D6B70', borderColor: '#E5D4D8'
   },
   {
-    name: '深空灰', id: 'dark',
-    primaryColor: '#1A1A2E', accentColor: '#E94560',
-    bgColor: '#F0F0F5', surfaceColor: '#FFFFFF',
-    textPrimary: '#1A1A2E', textSecondary: '#6B7094', borderColor: '#D5D5E0'
+    name: '墨石', id: 'dark',
+    primaryColor: '#3D3D4E', accentColor: '#6366F1',
+    bgColor: '#F5F5F8', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6E6E80', borderColor: '#D8D8E2'
   },
   {
-    name: '暖橙', id: 'orange',
-    primaryColor: '#7B341E', accentColor: '#D97706',
-    bgColor: '#FFFBEB', surfaceColor: '#FFFFFF',
-    textPrimary: '#7B341E', textSecondary: '#92400E', borderColor: '#FDE68A'
+    name: '暮橘', id: 'orange',
+    primaryColor: '#B45A1E', accentColor: '#D97706',
+    bgColor: '#FFF9F0', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#7A6B5E', borderColor: '#F0DFC8'
   },
   {
-    name: '靛紫', id: 'indigo',
-    primaryColor: '#312E81', accentColor: '#6366F1',
-    bgColor: '#F5F3FF', surfaceColor: '#FFFFFF',
-    textPrimary: '#312E81', textSecondary: '#7C7DBF', borderColor: '#DDD6FE'
+    name: '鸢尾', id: 'indigo',
+    primaryColor: '#4B48A0', accentColor: '#6366F1',
+    bgColor: '#F6F5FF', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#7070A8', borderColor: '#DCDBF0'
   },
   {
-    name: '薄荷青', id: 'teal',
-    primaryColor: '#134E4A', accentColor: '#14B8A6',
-    bgColor: '#F0FDFA', surfaceColor: '#FFFFFF',
-    textPrimary: '#134E4A', textSecondary: '#5EAAA0', borderColor: '#CCFBF1'
+    name: '竹青', id: 'teal',
+    primaryColor: '#2D7D72', accentColor: '#14B8A6',
+    bgColor: '#F2FAF8', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6A8A85', borderColor: '#C8E0DC'
   },
   {
-    name: '玫瑰粉', id: 'rose',
-    primaryColor: '#881337', accentColor: '#E11D48',
-    bgColor: '#FFF1F2', surfaceColor: '#FFFFFF',
-    textPrimary: '#881337', textSecondary: '#C27A8A', borderColor: '#FECDD3'
+    name: '胭脂', id: 'rose',
+    primaryColor: '#B03A5A', accentColor: '#E11D48',
+    bgColor: '#FFF5F7', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A6B75', borderColor: '#F0D4DA'
   },
   {
-    name: '午夜蓝', id: 'navy',
-    primaryColor: '#1E3A5F', accentColor: '#3B82F6',
-    bgColor: '#F0F5FF', surfaceColor: '#FFFFFF',
-    textPrimary: '#1E3A5F', textSecondary: '#6B8DB5', borderColor: '#C7D8F0'
+    name: '藏蓝', id: 'navy',
+    primaryColor: '#2A5090', accentColor: '#3B82F6',
+    bgColor: '#F3F6FC', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6A7FA0', borderColor: '#CCD8EC'
   },
   {
-    name: '焦糖棕', id: 'brown',
-    primaryColor: '#5D4037', accentColor: '#A1887F',
-    bgColor: '#FAF6F3', surfaceColor: '#FFFFFF',
-    textPrimary: '#5D4037', textSecondary: '#8D7B74', borderColor: '#E8DCD5'
+    name: '檀木', id: 'brown',
+    primaryColor: '#6B4E3D', accentColor: '#A1887F',
+    bgColor: '#F9F6F4', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#7A6E68', borderColor: '#E0D8D2'
   }
 ]
 
@@ -180,7 +403,7 @@ interface HistoryState {
 export const useResumeStore = defineStore('resume', () => {
   // ---- State ----
   const config = ref<ResumeConfig>({
-    theme: 'default', primaryColor: '#2C3E50', fontFamily: 'system-ui, -apple-system, sans-serif',
+    theme: 'default', primaryColor: '#2D5F7C', fontFamily: 'system-ui, -apple-system, sans-serif',
     fontSize: 14, lineHeight: 1.6, pageMargin: 20, titleStyle: 'underline'
   })
   const avatar = ref<AvatarConfig>({ url: '', shape: 'circle' })
@@ -192,6 +415,14 @@ export const useResumeStore = defineStore('resume', () => {
   const currentPhase = ref<'fill' | 'style' | 'export'>('fill')
   const saveStatus = ref<'saved' | 'saving' | 'unsaved'>('saved')
   let saveTimer: ReturnType<typeof setTimeout> | null = null
+
+  // ---- New: Document Model (Phase 1 Refactor) ----
+  const docRef = ref<ResumeDocument | null>(null)
+  const useNewModel = ref(false)
+  const selectedElementId = ref<string | null>(null)
+
+  // ---- Templates ----
+  const templates = ref<ResumeTemplate[]>([])
 
   // ---- Undo/Redo State ----
   const history = ref<HistoryState[]>([])
@@ -251,6 +482,29 @@ export const useResumeStore = defineStore('resume', () => {
   const selectedModule = computed(() =>
     modules.value.find(m => m.id === selectedModuleId.value) || null
   )
+
+  // ---- New: Document Model Computed (Phase 1) ----
+  const currentPage = computed<ResumePage | null>(() => {
+    if (!docRef.value || docRef.value.pages.length === 0) return null
+    return docRef.value.pages[0]
+  })
+
+  const getElements = computed<ResumeElement[]>(() => {
+    if (!currentPage.value) return []
+    // Only return top-level elements (children rendered inside their parent module)
+    return [...currentPage.value.elements]
+      .filter(el => el.parentId === null)
+      .sort((a, b) => a.order - b.order)
+  })
+
+  const selectedElement = computed<ResumeElement | null>(() => {
+    if (!selectedElementId.value || !docRef.value) return null
+    for (const page of docRef.value.pages) {
+      const found = page.elements.find(el => el.id === selectedElementId.value)
+      if (found) return found
+    }
+    return null
+  })
 
   // ---- History Management ----
   function pushHistory() {
@@ -392,14 +646,19 @@ export const useResumeStore = defineStore('resume', () => {
     const mod = modules.value.find(m => m.id === moduleId)
     if (!mod) return
     const defaults: Record<string, string> = {
-      personal: '{name:"",phone:"",email:"",location:"",position:"",summary:""}',
-      education: '{school:"",degree:"",major:"",dateRange:"",description:""}',
-      experience: '{company:"",position:"",dateRange:"",description:""}',
-      project: '{name:"",role:"",dateRange:"",description:"",link:""}',
-      skill: '{name:"",level:""}',
-      custom: '{title:"",content:""}',
+      personal: '{"name":"","phone":"","email":"","location":"","position":"","summary":""}',
+      education: '{"school":"","degree":"","major":"","dateRange":"","description":""}',
+      experience: '{"company":"","position":"","dateRange":"","description":""}',
+      project: '{"name":"","role":"","dateRange":"","description":"","link":""}',
+      skill: '{"name":"","content":""}',
+      strength: '{"title":"","content":""}',
+      custom: '{"title":"","content":""}',
     }
-    mod.items.push({ id: `item_${uuid()}`, ...JSON.parse(defaults[mod.type] || '{}') })
+    const newItem: ModuleItem = { id: `item_${uuid()}`, ...JSON.parse(defaults[mod.type] || '{}') }
+    if (mod.type === 'personal') {
+      newItem.personalFields = createDefaultPersonalFields()
+    }
+    mod.items.push(newItem)
   }
 
   function removeItem(moduleId: string, itemId: string) {
@@ -438,7 +697,7 @@ export const useResumeStore = defineStore('resume', () => {
   function addModule(type: ModuleType, title?: string): string | null {
     const typeNames: Record<ModuleType, string> = {
       personal: '个人信息', education: '教育经历', experience: '工作经历',
-      project: '项目经历', skill: '技能特长', custom: '自定义模块'
+      project: '项目经历', skill: '技能特长', strength: '个人优势', custom: '自定义模块'
     }
     const defaultItems: Record<ModuleType, string> = {
       personal: '{"name":"","phone":"","email":"","location":"","position":"","summary":""}',
@@ -446,6 +705,7 @@ export const useResumeStore = defineStore('resume', () => {
       experience: '{"company":"","position":"","dateRange":"","description":""}',
       project: '{"name":"","role":"","dateRange":"","description":"","link":""}',
       skill: '{"name":"","level":""}',
+      strength: '{"title":"","content":""}',
       custom: '{"title":"","content":""}',
     }
     const newMod: ResumeModule = {
@@ -454,7 +714,11 @@ export const useResumeStore = defineStore('resume', () => {
       title: title || typeNames[type],
       visible: true,
       order: modules.value.length,
-      items: [{ id: `item_${uuid()}`, ...JSON.parse(defaultItems[type]) }]
+      items: [{
+        id: `item_${uuid()}`,
+        ...JSON.parse(defaultItems[type]),
+        ...(type === 'personal' ? { personalFields: createDefaultPersonalFields() } : {})
+      }]
     }
     modules.value.push(newMod)
     return newMod.id
@@ -463,6 +727,11 @@ export const useResumeStore = defineStore('resume', () => {
   function toggleModuleVisibility(moduleId: string) {
     const mod = modules.value.find(m => m.id === moduleId)
     if (mod) mod.visible = !mod.visible
+  }
+
+  function toggleModuleTitle(moduleId: string) {
+    const mod = modules.value.find(m => m.id === moduleId)
+    if (mod) mod.hideTitle = !mod.hideTitle
   }
 
   function reorderModules(newOrder: ResumeModule[]) {
@@ -514,7 +783,7 @@ export const useResumeStore = defineStore('resume', () => {
 
   function resetToDefault() {
     config.value = {
-      theme: 'default', primaryColor: '#2C3E50', fontFamily: 'system-ui, -apple-system, sans-serif',
+      theme: 'default', primaryColor: '#2D5F7C', fontFamily: 'system-ui, -apple-system, sans-serif',
       fontSize: 14, lineHeight: 1.6, pageMargin: 20, titleStyle: 'underline'
     }
     avatar.value = { url: '', shape: 'circle' }
@@ -522,10 +791,202 @@ export const useResumeStore = defineStore('resume', () => {
     applyTheme('default')
   }
 
+  // ---- New: Document Model Actions (Phase 1) ----
+
+  function initDocument() {
+    docRef.value = createDefaultDocument()
+    useNewModel.value = true
+  }
+
+  function migrateToNewModel() {
+    // Always rebuild from current modules to ensure latest data is migrated
+    const oldData: ResumeData = {
+      meta: { version: '1.0', lastSaved: lastSaved.value || new Date().toISOString() },
+      config: config.value,
+      avatar: avatar.value,
+      modules: modules.value,
+    }
+    docRef.value = migrateResumeDataToDocument(oldData, THEME_PRESETS)
+    useNewModel.value = true
+  }
+
+  function addElement(type: ElementType, parentId?: string | null, props?: Partial<ResumeElement>) {
+    if (!docRef.value) return
+    const page = docRef.value.pages[0]
+    if (!page) return
+    const ts = Date.now().toString(36)
+    const rand = Math.random().toString(36).slice(2, 6)
+    const newEl: ResumeElement = {
+      id: `el_${ts}_${rand}`,
+      type,
+      parentId: parentId ?? null,
+      order: page.elements.length,
+      visible: true,
+      layout: { mode: 'flow' as const },
+      style: {},
+      ...props,
+    }
+    page.elements.push(newEl)
+    selectedElementId.value = newEl.id
+  }
+
+  function updateElement(id: string, updates: Partial<ResumeElement>) {
+    if (!docRef.value) return
+    for (const page of docRef.value.pages) {
+      const el = page.elements.find(e => e.id === id)
+      if (el) { Object.assign(el, updates); break }
+    }
+  }
+
+  function removeElement(id: string) {
+    if (!docRef.value) return
+    for (const page of docRef.value.pages) {
+      const idx = page.elements.findIndex(e => e.id === id)
+      if (idx !== -1) {
+        page.elements.splice(idx, 1)
+        if (selectedElementId.value === id) selectedElementId.value = null
+        break
+      }
+    }
+  }
+
+  function selectElement(id: string | null) {
+    selectedElementId.value = id
+  }
+
+  // ---- Template Actions ----
+  function saveAsTemplate(name: string) {
+    const now = new Date().toISOString()
+    const tpl: ResumeTemplate = {
+      id: `tpl_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      name: name.trim() || `模板 ${templates.value.length + 1}`,
+      createdAt: now,
+      updatedAt: now,
+      data: exportData(),
+    }
+    templates.value.push(tpl)
+  }
+
+  function deleteTemplate(id: string) {
+    templates.value = templates.value.filter(t => t.id !== id)
+  }
+
+  function loadTemplate(id: string) {
+    const tpl = templates.value.find(t => t.id === id)
+    if (!tpl) return
+    importData(tpl.data)
+    lastSaved.value = tpl.updatedAt
+  }
+
+  function loadDefaultTemplate() {
+    resetToDefault()
+  }
+
+  // ---- Personal Field Management ----
+  function getPersonalItem(mod?: ResumeModule | null): ModuleItem | null {
+    const m = mod || modules.value.find(x => x.type === 'personal')
+    if (!m || !m.items.length) return null
+    const item = m.items[0]
+    // Ensure personalFields exists
+    if (!item.personalFields || !Array.isArray(item.personalFields)) {
+      item.personalFields = createDefaultPersonalFields()
+    }
+    return item
+  }
+
+  function getPersonalFields(mod?: ResumeModule | null): PersonalFieldConfig[] {
+    const item = getPersonalItem(mod)
+    if (!item || !item.personalFields) return []
+    return [...item.personalFields].sort((a, b) => a.order - b.order)
+  }
+
+  function addPersonalField(label: string, icon?: string) {
+    const personalMod = modules.value.find(x => x.type === 'personal')
+    if (!personalMod) return
+    const item = getPersonalItem(personalMod)
+    if (!item) return
+    const fields = item.personalFields as PersonalFieldConfig[]
+    const key = `custom_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 5)}`
+    const newField: PersonalFieldConfig = {
+      id: `pf_${key}`,
+      key,
+      label: label.trim() || '自定义字段',
+      icon: icon || '',
+      visible: true,
+      order: fields.length,
+      isBuiltin: false,
+    }
+    fields.push(newField)
+    // Also add the key to the item data
+    item[key] = ''
+  }
+
+  function removePersonalField(fieldId: string) {
+    const personalMod = modules.value.find(x => x.type === 'personal')
+    if (!personalMod) return
+    const item = getPersonalItem(personalMod)
+    if (!item) return
+    const fields = item.personalFields as PersonalFieldConfig[]
+    const idx = fields.findIndex(f => f.id === fieldId)
+    if (idx < 0) return
+    const field = fields[idx]
+    // Don't allow removing builtin fields
+    if (field.isBuiltin) return
+    fields.splice(idx, 1)
+    // Remove data key from item
+    delete item[field.key]
+  }
+
+  function reorderPersonalFields(newOrder: PersonalFieldConfig[]) {
+    const personalMod = modules.value.find(x => x.type === 'personal')
+    if (!personalMod) return
+    const item = getPersonalItem(personalMod)
+    if (!item) return
+    const fields = item.personalFields as PersonalFieldConfig[]
+    newOrder.forEach((f, idx) => {
+      const original = fields.find(o => o.id === f.id)
+      if (original) original.order = idx
+    })
+  }
+
+  function togglePersonalFieldVisibility(fieldId: string) {
+    const personalMod = modules.value.find(x => x.type === 'personal')
+    if (!personalMod) return
+    const item = getPersonalItem(personalMod)
+    if (!item) return
+    const fields = item.personalFields as PersonalFieldConfig[]
+    const field = fields.find(f => f.id === fieldId)
+    if (field) field.visible = !field.visible
+  }
+
+  function updatePersonalFieldIcon(fieldId: string, icon: string) {
+    const personalMod = modules.value.find(x => x.type === 'personal')
+    if (!personalMod) return
+    const item = getPersonalItem(personalMod)
+    if (!item) return
+    const fields = item.personalFields as PersonalFieldConfig[]
+    const field = fields.find(f => f.id === fieldId)
+    if (field) field.icon = icon
+  }
+
+  function updatePersonalFieldLabel(fieldId: string, label: string) {
+    const personalMod = modules.value.find(x => x.type === 'personal')
+    if (!personalMod) return
+    const item = getPersonalItem(personalMod)
+    if (!item) return
+    const fields = item.personalFields as PersonalFieldConfig[]
+    const field = fields.find(f => f.id === fieldId)
+    if (field) field.label = label
+  }
+
   return {
+    // Phase 1 新文档模型状态
     config, avatar, modules, lastSaved,
+    docRef, useNewModel, selectedElementId,
     selectedModuleId, currentPhase, saveStatus,
     selectedModule,
+    // Phase 1 新 computed
+    currentPage, getElements, selectedElement,
     visibleModules, charCount,
     completionByModule, overallCompletion, emptyModuleCount,
     canUndo, canRedo,
@@ -533,14 +994,22 @@ export const useResumeStore = defineStore('resume', () => {
     applyTheme, applyCssVars, applyCssVarsFromConfig, setPrimaryColor, setTitleStyle,
     updateModule, updateItem, addItem, removeItem,
     duplicateItem, moveItem, removeModule, addModule,
-    toggleModuleVisibility, reorderModules, setAvatar,
+    toggleModuleVisibility, toggleModuleTitle, reorderModules, setAvatar,
     undo, redo,
-    exportData, importData, resetToDefault
+    exportData, importData, resetToDefault,
+    // Phase 1 新 actions
+    initDocument, migrateToNewModel, addElement, updateElement, removeElement, selectElement,
+    // Template actions
+    templates, saveAsTemplate, deleteTemplate, loadTemplate, loadDefaultTemplate,
+    // Personal field management
+    getPersonalItem, getPersonalFields,
+    addPersonalField, removePersonalField, reorderPersonalFields,
+    togglePersonalFieldVisibility, updatePersonalFieldIcon, updatePersonalFieldLabel,
   }
 }, {
   persist: {
     key: 'resume-editor-data',
     storage: localStorage,
-    pick: ['config', 'avatar', 'modules', 'lastSaved', 'selectedModuleId', 'currentPhase']
+    pick: ['config', 'avatar', 'modules', 'lastSaved', 'selectedModuleId', 'currentPhase', 'docRef', 'useNewModel', 'selectedElementId', 'templates']
   }
 })

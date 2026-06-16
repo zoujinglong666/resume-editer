@@ -1,15 +1,15 @@
 <template>
   <div class="app-statusbar no-print shrink-0">
     <!-- Left -->
-    <div class="flex items-center gap-4">
+    <div class="flex items-center" style="gap: var(--card-gap);">
       <span>完成度 {{ store.overallCompletion }}%</span>
       <span class="save-status-dot" :class="store.saveStatus" style="display: inline-block;" />
     </div>
 
     <!-- Center -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center" style="gap: var(--normal-gap);">
       <template v-for="(phase, idx) in phases" :key="phase.key">
-        <span class="flex items-center gap-1.5">
+        <span class="flex items-center" style="gap: var(--list-gap);">
           <span
             class="inline-block w-2 h-2 rounded-full"
             :class="{

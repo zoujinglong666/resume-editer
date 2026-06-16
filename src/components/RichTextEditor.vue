@@ -111,6 +111,12 @@
 
       <div class="rte-divider"></div>
 
+      <button type="button" class="rte-btn" :class="{ active: states.formatBlock === 'blockquote' }" title="引用块" @click="exec('formatBlock', 'blockquote')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3"/></svg>
+      </button>
+
+      <div class="rte-divider"></div>
+
       <button type="button" class="rte-btn" title="插入链接" @click="insertLink">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
       </button>
@@ -161,6 +167,7 @@ const states = ref<Record<string, any>>({
   justifyRight: false,
   foreColor: '',
   hiliteColor: '',
+  formatBlock: '',
 })
 
 // Color display helpers (ensure valid CSS color value)
@@ -221,6 +228,13 @@ function updateStates() {
     newStates.hiliteColor = document.queryCommandValue('hiliteColor')
   } catch {
     newStates.hiliteColor = ''
+  }
+  // Block format
+  try {
+    const block = document.queryCommandValue('formatBlock')
+    newStates.formatBlock = typeof block === 'string' ? block.toLowerCase().replace(/[<>]/g, '') : ''
+  } catch {
+    newStates.formatBlock = ''
   }
   states.value = newStates
 }
