@@ -25,7 +25,25 @@
     </div>
 
     <!-- Right -->
-    <span>模块 {{ store.modules.length }} · {{ charCount }} 字符</span>
+    <span class="flex items-center" style="gap: var(--normal-gap);">
+      <button
+        class="model-toggle-btn"
+        :title="store.useNewModel ? '当前：新模型（点击切换旧模型）' : '当前：旧模型（点击切换新模型）'"
+        @click="store.toggleModel()"
+      >
+        {{ store.useNewModel ? '⚡ 新模型' : '📄 旧模型' }}
+      </button>
+      <span>
+        <template v-if="store.useNewModel && store.docRef">
+          元素 {{ store.getElements.length }}
+          <template v-if="store.recycleBin.length > 0">
+            · <span style="color: #fbbf24;">回收站 {{ store.recycleBin.length }}</span>
+          </template>
+          ·
+        </template>
+        模块 {{ store.modules.length }} · {{ charCount }} 字符
+      </span>
+    </span>
   </div>
 </template>
 

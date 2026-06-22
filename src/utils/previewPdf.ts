@@ -75,14 +75,14 @@ function renderItemHtml(type: string, item: any): string {
       return h
     }
     case 'education': {
-      let h = '<div class="preview-item">'
+      let h = '<div class="preview-item preview-edu-item">'
       h += `<div class="preview-item-header">`
-      h += `<span class="preview-item-title">${item.school || ''}</span>`
+      h += `<span class="preview-item-title preview-edu-school">${item.school || ''}</span>`
+      const sub = [item.degree, item.major].filter(Boolean).join(' · ')
+      if (sub) h += `<span class="preview-edu-inline-meta"> · ${sub}</span>`
       if (item.dateRange) h += `<span class="preview-item-date">${item.dateRange}</span>`
       h += `</div>`
-      const sub = [item.degree, item.major].filter(Boolean).join(' · ')
-      if (sub) h += `<div class="preview-item-sub">${sub}</div>`
-      if (item.description) h += `<div class="preview-item-desc">${formatDesc(item.description)}</div>`
+      if (item.description) h += `<div class="preview-item-desc preview-edu-desc">${formatDesc(item.description)}</div>`
       return h + '</div>'
     }
     case 'experience': {
@@ -107,10 +107,12 @@ function renderItemHtml(type: string, item: any): string {
       return h + '</div>'
     }
     case 'skill': {
-      let h = '<div class="preview-item">'
-      if (item.name) {
-        h += `<span class="preview-skill-name">${item.name}</span>`
-        if (item.content) h += `<span class="preview-skill-sep">：</span><span class="preview-skill-content">${formatDesc(item.content)}</span>`
+      let h = '<div class="preview-item preview-skill-row">'
+      if (item.name && item.content) {
+        h += `<div class="preview-skill-line"><strong class="preview-skill-name">${item.name}</strong><span class="preview-skill-sep">：</span><span class="preview-skill-content">${formatDesc(item.content)}</span></div>`
+      } else if (item.name) {
+        h += `<div class="preview-skill-line"><strong class="preview-skill-name">${item.name}</strong></div>`
+        if (item.content) h += `<div class="preview-skill-content">${formatDesc(item.content)}</div>`
       }
       if (item.level && !item.content) h += `<span class="preview-skill-level">${item.level}</span>`
       return h + '</div>'

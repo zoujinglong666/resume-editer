@@ -1,28 +1,28 @@
 <template>
   <div class="app-canvas-area" ref="scrollContainer">
-    <!-- Dev/Test Toggle (remove after Phase 1) -->
-    <div class="no-print flex items-center" style="margin-bottom: var(--tight-gap); gap: var(--tight-gap);" >
-      <label class="text-sm">
-        <input type="checkbox" v-model="store.useNewModel" @change="onModelToggle" />
-        使用新模型 (useNewModel)
-      </label>
-      <button
-        v-if="!store.docRef"
-        class="text-sm px-2 py-1 bg-blue-500 text-white rounded"
-        @click="store.migrateToNewModel()"
-      >迁移到新模型</button>
-    </div>
-
     <div ref="canvasEl" class="a4-canvas relative" id="resume-canvas">
       <!-- Page Break Lines -->
       <div
         v-for="n in pageBreakCount"
         :key="`pb-${n}`"
+        v-show="showPageBreakLines"
         class="page-break-line no-print"
         :style="{ top: `${n * 297}mm` }"
       >
         <span class="page-break-label">A4 分页线</span>
       </div>
+      <!-- Page Break Toggle -->
+      <button
+        v-if="pageBreakCount > 0"
+        class="page-break-toggle no-print"
+        :class="{ active: showPageBreakLines }"
+        :style="{ top: `${297 + 4}px` }"
+        @click="showPageBreakLines = !showPageBreakLines"
+        :title="showPageBreakLines ? '隐藏分页线' : '显示分页线'"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>{{ showPageBreakLines ? '隐藏分页线' : '显示分页线' }}</span>
+      </button>
 
       <!-- New Document Model Rendering -->
       <template v-if="store.useNewModel && store.docRef">
@@ -64,6 +64,26 @@
             </div>
           </template>
         </draggable>
+
+        <!-- Insert Toolbar -->
+        <div class="insert-toolbar no-print" v-if="store.useNewModel">
+          <button class="insert-btn" @click.stop="onInsertRow" title="插入行容器">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/></svg>
+            <span>行</span>
+          </button>
+          <button class="insert-btn" @click.stop="onInsertColumn" title="插入列容器">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+            <span>列</span>
+          </button>
+          <button class="insert-btn" @click.stop="onInsertText" title="插入文本">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9.5" y1="20" x2="14.5" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span>文本</span>
+          </button>
+          <button class="insert-btn" @click.stop="onInsertDivider" title="插入分割线">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/></svg>
+            <span>分割线</span>
+          </button>
+        </div>
 
         <!-- Element Context Menu -->
         <ContextMenu
@@ -202,7 +222,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, computed, onMounted } from 'vue'
+import { ref, watch, nextTick, computed, onMounted, onUnmounted } from 'vue'
 import draggable from 'vuedraggable'
 import { useResumeStore } from '../stores/resume'
 import RenderNode from './editor/RenderNode.vue'
@@ -223,6 +243,7 @@ const canvasEl = ref<HTMLElement | null>(null)
 const scrollContainer = ref<HTMLElement | null>(null)
 
 // ---- Page Break Lines ----
+const showPageBreakLines = ref(true)
 const pageBreakCount = ref(0)
 
 function updatePageBreakCount() {
@@ -385,13 +406,6 @@ function onModuleMenuClose() {
 
 // ---- New Model: Element Operations ----
 
-function onModelToggle() {
-  if (store.useNewModel && !store.docRef) {
-    // User is trying to switch to new model but haven't migrated yet
-    store.migrateToNewModel()
-  }
-}
-
 function onElementClick(elementId: string) {
   store.selectElement(elementId)
 }
@@ -399,6 +413,45 @@ function onElementClick(elementId: string) {
 function onElementSelect(elementId: string) {
   store.selectElement(elementId)
 }
+
+// Auto-initialize new model
+onMounted(() => {
+  if (store.useNewModel && !store.docRef) {
+    store.migrateToNewModel()
+  }
+})
+
+// Global keyboard shortcuts for new model
+function onGlobalKeydown(e: KeyboardEvent) {
+  if (!store.useNewModel || !store.docRef) return
+  // Don't handle when editing text
+  if ((e.target as HTMLElement)?.contentEditable === 'true') return
+  if ((e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'TEXTAREA') return
+
+  const selectedId = store.selectedElementId
+  if (!selectedId) return
+
+  // Delete / Backspace: remove selected element
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    e.preventDefault()
+    store.removeElement(selectedId)
+  }
+  // Ctrl/Cmd + D: duplicate selected element
+  if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+    e.preventDefault()
+    const el = store.selectedElement
+    if (el) {
+      const copy = JSON.parse(JSON.stringify(el))
+      copy.id = `el_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`
+      copy.content = el.content
+      copy.html = el.html
+      store.addElement(el.type, el.parentId, copy)
+    }
+  }
+}
+
+onMounted(() => document.addEventListener('keydown', onGlobalKeydown))
+onUnmounted(() => document.removeEventListener('keydown', onGlobalKeydown))
 
 function onElementContextMenu(e: MouseEvent, elementId: string) {
   e.preventDefault()
@@ -454,6 +507,62 @@ function onElementContextMenu(e: MouseEvent, elementId: string) {
     action: () => store.removeElement(elementId)
   })
 
+  items.push({ label: '', divider: true })
+
+  // Layout operations
+  items.push({
+    label: '设为行内排列',
+    icon: '↔️',
+    action: () => {
+      store.updateElement(elementId, {
+        layout: { ...element.layout, mode: 'inline' }
+      })
+    }
+  })
+  items.push({
+    label: '设为块级排列',
+    icon: '↕️',
+    action: () => {
+      store.updateElement(elementId, {
+        layout: { ...element.layout, mode: 'flow' }
+      })
+    }
+  })
+
+  items.push({ label: '', divider: true })
+
+  // Wrap in container
+  items.push({
+    label: '包裹到行容器',
+    icon: '📦',
+    action: () => {
+      const rowId = store.createRowElement(element.parentId)
+      if (rowId) {
+        store.moveElementToContainer(elementId, rowId)
+      }
+    }
+  })
+  items.push({
+    label: '包裹到列容器',
+    icon: '📋',
+    action: () => {
+      const colId = store.createColumnElement(element.parentId)
+      if (colId) {
+        store.moveElementToContainer(elementId, colId)
+      }
+    }
+  })
+
+  // If inside a container, offer to move out
+  if (element.parentId) {
+    items.push({ label: '', divider: true })
+    items.push({
+      label: '移出到顶层',
+      icon: '⬆️',
+      action: () => store.moveElementToTopLevel(elementId)
+    })
+  }
+
   elementMenuItems.value = items
   elementMenuX.value = e.clientX
   elementMenuY.value = e.clientY
@@ -467,6 +576,24 @@ function onElementMenuClose() {
 
 function onElementDragEnd() {
   // Order is updated via the writable computed in elementsList
+}
+
+// ---- Insert Toolbar Actions ----
+
+function onInsertRow() {
+  store.createRowElement()
+}
+
+function onInsertColumn() {
+  store.createColumnElement()
+}
+
+function onInsertText() {
+  store.addElement('text', null, { content: '文本内容', layout: { mode: 'flow' } })
+}
+
+function onInsertDivider() {
+  store.addElement('divider')
 }
 
 // ---- Expose ----
@@ -566,5 +693,73 @@ watch(() => store.selectedElementId, (newId) => {
   background: var(--surface-color);
   padding: 0 4px;
   border-radius: 2px;
+}
+
+/* Page Break Toggle Button */
+.page-break-toggle {
+  position: absolute;
+  right: -8px;
+  transform: translateX(100%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-color, #e4e4ec);
+  border-radius: 6px;
+  background: var(--surface-color, #fff);
+  color: var(--text-secondary, #94a3b8);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.page-break-toggle:hover {
+  background: var(--primary-50, #eef2ff);
+  color: var(--primary-600, #4f46e5);
+  border-color: var(--primary-200, #c7d2fe);
+}
+
+.page-break-toggle.active {
+  color: var(--primary-500, #6366f1);
+}
+
+/* Insert Toolbar */
+.insert-toolbar {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  justify-content: center;
+}
+.insert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.insert-btn:hover {
+  color: var(--primary-600, #4f46e5);
+  border-color: var(--primary-400, #818cf8);
+  background: var(--primary-50, #eef2ff);
+}
+.insert-btn svg {
+  opacity: 0.7;
+}
+.insert-btn:hover svg {
+  opacity: 1;
 }
 </style>

@@ -390,6 +390,55 @@ export const THEME_PRESETS: ThemePreset[] = [
     primaryColor: '#6B4E3D', accentColor: '#A1887F',
     bgColor: '#F9F6F4', surfaceColor: '#FFFFFF',
     textPrimary: '#333333', textSecondary: '#7A6E68', borderColor: '#E0D8D2'
+  },
+  // ── 国画/水墨风格系列 ──
+  {
+    name: '宣纸', id: 'xuan',
+    primaryColor: '#4A4A3E', accentColor: '#7A7A68',
+    bgColor: '#FBF9F3', surfaceColor: '#FDFCF7',
+    textPrimary: '#2C2C28', textSecondary: '#6E6E62', borderColor: '#E0DCD2'
+  },
+  {
+    name: '水墨', id: 'ink',
+    primaryColor: '#2C2C2C', accentColor: '#555555',
+    bgColor: '#F8F8F6', surfaceColor: '#FFFFFF',
+    textPrimary: '#1A1A1A', textSecondary: '#666660', borderColor: '#D0CEC8'
+  },
+  {
+    name: '青瓷', id: 'celadon',
+    primaryColor: '#5B8C7A', accentColor: '#7FB5A0',
+    bgColor: '#F3F9F6', surfaceColor: '#FAFDF9',
+    textPrimary: '#2A3A32', textSecondary: '#6A8A7C', borderColor: '#C8DDD2'
+  },
+  {
+    name: '赭石', id: 'ochre',
+    primaryColor: '#8B6914', accentColor: '#B8922A',
+    bgColor: '#FBF8F0', surfaceColor: '#FEFCF7',
+    textPrimary: '#3A3020', textSecondary: '#807050', borderColor: '#E2D8C0'
+  },
+  {
+    name: '花青', id: 'cyanine',
+    primaryColor: '#3A6B8C', accentColor: '#5A9ABF',
+    bgColor: '#F2F7FA', surfaceColor: '#F9FBFD',
+    textPrimary: '#2A3A48', textSecondary: '#607888', borderColor: '#C4D8E6'
+  },
+  {
+    name: '藤黄', id: 'gamboge',
+    primaryColor: '#A07828', accentColor: '#C8A040',
+    bgColor: '#FBF9F0', surfaceColor: '#FEFCF6',
+    textPrimary: '#3A3218', textSecondary: '#887848', borderColor: '#E6DCC0'
+  },
+  {
+    name: '石绿', id: 'malachite',
+    primaryColor: '#3A7A5A', accentColor: '#52A878',
+    bgColor: '#F2F9F5', surfaceColor: '#F9FDF9',
+    textPrimary: '#283830', textSecondary: '#5A8870', borderColor: '#C0DED0'
+  },
+  {
+    name: '胭脂墨', id: 'rouge-ink',
+    primaryColor: '#7A3040', accentColor: '#A04858',
+    bgColor: '#FBF5F6', surfaceColor: '#FEFAFB',
+    textPrimary: '#3A2028', textSecondary: '#886870', borderColor: '#E6D0D4'
   }
 ]
 
@@ -431,9 +480,19 @@ export const useResumeStore = defineStore('resume', () => {
   const maxHistory = 50
   const isUndoRedo = ref(false)
 
+  // ---- New Model: Document History ----
+  const docHistory = ref<string[]>([])  // JSON snapshots of docRef
+  const docHistoryIndex = ref(-1)
+  const maxDocHistory = 50
+  const isDocUndoRedo = ref(false)
+
+  // ---- Soft Delete: Recycle Bin ----
+  const recycleBin = ref<{ element: ResumeElement; deletedAt: string; parentId: string | null }[]>([])
+  const maxRecycleBinSize = 20
+
   // ---- Computed ----
-  const canUndo = computed(() => historyIndex.value > 0)
-  const canRedo = computed(() => historyIndex.value < history.value.length - 1)
+  const canUndo = computed(() => historyIndex.value > 0 || docHistoryIndex.value > 0)
+  const canRedo = computed(() => historyIndex.value < history.value.length - 1 || docHistoryIndex.value < docHistory.value.length - 1)
 
   const visibleModules = computed(() =>
     modules.value.filter(m => m.visible).sort((a, b) => a.order - b.order)
@@ -529,6 +588,15 @@ export const useResumeStore = defineStore('resume', () => {
 
   function undo() {
     if (!canUndo.value) return
+    // Undo new model first (if active)
+    if (useNewModel.value && docHistoryIndex.value > 0) {
+      isDocUndoRedo.value = true
+      docHistoryIndex.value--
+      docRef.value = JSON.parse(docHistory.value[docHistoryIndex.value])
+      isDocUndoRedo.value = false
+      return
+    }
+    // Fallback to old model undo
     isUndoRedo.value = true
     historyIndex.value--
     const state = history.value[historyIndex.value]
@@ -541,6 +609,15 @@ export const useResumeStore = defineStore('resume', () => {
 
   function redo() {
     if (!canRedo.value) return
+    // Redo new model first (if active)
+    if (useNewModel.value && docHistoryIndex.value < docHistory.value.length - 1) {
+      isDocUndoRedo.value = true
+      docHistoryIndex.value++
+      docRef.value = JSON.parse(docHistory.value[docHistoryIndex.value])
+      isDocUndoRedo.value = false
+      return
+    }
+    // Fallback to old model redo
     isUndoRedo.value = true
     historyIndex.value++
     const state = history.value[historyIndex.value]
@@ -580,6 +657,34 @@ export const useResumeStore = defineStore('resume', () => {
       saveStatus.value = 'saved'
     }, 500)
   }, { deep: true })
+
+  // ---- New Model: Document History Watch ----
+  let docHistoryTimer: ReturnType<typeof setTimeout> | null = null
+  watch(docRef, () => {
+    if (!docRef.value || isDocUndoRedo.value) return
+    if (docHistoryTimer) clearTimeout(docHistoryTimer)
+    saveStatus.value = 'unsaved'
+    docHistoryTimer = setTimeout(() => {
+      pushDocHistory()
+      lastSaved.value = new Date().toISOString()
+      saveStatus.value = 'saved'
+    }, 500)
+  }, { deep: true })
+
+  function pushDocHistory() {
+    if (!docRef.value || isDocUndoRedo.value) return
+    const snapshot = JSON.stringify(docRef.value)
+    // Remove future states
+    if (docHistoryIndex.value < docHistory.value.length - 1) {
+      docHistory.value = docHistory.value.slice(0, docHistoryIndex.value + 1)
+    }
+    docHistory.value.push(snapshot)
+    if (docHistory.value.length > maxDocHistory) {
+      docHistory.value.shift()
+    } else {
+      docHistoryIndex.value++
+    }
+  }
 
   // Initialize history with default state
   pushHistory()
@@ -809,6 +914,20 @@ export const useResumeStore = defineStore('resume', () => {
     useNewModel.value = true
   }
 
+  function toggleModel() {
+    if (useNewModel.value) {
+      // Switch to old model
+      useNewModel.value = false
+    } else {
+      // Switch to new model (migrate if needed)
+      if (!docRef.value) {
+        migrateToNewModel()
+      } else {
+        useNewModel.value = true
+      }
+    }
+  }
+
   function addElement(type: ElementType, parentId?: string | null, props?: Partial<ResumeElement>) {
     if (!docRef.value) return
     const page = docRef.value.pages[0]
@@ -842,6 +961,16 @@ export const useResumeStore = defineStore('resume', () => {
     for (const page of docRef.value.pages) {
       const idx = page.elements.findIndex(e => e.id === id)
       if (idx !== -1) {
+        const el = page.elements[idx]
+        // Soft delete: move to recycle bin
+        recycleBin.value.unshift({
+          element: JSON.parse(JSON.stringify(el)),
+          deletedAt: new Date().toISOString(),
+          parentId: el.parentId,
+        })
+        if (recycleBin.value.length > maxRecycleBinSize) {
+          recycleBin.value.pop()
+        }
         page.elements.splice(idx, 1)
         if (selectedElementId.value === id) selectedElementId.value = null
         break
@@ -849,8 +978,132 @@ export const useResumeStore = defineStore('resume', () => {
     }
   }
 
+  /** 从回收站恢复元素 */
+  function restoreElement(elementId: string): boolean {
+    const entry = recycleBin.value.find(e => e.element.id === elementId)
+    if (!entry || !docRef.value) return false
+    const page = docRef.value.pages[0]
+    if (!page) return false
+    page.elements.push(entry.element)
+    recycleBin.value = recycleBin.value.filter(e => e.element.id !== elementId)
+    return true
+  }
+
+  /** 清空回收站 */
+  function clearRecycleBin() {
+    recycleBin.value = []
+  }
+
+  /** 获取回收站内容 */
+  function getRecycleBinItems() {
+    return recycleBin.value.map(entry => ({
+      id: entry.element.id,
+      type: entry.element.type,
+      content: entry.element.content || entry.element.html || '',
+      deletedAt: entry.deletedAt,
+    }))
+  }
+
   function selectElement(id: string | null) {
     selectedElementId.value = id
+  }
+
+  // ---- Container & Layout Actions ----
+
+  /** 创建一个 row 容器并插入到页面 */
+  function createRowElement(parentId?: string | null, opts?: Partial<ResumeElement>): string | null {
+    if (!docRef.value) return null
+    const page = docRef.value.pages[0]
+    if (!page) return null
+    const ts = Date.now().toString(36)
+    const rand = Math.random().toString(36).slice(2, 6)
+    const newEl: ResumeElement = {
+      id: `row_${ts}_${rand}`,
+      type: 'row',
+      parentId: parentId ?? null,
+      order: page.elements.filter(e => e.parentId === (parentId ?? null)).length,
+      visible: true,
+      layout: {
+        mode: 'flow',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: 8,
+      },
+      style: {},
+      ...opts,
+    }
+    page.elements.push(newEl)
+    selectedElementId.value = newEl.id
+    return newEl.id
+  }
+
+  /** 创建一个 column 容器并插入到页面 */
+  function createColumnElement(parentId?: string | null, opts?: Partial<ResumeElement>): string | null {
+    if (!docRef.value) return null
+    const page = docRef.value.pages[0]
+    if (!page) return null
+    const ts = Date.now().toString(36)
+    const rand = Math.random().toString(36).slice(2, 6)
+    const newEl: ResumeElement = {
+      id: `col_${ts}_${rand}`,
+      type: 'column',
+      parentId: parentId ?? null,
+      order: page.elements.filter(e => e.parentId === (parentId ?? null)).length,
+      visible: true,
+      layout: {
+        mode: 'flow',
+        flexDirection: 'column',
+        gap: 8,
+      },
+      style: {},
+      ...opts,
+    }
+    page.elements.push(newEl)
+    selectedElementId.value = newEl.id
+    return newEl.id
+  }
+
+  /** 将一个元素移动到指定容器内 */
+  function moveElementToContainer(elementId: string, containerId: string, insertIndex?: number): boolean {
+    if (!docRef.value) return false
+    const page = docRef.value.pages[0]
+    if (!page) return false
+    const el = page.elements.find(e => e.id === elementId)
+    const container = page.elements.find(e => e.id === containerId)
+    if (!el || !container) return false
+    if (container.type !== 'row' && container.type !== 'column' && container.type !== 'module') return false
+    // Prevent circular nesting
+    let check: string | null = containerId
+    while (check) {
+      if (check === elementId) return false // would create a cycle
+      const parent = page.elements.find(e => e.id === check)
+      check = parent?.parentId ?? null
+    }
+    el.parentId = containerId
+    // Re-order siblings
+    const siblings = page.elements
+      .filter(e => e.parentId === containerId && e.id !== elementId)
+      .sort((a, b) => a.order - b.order)
+    if (insertIndex != null && insertIndex >= 0 && insertIndex <= siblings.length) {
+      siblings.splice(insertIndex, 0, el)
+    } else {
+      siblings.push(el)
+    }
+    siblings.forEach((s, i) => { s.order = i })
+    return true
+  }
+
+  /** 将元素从容器中移出到顶层 */
+  function moveElementToTopLevel(elementId: string): boolean {
+    if (!docRef.value) return false
+    const page = docRef.value.pages[0]
+    if (!page) return false
+    const el = page.elements.find(e => e.id === elementId)
+    if (!el) return false
+    el.parentId = null
+    el.order = page.elements.filter(e => e.parentId === null).length
+    return true
   }
 
   // ---- Template Actions ----
@@ -997,7 +1250,11 @@ export const useResumeStore = defineStore('resume', () => {
     undo, redo,
     exportData, importData, resetToDefault,
     // Phase 1 新 actions
-    initDocument, migrateToNewModel, addElement, updateElement, removeElement, selectElement,
+    initDocument, migrateToNewModel, toggleModel, addElement, updateElement, removeElement, selectElement,
+    // Container & layout actions
+    createRowElement, createColumnElement, moveElementToContainer, moveElementToTopLevel,
+    // Soft delete & recycle bin
+    recycleBin, restoreElement, clearRecycleBin, getRecycleBinItems,
     // Template actions
     templates, saveAsTemplate, deleteTemplate, loadTemplate, loadDefaultTemplate,
     // Personal field management

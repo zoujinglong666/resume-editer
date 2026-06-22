@@ -91,7 +91,7 @@
             <template v-else-if="element.moduleType === 'education'">
               <div class="education-compact">
                 <div class="item-header">
-                  <span class="item-title">{{ [item.school, item.degree, item.major].filter(Boolean).join(' · ') }}</span>
+                  <span class="item-title">{{ item.school }}<span v-if="item.degree || item.major" class="edu-inline-sep"> · </span><span v-if="item.degree" class="edu-inline-meta">{{ item.degree }}</span><span v-if="item.degree && item.major" class="edu-inline-sep"> · </span><span v-if="item.major" class="edu-inline-meta">{{ item.major }}</span></span>
                   <span v-if="item.dateRange" class="item-date">{{ item.dateRange }}</span>
                 </div>
                 <div v-if="item.description" class="item-desc" v-html="formatDesc(item.description)"></div>
@@ -124,8 +124,7 @@
             <!-- Skill -->
             <template v-else-if="element.moduleType === 'skill'">
               <div v-if="item.content" class="skill-list-row">
-                <strong>{{ item.name }}</strong>：
-                <span v-html="formatDesc(item.content)"></span>
+                <strong class="skill-cat-name">{{ item.name }}</strong><span class="skill-cat-sep">：</span><span v-html="formatDesc(item.content)"></span>
               </div>
               <div v-else class="skill-compact">{{ item.name }}</div>
             </template>
@@ -238,6 +237,22 @@
       <span class="node-icon" :style="iconStyle">{{ element.content || '●' }}</span>
     </template>
 
+    <!-- Row / Column Container -->
+    <template v-else-if="element.type === 'row' || element.type === 'column'">
+      <div class="node-container" :class="`container-${element.type}`" :style="containerStyle">
+        <RenderNode
+          v-for="child in childElements"
+          :key="child.id"
+          :element="child"
+          :is-selected="store.selectedElementId === child.id"
+          @select="(id: string) => store.selectElement(id)"
+        />
+        <div v-if="childElements.length === 0" class="container-empty-hint">
+          {{ element.type === 'row' ? '拖入元素到行容器' : '拖入元素到列容器' }}
+        </div>
+      </div>
+    </template>
+
     <!-- Fallback -->
     <template v-else>
       <div class="node-fallback" :style="nodeStyle">
@@ -335,6 +350,27 @@ const nodeStyle = computed(() => {
     width: l.width && l.width !== 'auto' ? `${l.width}px` : (l.width === 'auto' ? 'auto' : undefined),
     height: l.height && l.height !== 'auto' ? `${l.height}px` : (l.height === 'auto' ? 'auto' : undefined),
     zIndex: l.zIndex || undefined,
+    // Inline mode
+    display: l.mode === 'inline' ? 'inline-block' : undefined,
+    verticalAlign: l.mode === 'inline' ? 'top' : undefined,
+    // Flex child
+    flexGrow: l.flexGrow ?? undefined,
+    flexShrink: l.flexShrink ?? undefined,
+    flexBasis: l.flexBasis != null ? (l.flexBasis === 'auto' ? 'auto' : `${l.flexBasis}px`) : undefined,
+  } as any
+})
+
+const containerStyle = computed(() => {
+  const l = props.element.layout || {}
+  const isRow = props.element.type === 'row'
+  return {
+    display: 'flex',
+    flexDirection: l.flexDirection || (isRow ? 'row' : 'column'),
+    flexWrap: l.flexWrap || 'wrap',
+    justifyContent: l.justifyContent || 'flex-start',
+    alignItems: l.alignItems || (isRow ? 'center' : 'stretch'),
+    gap: l.gap != null ? `${l.gap}px` : '8px',
+    width: l.width && l.width !== 'auto' ? `${l.width}px` : (l.width === 'auto' ? 'auto' : '100%'),
   } as any
 })
 
@@ -798,6 +834,16 @@ function onItemInput(_e: InputEvent) {
 .education-compact {
   padding: 0;
 }
+.edu-inline-sep {
+  color: var(--text-secondary, #7F8C8D);
+  font-weight: 400;
+  margin: 0 2px;
+}
+.edu-inline-meta {
+  font-weight: 400;
+  color: var(--text-secondary, #7F8C8D);
+  font-size: 0.9rem;
+}
 
 /* Experience module */
 .experience-compact {
@@ -821,18 +867,25 @@ function onItemInput(_e: InputEvent) {
   padding: 2px 0;
 }
 
-/* Skill list mode (类别：关键词) */
+/* Skill list mode (类别独占一行，关键词在下方) */
 .skill-list-row {
   font-size: 0.85rem;
   line-height: 1.7;
   color: var(--text-secondary, #5a6c7d);
-  margin-bottom: 3px;
+  margin-bottom: 6px;
 }
 
-.skill-list-row strong {
+.skill-cat-name {
   color: var(--text-primary, #333333);
   font-weight: 600;
+  flex-shrink: 0;
 }
+
+.skill-cat-sep {
+  color: var(--text-primary, #333333);
+  flex-shrink: 0;
+}
+
 .skill-list-row :deep(ol),
 .skill-list-row :deep(ul) {
   margin: 2px 0;
@@ -969,6 +1022,28 @@ function onItemInput(_e: InputEvent) {
   color: var(--text-secondary, #5a6c7d);
   padding: 2px 0;
   min-height: 1em;
+}
+
+/* Row / Column Container */
+.node-container {
+  position: relative;
+  min-height: 24px;
+}
+
+.node-container:hover {
+  outline: 1px dashed #a0aec0;
+  outline-offset: -1px;
+  border-radius: 4px;
+}
+
+.container-empty-hint {
+  color: #9ca3af;
+  font-size: 12px;
+  padding: 8px 12px;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+  text-align: center;
+  width: 100%;
 }
 
 .selection-indicator {

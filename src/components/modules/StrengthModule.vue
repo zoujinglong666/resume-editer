@@ -12,6 +12,7 @@
         contenteditable="true"
         :data-placeholder="'能力标签'"
         @blur="updateField(item.id, 'title', $event)"
+        @keydown="onFieldKeydown($event, item.id, 'title')"
         @paste="onPaste"
       >{{ item.title }}</span>
       <span class="strength-sep">：</span>
@@ -20,6 +21,7 @@
         contenteditable="true"
         :data-placeholder="'量化事实或证据'"
         @blur="updateField(item.id, 'content', $event)"
+        @keydown="onFieldKeydown($event, item.id, 'content')"
         @paste="onPaste"
       >{{ item.content }}</span>
     </div>
@@ -137,6 +139,27 @@ function onPaste(e: ClipboardEvent) {
   const text = e.clipboardData?.getData('text/plain') || ''
   document.execCommand('insertText', false, text)
 }
+
+// ---- Field Navigation ----
+function onFieldKeydown(e: KeyboardEvent, itemId: string, currentField: string) {
+  if (e.key === 'Tab') {
+    e.preventDefault()
+    // title → content
+    if (currentField === 'title' && !e.shiftKey) {
+      const nextEl = document.querySelector(`[data-placeholder="'量化事实或证据'"]`) as HTMLElement
+      if (nextEl) nextEl.focus()
+    } else if (currentField === 'content' && e.shiftKey) {
+      const prevEl = document.querySelector(`[data-placeholder="'能力标签'"]`) as HTMLElement
+      if (prevEl) prevEl.focus()
+    }
+  } else if (e.key === 'Enter' && !e.shiftKey) {
+    if (currentField === 'title') {
+      e.preventDefault()
+      const nextEl = document.querySelector(`[data-placeholder="'量化事实或证据'"]`) as HTMLElement
+      if (nextEl) nextEl.focus()
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -149,12 +172,40 @@ function onPaste(e: ClipboardEvent) {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.strength-item:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.02));
+}
+
+.strength-item:focus-within {
+  background: var(--surface-active, rgba(99, 102, 241, 0.03));
+  box-shadow: 0 0 0 1px var(--primary-200, #c7d2fe);
 }
 
 .strength-label {
   font-weight: 600;
   color: var(--text-primary);
   flex-shrink: 0;
+  outline: none;
+  border-radius: 3px;
+  padding: 1px 3px;
+  margin: -1px -3px;
+  transition: all 0.2s ease;
+}
+
+.strength-label:focus {
+  background: var(--primary-50, #eef2ff);
+  box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
+}
+
+.strength-label:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder, #94a3b8);
+  pointer-events: none;
 }
 
 .strength-sep {
@@ -164,5 +215,21 @@ function onPaste(e: ClipboardEvent) {
 
 .strength-fact {
   color: var(--text-secondary);
+  outline: none;
+  border-radius: 3px;
+  padding: 1px 3px;
+  margin: -1px -3px;
+  transition: all 0.2s ease;
+}
+
+.strength-fact:focus {
+  background: var(--primary-50, #eef2ff);
+  box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
+}
+
+.strength-fact:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder, #94a3b8);
+  pointer-events: none;
 }
 </style>

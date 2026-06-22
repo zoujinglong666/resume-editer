@@ -32,10 +32,10 @@
           >{{ item.position }}</div>
         </div>
 
-        <!-- Dynamic Info Row: all visible contact-like fields with hover delete -->
+        <!-- Dynamic Info Row: only show fields that have a value -->
         <div v-if="visibleContactFields(item).length > 0" class="personal-info-row">
           <template v-for="field in visibleContactFields(item)" :key="field.id">
-            <span class="personal-info-item" :class="{ 'has-value': item[field.key] }">
+            <span v-if="item[field.key]" class="personal-info-item has-value">
               <component
                 v-if="field.icon"
                 :is="getLucideIcon(field.icon)"
@@ -49,7 +49,6 @@
               >{{ item[field.key] }}</span>
               <!-- Hover Delete Button (edit mode only) -->
               <button
-                v-if="item[field.key]"
                 class="personal-field-delete-btn no-print"
                 @click.stop="clearField(item.id, field.key)"
                 :title="'清除' + field.label"
@@ -286,11 +285,7 @@ function removeAvatar() {
   height: 14px;
   flex-shrink: 0;
   color: var(--primary-500);
-  display: inline-block;
-  vertical-align: middle;
   margin-right: 5px;
-  position: relative;
-  top: -1px;
 }
 
 .personal-info-row {

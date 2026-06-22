@@ -16,6 +16,9 @@
         @export-pdf="showPdfDialog = true"
         @export-json="handleExport"
         @import-json="handleImport"
+        @export-docx="handleExportDocx"
+        @export-md="handleExportMd"
+        @export-html="handleExportHtml"
       />
       <Canvas ref="canvasRef" />
       <EditorPanel />
@@ -50,6 +53,7 @@ import StatusBar from './components/StatusBar.vue'
 import PdfExportDialog from './components/PdfExportDialog.vue'
 import ResumePreviewDialog from './components/ResumePreviewDialog.vue'
 import { exportPreviewPdf } from './utils/previewPdf'
+import { exportToMarkdown, exportToHtml, exportToDocx } from './utils/exportFormats'
 
 const store = useResumeStore()
 const canvasRef = ref<InstanceType<typeof Canvas> | null>(null)
@@ -140,5 +144,35 @@ async function handleQuickExportPdf() {
   } finally {
     isQuickExporting.value = false
   }
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function handleExportDocx() {
+  exportToDocx(store.modules, store.config).then(blob => {
+    downloadBlob(blob, `resume-${new Date().toISOString().slice(0, 10)}.docx`)
+  }).catch(err => {
+    console.error('DOCX export failed:', err)
+    alert('DOCX 导出失败，请重试')
+  })
+}
+
+function handleExportMd() {
+  const md = exportToMarkdown(store.modules, store.avatar)
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' })
+  downloadBlob(blob, `resume-${new Date().toISOString().slice(0, 10)}.md`)
+}
+
+function handleExportHtml() {
+  const html = exportToHtml(store.modules, store.config)
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+  downloadBlob(blob, `resume-${new Date().toISOString().slice(0, 10)}.html`)
 }
 </script>

@@ -1,5 +1,47 @@
 <template>
   <div class="app-sidebar no-print">
+    <!-- Sidebar Tab Bar -->
+    <div class="sidebar-tab-bar">
+      <button
+        v-for="tab in sidebarTabs"
+        :key="tab.key"
+        class="sidebar-tab-btn"
+        :class="{ active: activeSidebarTab === tab.key }"
+        :title="tab.label"
+        @click="activeSidebarTab = tab.key"
+      >
+        <span v-html="tab.icon"></span>
+        <span class="sidebar-tab-label">{{ tab.label }}</span>
+      </button>
+    </div>
+
+    <!-- AI Panel Tab -->
+    <template v-if="activeSidebarTab === 'ai'">
+      <AiPanel />
+    </template>
+
+    <!-- Scoring Tab -->
+    <template v-if="activeSidebarTab === 'score'">
+      <ScoringPanel />
+    </template>
+
+    <!-- Templates Tab -->
+    <template v-if="activeSidebarTab === 'templates'">
+      <TemplateMarket />
+    </template>
+
+    <!-- Version History Tab -->
+    <template v-if="activeSidebarTab === 'history'">
+      <VersionHistory />
+    </template>
+
+    <!-- Account Tab -->
+    <template v-if="activeSidebarTab === 'account'">
+      <AccountPanel />
+    </template>
+
+    <!-- Main Content Tab (Phase-based) -->
+    <template v-if="activeSidebarTab === 'main'">
     <!-- Phase 1: Fill mode -->
     <template v-if="store.currentPhase === 'fill'">
       <div class="panel-section">
@@ -44,6 +86,35 @@
             >
               {{ store.completionByModule[mod.id].filled }}/{{ store.completionByModule[mod.id].total }}
             </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recycle Bin (only in new model + fill phase) -->
+      <div v-if="store.useNewModel && store.recycleBin.length > 0" class="panel-section" style="border-bottom: none;">
+        <div class="panel-section-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <span>回收站 ({{ store.recycleBin.length }})</span>
+          <button
+            class="text-xs"
+            style="color: var(--sidebar-muted); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 3px;"
+            @click="store.clearRecycleBin()"
+          >清空</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-1);">
+          <div
+            v-for="item in store.recycleBin"
+            :key="item.element.id"
+            class="flex items-center justify-between text-xs rounded"
+            style="padding: var(--list-item-padding-y) var(--list-item-padding-x); background: rgba(255,255,255,0.03); border: 1px solid var(--sidebar-border);"
+          >
+            <span class="truncate flex-1" style="color: var(--sidebar-muted);">
+              {{ item.element.content || item.element.html?.replace(/<[^>]*>/g, '').slice(0, 20) || item.element.type }}
+            </span>
+            <button
+              class="shrink-0"
+              style="color: var(--primary-400); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 3px; font-size: 11px;"
+              @click="store.restoreElement(item.element.id)"
+            >恢复</button>
           </div>
         </div>
       </div>
@@ -243,6 +314,54 @@
             </div>
             <svg class="export-option-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
+          <div
+            class="export-option-card"
+            :class="{ active: hoverExportCard === 'docx' }"
+            @click="$emit('export-docx')"
+            @mouseenter="hoverExportCard = 'docx'"
+            @mouseleave="hoverExportCard = null"
+          >
+            <div class="export-option-icon docx">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <div class="export-option-body">
+              <div class="export-option-title">Word 格式</div>
+              <div class="export-option-desc">DOCX 格式，可在 Word 中继续编辑</div>
+            </div>
+            <svg class="export-option-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div
+            class="export-option-card"
+            :class="{ active: hoverExportCard === 'md' }"
+            @click="$emit('export-md')"
+            @mouseenter="hoverExportCard = 'md'"
+            @mouseleave="hoverExportCard = null"
+          >
+            <div class="export-option-icon md">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/><polyline points="14 2 14 8 20 8"/><line x1="2" y1="13" x2="12" y2="13"/><line x1="7" y1="8" x2="7" y2="18"/></svg>
+            </div>
+            <div class="export-option-body">
+              <div class="export-option-title">Markdown 格式</div>
+              <div class="export-option-desc">纯文本格式，适合 GitHub 或博客发布</div>
+            </div>
+            <svg class="export-option-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div
+            class="export-option-card"
+            :class="{ active: hoverExportCard === 'html' }"
+            @click="$emit('export-html')"
+            @mouseenter="hoverExportCard = 'html'"
+            @mouseleave="hoverExportCard = null"
+          >
+            <div class="export-option-icon html">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <div class="export-option-body">
+              <div class="export-option-title">HTML 格式</div>
+              <div class="export-option-desc">网页格式，可在线分享或浏览器打印</div>
+            </div>
+            <svg class="export-option-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
         </div>
       </div>
 
@@ -267,6 +386,7 @@
         </div>
       </div>
     </template>
+    </template><!-- end main tab -->
   </div>
 </template>
 
@@ -275,10 +395,28 @@ import { ref, computed } from 'vue'
 import { useResumeStore, THEME_PRESETS } from '../stores/resume'
 import AvatarUpload from './AvatarUpload.vue'
 import ProgressRing from './ProgressRing.vue'
+import AiPanel from './AiPanel.vue'
+import ScoringPanel from './ScoringPanel.vue'
+import TemplateMarket from './TemplateMarket.vue'
+import VersionHistory from './VersionHistory.vue'
+import AccountPanel from './AccountPanel.vue'
 
 const store = useResumeStore()
 const themes = THEME_PRESETS
 const hoverExportCard = ref<string | null>(null)
+
+// Sidebar tab system
+type SidebarTab = 'main' | 'ai' | 'score' | 'templates' | 'history' | 'account'
+const activeSidebarTab = ref<SidebarTab>('main')
+
+const sidebarTabs = [
+  { key: 'main' as const, label: '编辑', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' },
+  { key: 'ai' as const, label: 'AI', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14h.01"/><path d="M8 14h.01"/><path d="M12 17v4"/></svg>' },
+  { key: 'score' as const, label: '评分', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' },
+  { key: 'templates' as const, label: '模板', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
+  { key: 'history' as const, label: '历史', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
+  { key: 'account' as const, label: '账号', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
+]
 
 // Font size quick presets
 const fontSizePresets = [12, 13, 14, 15, 16]
@@ -310,7 +448,7 @@ const titleStyles = [
   { id: 'grad-fade', name: '渐变字' },
 ]
 
-defineEmits(['export-pdf', 'export-json', 'import-json'])
+defineEmits(['export-pdf', 'export-json', 'import-json', 'export-docx', 'export-md', 'export-html'])
 
 function getBadgeClass(modId: string): string {
   const stats = store.completionByModule[modId]
