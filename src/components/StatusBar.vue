@@ -1,5 +1,5 @@
 <template>
-  <div class="app-statusbar no-print shrink-0">
+  <div class="app-statusbar no-print shrink-0" style="min-height: 28px;">
     <!-- Left -->
     <div class="flex items-center" style="gap: var(--card-gap);">
       <span>完成度 {{ store.overallCompletion }}%</span>
