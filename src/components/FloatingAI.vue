@@ -22,10 +22,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useResumeStore } from '../stores/resume'
 import { loadAiConfig, aiPolishContent, type AiConfig } from '../utils/ai'
-
-const store = useResumeStore()
 const visible = ref(false)
 const isPolishing = ref(false)
 const positionStyle = ref<Record<string, string>>({})

@@ -147,7 +147,7 @@ function onPaste(e: ClipboardEvent) {
 }
 
 // ---- Field Navigation ----
-function onFieldKeydown(e: KeyboardEvent, itemId: string, currentField: string) {
+function onFieldKeydown(e: KeyboardEvent, _itemId: string, currentField: string) {
   if (e.key === 'Enter' && !e.shiftKey && currentField === 'title') {
     e.preventDefault()
     const descEl = document.querySelector('.description-section .item-desc') as HTMLElement

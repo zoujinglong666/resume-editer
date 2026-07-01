@@ -141,7 +141,7 @@ function onPaste(e: ClipboardEvent) {
 }
 
 // ---- Field Navigation ----
-function onFieldKeydown(e: KeyboardEvent, itemId: string, currentField: string) {
+function onFieldKeydown(e: KeyboardEvent, _itemId: string, currentField: string) {
   if (e.key === 'Tab') {
     e.preventDefault()
     // title → content

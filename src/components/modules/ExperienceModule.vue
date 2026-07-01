@@ -223,7 +223,7 @@ function onPaste(e: ClipboardEvent) {
 }
 
 // ---- Field Navigation with Tab ----
-function onFieldKeydown(e: KeyboardEvent, itemId: string, currentField: string) {
+function onFieldKeydown(e: KeyboardEvent, _itemId: string, currentField: string) {
   if (e.key === 'Tab') {
     e.preventDefault()
     const fieldOrder = ['company', 'position']
