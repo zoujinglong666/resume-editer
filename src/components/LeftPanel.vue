@@ -57,6 +57,14 @@
           class="w-full accent-[var(--primary-color)]"
         />
       </label>
+      <label class="block">
+        <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">下划线粗细: {{ store.config.underlineWidth }}px</span>
+        <input
+          type="range" min="1" max="6" step="0.5" :value="store.config.underlineWidth"
+          @input="updateUnderlineWidth(Number(($event.target as HTMLInputElement).value))"
+          class="w-full accent-[var(--primary-color)]"
+        />
+      </label>
     </div>
 
     <!-- Spacing -->
@@ -219,5 +227,10 @@ function updateModuleGap(val: number) {
 function updateItemGap(val: number) {
   store.config.itemGap = val
   document.documentElement.style.setProperty('--item-gap', `${val}px`)
+}
+
+function updateUnderlineWidth(val: number) {
+  store.config.underlineWidth = val
+  document.documentElement.style.setProperty('--underline-width', `${val}px`)
 }
 </script>

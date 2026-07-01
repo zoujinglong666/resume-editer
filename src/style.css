@@ -52,6 +52,85 @@
   --font-serif: 'Georgia', 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Menlo', monospace;
 
+  /* ═══════════════════════════════════════════════════════════
+     RESUME DESIGN TOKENS — Canvas Typography & Color
+     简历画布专属设计变量体系（禁止在模块中写硬编码值）
+     调整此处即可全局生效
+     ═══════════════════════════════════════════════════════════ */
+
+  /* ── Resume Font Family (中文 + 英文双语无衬线) ── */
+  --resume-font-sans: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --resume-font-serif: 'Georgia', 'Noto Serif SC', 'Songti SC', serif;
+  --resume-font-family: var(--resume-font-sans);  /* 默认：无衬线 */
+
+  /* ── Resume Font Size Scale (A4 简历字号阶梯) ── */
+  /* 最小不可读为 9px，常规正文 11-12px，标题阶梯向上递增 */
+  --resume-font-xs:  9px;     /* 极小辅助文字 */
+  --resume-font-sm:  11px;    /* 时间 / 日期 / 副标题 */
+  --resume-font-md:  12px;    /* 正文 (A4 上常用) */
+  --resume-font-lg:  14px;    /* 副标题 / 职位 */
+  --resume-font-xl:  16px;    /* 模块标题 */
+  --resume-font-2xl: 20px;    /* 姓名 */
+
+  /* ── Resume Line Height (呼吸感) ── */
+  --resume-line-height-tight: 1.3;
+  --resume-line-height-normal: 1.5;
+  --resume-line-height-relaxed: 1.65;
+
+  /* ── Resume Font Weight (字重阶梯) ── */
+  --resume-weight-normal: 400;
+  --resume-weight-medium: 500;
+  --resume-weight-semibold: 600;
+  --resume-weight-bold: 700;
+  --resume-weight-extra-bold: 800;
+
+  /* ── Resume Color Palette (三色体系: 主色 + 文字深灰 + 辅助灰) ── */
+  --resume-color-brand: var(--primary-600);       /* 主品牌色 — 标题下划线/强调 */
+  --resume-color-brand-light: var(--primary-400); /* 主色浅变体 */
+
+  --resume-text-heading: #1a1a2e;    /* 一级标题 / 姓名 */
+  --resume-text-body:    #4a4a5a;    /* 正文内容 */
+  --resume-text-meta:    #8a8a9a;    /* 日期 / 时间 / 辅助信息 */
+  --resume-text-link:    var(--primary-500); /* 链接色 */
+
+  --resume-border-light: #e8e8ee;     /* 分割线 */
+  --resume-border-line:  #d0d0da;     /* 边框 */
+
+  /* ── Resume Spacing Scale (8px 垂直栅格) ── */
+  --resume-space-1: 1px;
+  --resume-space-2: 2px;
+  --resume-space-4: 4px;
+  --resume-space-6: 6px;
+  --resume-space-8: 8px;
+  --resume-space-10: 10px;
+  --resume-space-12: 12px;
+  --resume-space-16: 16px;
+  --resume-space-20: 20px;
+  --resume-space-24: 24px;
+  --resume-space-32: 32px;
+  --resume-space-40: 40px;
+
+  /* ── Resume Spacing Semantics (场景映射) ── */
+  --resume-sp-contact-gap: var(--resume-space-8);      /* 联系方式之间 */
+  --resume-sp-item-inner: var(--resume-space-12);       /* 条目内部 padding */
+  --resume-sp-item-margin: var(--resume-space-12);      /* 条目之间 */
+  --resume-sp-module-title-bottom: var(--resume-space-12); /* 模块标题底部 */
+  --resume-sp-module-bottom: var(--resume-space-16);    /* 模块之间 */
+  --resume-sp-page-margin: 20px;                         /* A4 页面边距 */
+
+  /* ── Resume Border Radius ── */
+  --resume-radius-sm: 3px;
+  --resume-radius-md: 6px;
+  --resume-radius-lg: 10px;
+
+  /* ── Resume Avatar Size ── */
+  --resume-avatar-size: 88px;
+  --resume-avatar-radius: 50%;
+
+  /* ── A4 Paper ── */
+  --a4-width: 210mm;
+  --a4-height: 297mm;
+
   /* ── App Shell Colors ── */
   --app-bg: #f5f2ed;
   --sidebar-bg: #0f1117;
@@ -156,6 +235,40 @@
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Editor Card Spacing (8px grid for module items) ── */
+  --editor-card-py: var(--space-2_5);      /* 10px — card inner top/bottom padding */
+  --editor-card-px: var(--space-3);         /* 12px — card inner left/right padding */
+  --editor-card-gap: var(--space-2);        /* 8px  — flex gap between child elements in card */
+  --editor-card-mb: var(--space-3_5);       /* 14px — margin-bottom between cards */
+  --editor-card-br: var(--space-2);         /* 8px  — card border-radius */
+
+  /* ── Editor List Item Spacing (skill, strength) ── */
+  --editor-list-item-py: var(--space-1_5);  /* 6px  — list item vertical padding */
+  --editor-list-item-px: var(--space-2_5);  /* 10px — list item horizontal padding */
+  --editor-list-item-gap: var(--space-2);   /* 8px  — gap between list items */
+  --editor-list-item-mb: var(--space-2);    /* 8px  — margin-bottom of list items */
+  --editor-list-item-br: var(--space-2);    /* 8px  — list item border-radius */
+
+  /* ── Editor Field Spacing ── */
+  --editor-field-py: var(--space-0_5);      /* 2px  — field inner padding */
+  --editor-field-px: var(--space-1);        /* 4px  — field inner horizontal padding */
+  --editor-field-br: 4px;                   /* 4px  — field border-radius */
+
+  /* ── Editor Header Row Spacing ── */
+  --editor-header-gap: var(--space-3);      /* 12px — gap between title and date in header */
+  --editor-header-field-gap: var(--space-1_5); /* 6px — gap between fields (school·degree·major) */
+
+  /* ── Editor Date Section ── */
+  --editor-date-py: var(--space-1);         /* 4px  — date clickable padding */
+  --editor-date-px: var(--space-2);         /* 8px  — date clickable padding */
+  --editor-date-br: var(--space-1);         /* 4px  — date clickable border-radius */
+
+  /* ── Editor Personal Info ── */
+  --editor-personal-row-py: var(--space-2); /* 8px  — contact row vertical padding */
+  --editor-personal-row-px: var(--space-2_5); /* 10px — contact row horizontal padding */
+  --editor-personal-row-gap-x: 20px;        /* 20px — contact row horizontal gap */
+  --editor-personal-row-gap-y: var(--space-2); /* 8px — contact row vertical gap */
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -449,29 +562,39 @@ html, body, #app {
 
 /* ═══════════════════════════════════════════════════════════════
    A4 Canvas — Resume Preview
+   精确使用 Design Tokens，确保 html2canvas 导出无白边无贴边
    ═══════════════════════════════════════════════════════════════ */
 .a4-canvas {
-  width: 210mm;
-  min-height: 297mm;
+  width: var(--a4-width);
+  min-height: var(--a4-height);
   background: var(--surface-color);
   box-shadow:
     0 8px 40px -12px rgba(0,0,0,0.15),
     0 2px 12px -4px rgba(0,0,0,0.08),
     0 0 0 1px rgba(0,0,0,0.04);
   border-radius: 2px;
-  padding: var(--page-margin);
-  font-family: var(--font-family, var(--font-sans));
-  font-size: var(--font-size, var(--font-size-base));
-  line-height: var(--line-height, var(--line-height-normal));
-  color: var(--text-primary);
+  padding: var(--resume-sp-page-margin);
+  font-family: var(--resume-font-family, var(--resume-font-sans));
+  font-size: var(--resume-font-md);
+  line-height: var(--resume-line-height-normal);
+  color: var(--resume-text-body);
   position: relative;
   overflow: hidden;
   transition: box-shadow var(--transition-slow);
+
+  /* html2canvas 导出优化：强制使用精确像素计算，避免模糊 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    Professional Text Layout Engine (A4 canvas)
+   文本排版 + 两端对齐优化 + 视觉层级系统
    ═══════════════════════════════════════════════════════════════ */
+
+/* ── 全局文本包裹 ── */
 .a4-canvas *,
 .a4-canvas *::before,
 .a4-canvas *::after {
@@ -479,45 +602,60 @@ html, body, #app {
   word-wrap: break-word;
 }
 
+/* ── 描述类文本（正文内容） ── */
 .a4-canvas .item-desc,
 .a4-canvas .personal-summary,
 .a4-canvas .custom-content,
 .a4-canvas [contenteditable="true"],
 .a4-canvas .project-desc,
-.a4-canvas .exp-description {
+.a4-canvas .exp-description,
+.a4-canvas .edu-description-text {
   overflow-wrap: break-word;
   word-break: normal;
   white-space: normal;
   max-width: 100%;
   overflow: visible;
+  /* 两端对齐优化：使用中文两端对齐策略避免空白河流 */
+  text-align: justify;
+  text-justify: inter-ideograph;
+  /* word-spacing 负值可微调字间距，消除空白河流 */
+  word-spacing: -0.12em;
+  hyphens: manual;
 }
 
+/* ── 标题类文本（禁止两端对齐，避免标题拉伸） ── */
 .a4-canvas .module-title,
 .a4-canvas .item-title,
 .a4-canvas .personal-name,
 .a4-canvas .personal-position,
-.a4-canvas .skill-name {
+.a4-canvas .skill-name,
+.a4-canvas .skill-bar-label,
+.a4-canvas .edu-school,
+.a4-canvas .strength-label,
+.a4-canvas .skill-list-category {
   overflow-wrap: break-word;
   word-break: break-word;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* 标题永远不要两端对齐 */
+  text-align: left;
 }
 
+/* ── 行内元素（日期 / 副标题 / 联系方式） ── */
 .a4-canvas .item-header,
 .a4-canvas .personal-contact,
 .a4-canvas .personal-info-row {
   max-width: 100%;
   overflow: hidden;
 }
-
 .a4-canvas .item-header {
   min-width: 0;
 }
-
 .a4-canvas .item-date,
 .a4-canvas .item-subtitle,
-.a4-canvas .personal-contact-item {
+.a4-canvas .personal-contact-item,
+.a4-canvas .edu-date {
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -526,10 +664,68 @@ html, body, #app {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Module Sections (A4)
+   Visual Hierarchy — 简历视觉层级系统
+   三级信息聚焦：Heading → Body → Meta
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── resume-heading (一级标题 / 模块标题) ── */
+.a4-canvas .resume-heading {
+  font-size: var(--resume-font-xl);
+  font-weight: var(--resume-weight-bold);
+  color: var(--resume-text-heading);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ── resume-name (姓名，最高级别) ── */
+.a4-canvas .resume-name {
+  font-size: var(--resume-font-2xl);
+  font-weight: var(--resume-weight-extra-bold);
+  color: var(--resume-text-heading);
+  line-height: var(--resume-line-height-tight);
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+/* ── resume-position (目标职位) ── */
+.a4-canvas .resume-position {
+  font-size: var(--resume-font-lg);
+  font-weight: var(--resume-weight-medium);
+  color: var(--resume-color-brand);
+  margin: 0;
+}
+
+/* ── resume-body (正文内容) ── */
+.a4-canvas .resume-body {
+  font-size: var(--resume-font-md);
+  font-weight: var(--resume-weight-normal);
+  color: var(--resume-text-body);
+  line-height: var(--resume-line-height-normal);
+}
+
+/* ── resume-meta (辅助信息：日期 / 时间 / 地点) ── */
+.a4-canvas .resume-meta {
+  font-size: var(--resume-font-sm);
+  font-weight: var(--resume-weight-normal);
+  color: var(--resume-text-meta);
+}
+
+/* ── resume-link (链接) ── */
+.a4-canvas .resume-link {
+  color: var(--resume-text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.a4-canvas .resume-link:hover {
+  text-decoration-color: var(--resume-color-brand);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Module Sections (A4) — 使用 Resume Spacing Tokens
    ═══════════════════════════════════════════════════════════════ */
 .a4-canvas .module-section {
-  margin-bottom: var(--module-gap);
+  margin-bottom: var(--resume-sp-module-bottom);
   page-break-inside: avoid;
   position: relative;
 }
@@ -537,14 +733,136 @@ html, body, #app {
   margin-bottom: 0;
 }
 
+/* 模块标题使用 resume-heading */
 .a4-canvas .module-title {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--primary-600);
+  font-size: var(--resume-font-xl);
+  font-weight: var(--resume-weight-bold);
+  color: var(--resume-text-heading);
   letter-spacing: 0.3px;
   text-transform: uppercase;
   position: relative;
   margin: 0;
+}
+
+/* 条目标题 (公司 / 学校 / 项目名) */
+.a4-canvas .item-title {
+  font-weight: var(--resume-weight-semibold);
+  font-size: var(--resume-font-md);
+  color: var(--resume-text-heading);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 条目副标题 (职位 / 学历) */
+.a4-canvas .item-subtitle {
+  color: var(--resume-text-body);
+  font-size: var(--resume-font-sm);
+  font-weight: var(--resume-weight-medium);
+}
+
+/* 时间日期 */
+.a4-canvas .item-date {
+  color: var(--resume-text-meta);
+  font-size: var(--resume-font-sm);
+  white-space: nowrap;
+  font-weight: var(--resume-weight-normal);
+  flex-shrink: 0;
+}
+
+/* 条目正文 */
+.a4-canvas .item-desc {
+  color: var(--resume-text-body);
+  font-size: var(--resume-font-md);
+  line-height: var(--resume-line-height-normal);
+  margin-top: var(--resume-space-4);
+}
+
+/* 条目之间的间距 */
+.a4-canvas .module-item {
+  margin-bottom: var(--resume-sp-item-margin);
+  padding-bottom: var(--resume-sp-item-inner);
+  border-bottom: 1px solid var(--resume-border-light);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.a4-canvas .module-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Personal Info Section (A4) — 使用 Resume Tokens
+   ═══════════════════════════════════════════════════════════════ */
+.a4-canvas .personal-header {
+  display: flex;
+  gap: var(--resume-space-8);
+  margin-bottom: var(--resume-space-16);
+  padding-bottom: var(--resume-space-12);
+  border-bottom: 2px solid var(--resume-color-brand);
+}
+
+.a4-canvas .personal-avatar {
+  flex-shrink: 0;
+  width: var(--resume-avatar-size);
+  height: var(--resume-avatar-size);
+  overflow: hidden;
+}
+.a4-canvas .personal-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.a4-canvas .personal-avatar.circle { border-radius: 50%; }
+.a4-canvas .personal-avatar.rounded { border-radius: 12px; }
+
+.a4-canvas .personal-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.a4-canvas .personal-name {
+  font-size: var(--resume-font-2xl);
+  font-weight: var(--resume-weight-extra-bold);
+  color: var(--resume-text-heading);
+  line-height: var(--resume-line-height-tight);
+  margin-bottom: var(--resume-space-4);
+  letter-spacing: -0.3px;
+}
+
+.a4-canvas .personal-position {
+  font-size: var(--resume-font-lg);
+  color: var(--resume-color-brand);
+  font-weight: var(--resume-weight-medium);
+  margin-bottom: var(--resume-space-8);
+}
+
+.a4-canvas .personal-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--resume-sp-contact-gap) var(--resume-space-16);
+  font-size: var(--resume-font-sm);
+  color: var(--resume-text-body);
+}
+
+.a4-canvas .personal-contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--resume-space-2);
+  white-space: nowrap;
+}
+
+.a4-canvas .personal-summary {
+  font-size: var(--resume-font-md);
+  color: var(--resume-text-body);
+  line-height: var(--resume-line-height-normal);
+  margin-top: var(--resume-space-8);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -554,7 +872,7 @@ html, body, #app {
 /* Style 1: Underline (default) */
 .title-style-underline .module-title {
   padding-bottom: var(--space-2);
-  border-bottom: 2.5px solid var(--primary-600);
+  border-bottom: var(--underline-width, 2.5px) solid var(--primary-600);
 }
 
 /* Style 2: Left Bar */
@@ -704,9 +1022,9 @@ html, body, #app {
 }
 
 .a4-canvas .module-item {
-  margin-bottom: var(--item-gap);
-  padding-bottom: var(--space-1);
-  border-bottom: 1px solid var(--border-light);
+  margin-bottom: var(--resume-sp-item-margin);
+  padding-bottom: var(--resume-sp-item-inner);
+  border-bottom: 1px solid var(--resume-border-light);
   page-break-inside: avoid;
   break-inside: avoid;
 }
@@ -721,14 +1039,14 @@ html, body, #app {
   justify-content: space-between;
   align-items: baseline;
   flex-wrap: nowrap;
-  gap: var(--space-2);
-  margin-bottom: var(--space-1);
+  gap: var(--resume-space-6);
+  margin-bottom: var(--resume-space-2);
 }
 
 .a4-canvas .item-title {
-  font-weight: 600;
-  font-size: var(--font-size-base);
-  color: var(--text-primary);
+  font-weight: var(--resume-weight-semibold);
+  font-size: var(--resume-font-md);
+  color: var(--resume-text-heading);
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -737,9 +1055,9 @@ html, body, #app {
 }
 
 .a4-canvas .item-subtitle {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
+  color: var(--resume-text-body);
+  font-size: var(--resume-font-sm);
+  font-weight: var(--resume-weight-medium);
 }
 
 .a4-canvas .edu-inline-sep {
@@ -749,33 +1067,33 @@ html, body, #app {
 }
 .a4-canvas .edu-inline-meta {
   font-weight: 400;
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  color: var(--resume-text-meta);
+  font-size: var(--resume-font-sm);
 }
 
 .a4-canvas .item-date {
-  color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  color: var(--resume-text-meta);
+  font-size: var(--resume-font-sm);
   white-space: nowrap;
-  font-weight: 500;
+  font-weight: var(--resume-weight-normal);
   flex-shrink: 0;
 }
 
 .a4-canvas .item-desc {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-relaxed);
-  margin-top: var(--space-1);
+  color: var(--resume-text-body);
+  font-size: var(--resume-font-md);
+  line-height: var(--resume-line-height-normal);
+  margin-top: var(--resume-space-4);
 }
 /* Clean list styling for item descriptions */
 .a4-canvas .item-desc ul,
 .a4-canvas .item-desc ol {
-  margin: 4px 0;
-  padding-left: 0.8em;
+  margin: var(--resume-space-2) 0;
+  padding-left: 1.2em;
 }
 .a4-canvas .item-desc li {
-  margin-bottom: 0;
-  line-height: 1.35;
+  margin-bottom: var(--resume-space-2);
+  line-height: var(--resume-line-height-normal);
 }
 
 .a4-canvas .item-desc li:last-child {
@@ -787,23 +1105,23 @@ html, body, #app {
   font-size: 0.9em;
 }
 .a4-canvas .item-desc ul > li::marker {
-  color: var(--primary-500, #4f46e5);
+  color: var(--resume-color-brand);
 }
 .a4-canvas .item-desc ol > li::marker {
-  color: var(--primary-500, #4f46e5);
+  color: var(--resume-color-brand);
   font-weight: 600;
 }
 .a4-canvas .item-desc :not(ul):not(ol) + ul,
 .a4-canvas .item-desc :not(ul):not(ol) + ol {
-  margin-top: 6px;
+  margin-top: var(--resume-space-2);
 }
 
 .a4-canvas .item-link {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--primary-500);
+  gap: var(--resume-space-2);
+  font-size: var(--resume-font-sm);
+  color: var(--resume-text-link);
   text-decoration: none;
   margin-top: var(--space-1);
   word-break: break-all;
@@ -846,41 +1164,41 @@ html, body, #app {
 }
 
 .a4-canvas .personal-name {
-  font-size: var(--font-size-4xl);
-  font-weight: 800;
-  color: var(--primary-700);
-  line-height: var(--line-height-tight);
-  margin-bottom: var(--space-1);
-  letter-spacing: -0.5px;
+  font-size: var(--resume-font-2xl);
+  font-weight: var(--resume-weight-extra-bold);
+  color: var(--resume-text-heading);
+  line-height: var(--resume-line-height-tight);
+  margin-bottom: var(--resume-space-4);
+  letter-spacing: -0.3px;
 }
 
 .a4-canvas .personal-position {
-  font-size: var(--font-size-lg);
-  color: var(--primary-500);
-  font-weight: 600;
-  margin-bottom: var(--space-2);
+  font-size: var(--resume-font-lg);
+  color: var(--resume-color-brand);
+  font-weight: var(--resume-weight-medium);
+  margin-bottom: var(--resume-space-8);
 }
 
 .a4-canvas .personal-contact {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  gap: var(--resume-sp-contact-gap) var(--resume-space-16);
+  font-size: var(--resume-font-sm);
+  color: var(--resume-text-body);
 }
 
 .a4-canvas .personal-contact-item {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--resume-space-2);
   white-space: nowrap;
 }
 
 .a4-canvas .personal-summary {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  line-height: var(--line-height-relaxed);
-  margin-top: var(--space-2);
+  font-size: var(--resume-font-md);
+  color: var(--resume-text-body);
+  line-height: var(--resume-line-height-normal);
+  margin-top: var(--resume-space-8);
 }
 
 /* Rich text content — ensure formatted text renders correctly on canvas */
@@ -891,7 +1209,7 @@ html, body, #app {
 .a4-canvas .custom-content b,
 .a4-canvas .custom-content strong {
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--resume-text-heading);
 }
 .a4-canvas .item-desc i,
 .a4-canvas .item-desc em,
@@ -918,7 +1236,7 @@ html, body, #app {
 .a4-canvas .item-desc a,
 .a4-canvas .personal-summary a,
 .a4-canvas .custom-content a {
-  color: var(--primary-500);
+  color: var(--resume-text-link);
   text-decoration: underline;
 }
 .a4-canvas .item-desc ul,
@@ -927,43 +1245,46 @@ html, body, #app {
 .a4-canvas .personal-summary ol,
 .a4-canvas .custom-content ul,
 .a4-canvas .custom-content ol {
-  margin: 6px 0;
-  padding-left: 16px;
+  margin: var(--resume-space-2) 0;
+  padding-left: 1.2em;
 }
 .a4-canvas .item-desc li,
 .a4-canvas .personal-summary li,
 .a4-canvas .custom-content li {
-  margin: 3px 0;
+  margin: var(--resume-space-2) 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Skill Bars (A4)
+   Skill Bars (A4) — 使用 Resume Design Tokens
    ═══════════════════════════════════════════════════════════════ */
+
+/* ── Bar Mode (水平进度条) ── */
 .skill-bar-container {
-  margin-bottom: var(--space-3);
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: var(--space-3);
-  align-items: center;
+  margin-bottom: var(--resume-space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--resume-space-2);
+}
+.skill-bar-container:last-child {
+  margin-bottom: 0;
 }
 .skill-bar-label {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--text-primary);
-  text-align: right;
-  padding-right: var(--space-2);
+  font-size: var(--resume-font-sm);
+  font-weight: var(--resume-weight-semibold);
+  color: var(--resume-text-heading);
+  letter-spacing: 0.2px;
 }
 .skill-bar-track {
-  height: 8px;
-  background: var(--border-light);
-  border-radius: 4px;
+  height: 6px;
+  background: var(--resume-border-light);
+  border-radius: 3px;
   overflow: hidden;
   position: relative;
 }
 .skill-bar-fill {
   height: 100%;
-  border-radius: 4px;
-  background: linear-gradient(90deg, var(--primary-600), var(--primary-400));
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--resume-color-brand), var(--resume-color-brand-light));
   transition: width 0.4s ease;
   position: relative;
 }
@@ -973,7 +1294,39 @@ html, body, #app {
   top: 0; left: 0; right: 0;
   height: 50%;
   background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
-  border-radius: 4px 4px 0 0;
+  border-radius: 3px 3px 0 0;
+}
+
+/* ── List Mode (类别：关键词) ── */
+.skill-list-item {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--resume-space-1);
+  margin-bottom: var(--resume-space-4);
+  font-size: var(--resume-font-sm);
+  line-height: var(--resume-line-height-relaxed);
+  color: var(--resume-text-body);
+}
+.skill-list-item:last-child {
+  margin-bottom: 0;
+}
+.skill-list-category {
+  font-weight: var(--resume-weight-semibold);
+  color: var(--resume-text-heading);
+  white-space: nowrap;
+}
+.skill-list-sep {
+  color: var(--resume-text-meta);
+  font-weight: var(--resume-weight-medium);
+  margin: 0 2px;
+}
+.skill-list-keywords {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1342,6 +1695,54 @@ html, body, #app {
   margin-bottom: var(--form-field-gap);
 }
 
+/* ── Module List (Right Panel) ── */
+.module-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.module-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 13px;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+.module-list-item:hover {
+  background: var(--border-light);
+}
+
+.module-list-item.is-selected {
+  background: var(--primary-50);
+  color: var(--primary-600);
+  font-weight: 600;
+}
+
+.module-list-item.is-hidden {
+  opacity: 0.6;
+}
+
+.module-list-item-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.module-list-order {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 /* ── Light panels override ── */
 .bg-white .panel-section,
 [class*="bg-white"] .panel-section,
@@ -1352,6 +1753,203 @@ html, body, #app {
 [class*="bg-white"] .panel-section-title,
 .bg-[var(--surface-color)] .panel-section-title {
   color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Editor Card Spacing Utilities
+   Use these classes to ensure consistent vertical rhythm
+   across all module editor items.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Editor Card Container (auto-layout item) ── */
+.editor-card-item {
+  margin-bottom: var(--editor-card-mb);
+  border-radius: var(--editor-card-br);
+  transition: all 0.2s ease;
+}
+.editor-card-item:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.02));
+}
+.editor-card-item:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Editor Card Inner (edit-container) ── */
+.editor-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--editor-card-gap);
+  padding: var(--editor-card-py) var(--editor-card-px);
+  border: 1px solid transparent;
+  border-radius: var(--editor-card-br);
+  transition: all 0.2s ease;
+}
+.editor-card-inner:focus-within {
+  border-color: var(--primary-200, #c7d2fe);
+  background: var(--surface-active, rgba(99, 102, 241, 0.02));
+  box-shadow: 0 0 0 3px var(--primary-50, rgba(99, 102, 241, 0.1));
+}
+
+/* ── Editor Header Row (title + date) ── */
+.editor-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--editor-header-gap);
+}
+
+.editor-header-fields {
+  display: flex;
+  align-items: baseline;
+  gap: var(--editor-header-field-gap);
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Editor Date Section ── */
+.editor-date-section {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.editor-date-text {
+  font-size: 0.85em;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.editor-date-clickable {
+  cursor: pointer;
+  padding: var(--editor-date-py) var(--editor-date-px);
+  border-radius: var(--editor-date-br);
+  transition: all 0.2s ease;
+}
+.editor-date-clickable:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.05));
+  color: var(--text-primary, #1e293b);
+}
+
+.editor-date-placeholder {
+  color: var(--text-placeholder, #94a3b8);
+  font-style: italic;
+}
+
+/* ── Editor Field ── */
+.editor-field {
+  display: inline-block;
+  outline: none;
+  border-radius: var(--editor-field-br);
+  padding: var(--editor-field-py) var(--editor-field-px);
+  margin: calc(-1 * var(--editor-field-py)) calc(-1 * var(--editor-field-px));
+  transition: all 0.2s ease;
+}
+.editor-field:focus {
+  background: var(--primary-50, #eef2ff);
+  box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
+}
+.editor-field:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder, #94a3b8);
+  pointer-events: none;
+}
+
+/* ── Editor Field Variants ── */
+.editor-field-primary {
+  font-weight: 600;
+  font-size: 1em;
+  color: var(--text-primary, #1e293b);
+}
+
+.editor-field-secondary {
+  font-weight: 400;
+  font-size: 0.9em;
+  color: var(--text-secondary, #64748b);
+}
+
+/* ── Editor Subtitle Row ── */
+.editor-subtitle-row {
+  margin-top: 0;
+}
+
+/* ── Editor Description Section ── */
+.editor-description-section {
+  margin-top: 2px;
+}
+
+/* ── Editor List Item (skill, strength) ── */
+.editor-list-item {
+  margin-bottom: var(--editor-list-item-mb);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0;
+  padding: var(--editor-list-item-py) var(--editor-list-item-px);
+  border-radius: var(--editor-list-item-br);
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+.editor-list-item:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.02));
+}
+.editor-list-item:focus-within {
+  border-color: var(--primary-200, #c7d2fe);
+  background: var(--surface-active, rgba(99, 102, 241, 0.03));
+  box-shadow: 0 0 0 3px var(--primary-50, rgba(99, 102, 241, 0.1));
+}
+.editor-list-item:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Editor Personal Contact Row ── */
+.editor-contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--editor-personal-row-gap-y) var(--editor-personal-row-gap-x);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  padding: var(--editor-personal-row-py) var(--editor-personal-row-px);
+  background: rgba(99, 102, 241, 0.03);
+  border-radius: var(--editor-card-br);
+  border: 1px solid var(--border-light);
+}
+
+.editor-contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  position: relative;
+  padding: 2px 4px;
+  border-radius: var(--editor-field-br);
+  transition: background 0.2s ease;
+}
+.editor-contact-item:hover {
+  background: rgba(99, 102, 241, 0.06);
+}
+
+/* ── Editor Custom Field Row ── */
+.editor-custom-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  line-height: var(--line-height-relaxed);
+  position: relative;
+  padding: 2px 6px;
+  border-radius: var(--editor-field-br);
+  transition: background 0.2s ease;
+}
+.editor-custom-row:hover {
+  background: rgba(99, 102, 241, 0.04);
 }
 
 /* ═══════════════════════════════════════════════════════════════

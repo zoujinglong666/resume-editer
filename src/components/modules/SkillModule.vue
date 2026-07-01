@@ -219,27 +219,34 @@ function skillWidth(level: string | boolean | undefined): string {
 </script>
 
 <style scoped>
+/* ═══════════════════════════════════════════
+   间距栅格系统 — 使用 style.css 中的 --editor-* tokens
+   ═══════════════════════════════════════════ */
+
 .skill-list-item {
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-relaxed);
-  color: var(--text-secondary);
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--editor-list-item-mb);
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0;
-  padding: 4px 6px;
-  border-radius: 6px;
-  transition: background 0.2s ease;
+  padding: var(--editor-list-item-py) var(--editor-list-item-px);
+  border-radius: var(--editor-list-item-br);
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
 }
-
 .skill-list-item:hover {
   background: var(--surface-hover, rgba(0, 0, 0, 0.02));
 }
-
 .skill-list-item:focus-within {
+  border-color: var(--primary-200, #c7d2fe);
   background: var(--surface-active, rgba(99, 102, 241, 0.03));
-  box-shadow: 0 0 0 1px var(--primary-200, #c7d2fe);
+  box-shadow: 0 0 0 3px var(--primary-50, rgba(99, 102, 241, 0.1));
+}
+.skill-list-item:last-child {
+  margin-bottom: 0;
 }
 
 .skill-list-category {
@@ -265,17 +272,17 @@ function skillWidth(level: string | boolean | undefined): string {
 }
 
 .skill-list-sep {
-  color: var(--text-primary);
+  color: var(--resume-text-meta);
   flex-shrink: 0;
 }
 
 .skill-list-keywords {
-  color: var(--text-secondary);
+  color: var(--resume-text-body);
   white-space: pre-wrap;
   outline: none;
-  border-radius: 3px;
-  padding: 1px 3px;
-  margin: -1px -3px;
+  border-radius: var(--editor-field-br);
+  padding: var(--editor-field-py) var(--editor-field-px);
+  margin: calc(-1 * var(--editor-field-py)) calc(-1 * var(--editor-field-px));
   transition: all 0.2s ease;
 }
 

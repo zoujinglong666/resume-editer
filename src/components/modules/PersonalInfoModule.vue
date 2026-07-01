@@ -285,26 +285,36 @@ function removeAvatar() {
   height: 14px;
   flex-shrink: 0;
   color: var(--primary-500);
-  margin-right: 5px;
+  margin-right: 4px;
 }
 
 .personal-info-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3) var(--space-5);
+  gap: var(--editor-personal-row-gap-y) var(--editor-personal-row-gap-x);
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  margin-bottom: var(--space-3);
+  margin-bottom: 12px;
+  padding: var(--editor-personal-row-py) var(--editor-personal-row-px);
+  background: rgba(99, 102, 241, 0.03);
+  border-radius: var(--editor-card-br);
+  border: 1px solid var(--border-light);
 }
 
 .personal-info-item {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1_5);
+  gap: 4px;
   white-space: nowrap;
   position: relative;
-  padding-right: 4px;
+  padding: var(--editor-field-py) var(--editor-field-px);
+  border-radius: var(--editor-field-br);
+  transition: background 0.2s ease;
+}
+
+.personal-info-item:hover {
+  background: rgba(99, 102, 241, 0.06);
 }
 
 .personal-info-item.has-value:hover .personal-field-delete-btn {
@@ -337,15 +347,87 @@ function removeAvatar() {
   transform: scale(1.1);
 }
 
+.personal-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary-700, #4338ca);
+  line-height: 1.25;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  outline: none;
+  transition: background 0.2s ease;
+}
+
+.personal-name:hover {
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.personal-name:focus {
+  background: var(--primary-50, #eef2ff);
+  box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
+}
+
+.personal-position {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary-500, #6366f1);
+  margin-bottom: 10px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  outline: none;
+  transition: background 0.2s ease;
+}
+
+.personal-position:hover {
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.personal-position:focus {
+  background: var(--primary-50, #eef2ff);
+  box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
+}
+
+.personal-summary {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-top: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.02);
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.personal-summary:hover {
+  background: rgba(99, 102, 241, 0.04);
+}
+
+.personal-summary:focus {
+  background: var(--primary-50, #eef2ff);
+  box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
+  border-color: var(--primary-200);
+}
+
 .personal-custom-row {
   display: flex;
   align-items: center;
-  gap: var(--tight-gap);
+  gap: 6px;
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  margin-bottom: var(--space-2);
+  margin-bottom: 6px;
   line-height: var(--line-height-relaxed);
   position: relative;
+  padding: var(--editor-field-py) 6px;
+  border-radius: var(--editor-field-br);
+  transition: background 0.2s ease;
+}
+
+.personal-custom-row:hover {
+  background: rgba(99, 102, 241, 0.04);
 }
 
 .personal-custom-row:hover .personal-field-delete-btn {

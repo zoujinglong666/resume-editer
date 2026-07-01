@@ -158,16 +158,18 @@ function onFieldKeydown(e: KeyboardEvent, itemId: string, currentField: string) 
 
 <style scoped>
 /* Auto Layout 风格通用容器 */
+/* ═══════════════════════════════════════════
+   间距栅格系统 — 使用 style.css 中的 --editor-* tokens
+   ═══════════════════════════════════════════ */
+
 .autolayout-item {
-  margin-bottom: 16px;
-  border-radius: 8px;
+  margin-bottom: var(--editor-card-mb);
+  border-radius: var(--editor-card-br);
   transition: all 0.2s ease;
 }
-
 .autolayout-item:hover {
   background: var(--surface-hover, rgba(0, 0, 0, 0.02));
 }
-
 .autolayout-item:last-child {
   margin-bottom: 0;
 }
@@ -175,13 +177,12 @@ function onFieldKeydown(e: KeyboardEvent, itemId: string, currentField: string) 
 .edit-container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px;
+  gap: var(--editor-card-gap);
+  padding: var(--editor-card-py) var(--editor-card-px);
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--editor-card-br);
   transition: all 0.2s ease;
 }
-
 .edit-container:focus-within {
   border-color: var(--primary-200, #c7d2fe);
   background: var(--surface-active, rgba(99, 102, 241, 0.02));

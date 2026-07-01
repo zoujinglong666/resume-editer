@@ -66,6 +66,7 @@ export interface ResumeConfig {
   moduleGap: number
   itemGap: number
   titleStyle: TitleStyle
+  underlineWidth: number
 }
 
 // ===== Meta =====

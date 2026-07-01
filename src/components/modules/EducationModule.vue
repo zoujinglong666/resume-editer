@@ -390,31 +390,33 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
 </script>
 
 <style scoped>
-/* Figma Auto Layout 风格的教育经历编辑容器 */
+/* ═══════════════════════════════════════════
+   间距栅格系统 — 使用 style.css 中的 --editor-* tokens
+   ═══════════════════════════════════════════ */
+
+/* 条目卡片容器 */
 .edu-autolayout-item {
-  margin-bottom: 16px;
-  border-radius: 8px;
+  margin-bottom: var(--editor-card-mb);
+  border-radius: var(--editor-card-br);
   transition: all 0.2s ease;
 }
-
 .edu-autolayout-item:hover {
   background: var(--surface-hover, rgba(0, 0, 0, 0.02));
 }
-
 .edu-autolayout-item:last-child {
   margin-bottom: 0;
 }
 
+/* 卡片内层 */
 .edu-edit-container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px 10px;
+  gap: var(--editor-card-gap);
+  padding: var(--editor-card-py) var(--editor-card-px);
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--editor-card-br);
   transition: all 0.2s ease;
 }
-
 .edu-edit-container:focus-within {
   border-color: var(--primary-200, #c7d2fe);
   background: var(--surface-active, rgba(99, 102, 241, 0.02));
@@ -425,14 +427,13 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
 .edu-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+  align-items: baseline;
+  gap: var(--editor-header-gap);
 }
-
 .edu-header-fields {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: baseline;
+  gap: var(--editor-header-field-gap);
   flex: 1;
   min-width: 0;
 }
@@ -441,17 +442,15 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
 .edu-field {
   display: inline;
   outline: none;
-  border-radius: 3px;
-  padding: 1px 3px;
-  margin: -1px -3px;
+  border-radius: var(--editor-field-br);
+  padding: var(--editor-field-py) var(--editor-field-px);
+  margin: calc(-1 * var(--editor-field-py)) calc(-1 * var(--editor-field-px));
   transition: all 0.15s ease;
 }
-
 .edu-field:focus {
   background: var(--primary-50, #eef2ff);
   box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
 }
-
 .edu-field:empty::before {
   content: attr(data-placeholder);
   color: var(--text-placeholder, #94a3b8);
@@ -463,14 +462,12 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
   font-size: 1em;
   color: var(--text-primary, #1e293b);
 }
-
 .edu-degree,
 .edu-major {
   font-weight: 400;
   font-size: 0.9em;
   color: var(--text-secondary, #64748b);
 }
-
 .edu-separator {
   color: var(--text-tertiary, #94a3b8);
   user-select: none;
@@ -483,26 +480,22 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
   display: flex;
   align-items: center;
 }
-
 .edu-date {
   font-size: 0.85em;
   color: var(--text-secondary, #64748b);
   white-space: nowrap;
   line-height: 1;
 }
-
 .edu-date-clickable {
   cursor: pointer;
-  padding: 3px 8px;
-  border-radius: 4px;
-  transition: all 0.15s ease;
+  padding: var(--editor-date-py) var(--editor-date-px);
+  border-radius: var(--editor-date-br);
+  transition: all 0.2s ease;
 }
-
 .edu-date-clickable:hover {
   background: var(--surface-hover, rgba(0, 0, 0, 0.05));
   color: var(--text-primary, #1e293b);
 }
-
 .edu-date-placeholder {
   color: var(--text-placeholder, #94a3b8);
   font-style: italic;
@@ -512,27 +505,23 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
 .edu-description-section {
   margin-top: 4px;
 }
-
-/* Education description: plain text style */
 .edu-description-text {
   min-height: 1.5em;
   outline: none;
   line-height: 1.55;
   font-size: 0.95em;
   color: var(--text-secondary, #64748b);
-  padding: 4px 0;
-  border-radius: 4px;
+  padding: var(--editor-field-py) 0;
+  border-radius: var(--editor-field-br);
   transition: all 0.2s ease;
   word-break: break-word;
 }
-
 .edu-description-text:focus {
   background: var(--primary-50, #eef2ff);
   box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
-  padding: 4px 6px;
+  padding: var(--editor-field-py) 6px;
   margin: 0 -6px;
 }
-
 .edu-description-text:empty::before {
   content: attr(data-placeholder);
   color: var(--text-placeholder, #94a3b8);
@@ -546,7 +535,6 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
     align-items: flex-start;
     gap: 8px;
   }
-  
   .edu-date-section {
     align-self: flex-end;
   }

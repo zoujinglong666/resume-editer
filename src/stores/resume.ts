@@ -453,7 +453,7 @@ export const useResumeStore = defineStore('resume', () => {
   // ---- State ----
   const config = ref<ResumeConfig>({
     theme: 'default', primaryColor: '#2D5F7C', fontFamily: 'system-ui, -apple-system, sans-serif',
-    fontSize: 14, lineHeight: 1.6, pageMargin: 20, moduleGap: 12, itemGap: 6, titleStyle: 'underline'
+    fontSize: 14, lineHeight: 1.6, pageMargin: 20, moduleGap: 12, itemGap: 6, titleStyle: 'underline', underlineWidth: 2.5
   })
   const avatar = ref<AvatarConfig>({ url: '', shape: 'circle' })
   const modules = ref<ResumeModule[]>(createDefaultModules())
@@ -646,6 +646,7 @@ export const useResumeStore = defineStore('resume', () => {
     document.documentElement.style.setProperty('--module-gap', `${config.value.moduleGap}px`)
     document.documentElement.style.setProperty('--item-gap', `${config.value.itemGap}px`)
     document.documentElement.style.setProperty('--title-style', config.value.titleStyle || 'underline')
+    document.documentElement.style.setProperty('--underline-width', `${config.value.underlineWidth}px`)
   }
 
   // Watch for changes and push to history (debounced)
