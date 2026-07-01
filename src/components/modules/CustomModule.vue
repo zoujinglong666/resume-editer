@@ -1,22 +1,29 @@
 <template>
   <div>
-    <div v-for="item in module.items" :key="item.id" class="module-item" @contextmenu.prevent="onItemContextMenu($event, item.id)">
-      <div
-        class="item-title"
-        contenteditable="true"
-        :data-placeholder="'标题'"
-        @blur="updateField(item.id, 'title', $event)"
-        @paste="onPaste"
-      >{{ item.title }}</div>
+    <div v-for="item in module.items" :key="item.id" class="module-item autolayout-item" @contextmenu.prevent="onItemContextMenu($event, item.id)">
+      <div class="edit-container">
+        <!-- Title row -->
+        <div class="title-row">
+          <span
+            class="field field-primary"
+            contenteditable="true"
+            :data-placeholder="'标题'"
+            @blur="updateField(item.id, 'title', $event)"
+            @keydown="onFieldKeydown($event, item.id, 'title')"
+            @paste="onPaste"
+          >{{ item.title }}</span>
+        </div>
 
-      <div
-        class="item-desc"
-        contenteditable="true"
-        :data-placeholder="'支持富文本内容...'"
-        @blur="updateField(item.id, 'content', $event)"
-        @paste="onPaste"
-        v-sync-html="item.content"
-      ></div>
+        <!-- Description -->
+        <div class="description-section">
+          <DescWithToolbar
+            :model-value="item.content || ''"
+            placeholder="支持富文本内容..."
+            @update:model-value="store.updateItem(module.id, item.id, 'content', $event)"
+            @blur="updateField(item.id, 'content', $event)"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Item Context Menu -->
@@ -37,6 +44,7 @@ import { useResumeStore } from '../../stores/resume'
 import type { ResumeModule } from '../../types'
 import ContextMenu from '../ContextMenu.vue'
 import type { ContextMenuItem } from '../ContextMenu.vue'
+import DescWithToolbar from './DescWithToolbar.vue'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
@@ -137,4 +145,85 @@ function onPaste(e: ClipboardEvent) {
   const text = e.clipboardData?.getData('text/plain') || ''
   document.execCommand('insertText', false, text)
 }
+
+// ---- Field Navigation ----
+function onFieldKeydown(e: KeyboardEvent, itemId: string, currentField: string) {
+  if (e.key === 'Enter' && !e.shiftKey && currentField === 'title') {
+    e.preventDefault()
+    const descEl = document.querySelector('.description-section .item-desc') as HTMLElement
+    if (descEl) descEl.focus()
+  }
+}
 </script>
+
+<style scoped>
+/* Auto Layout 风格通用容器 */
+.autolayout-item {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.autolayout-item:hover {
+  background: var(--surface-hover, rgba(0, 0, 0, 0.02));
+}
+
+.autolayout-item:last-child {
+  margin-bottom: 0;
+}
+
+.edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.edit-container:focus-within {
+  border-color: var(--primary-200, #c7d2fe);
+  background: var(--surface-active, rgba(99, 102, 241, 0.02));
+  box-shadow: 0 0 0 3px var(--primary-50, rgba(99, 102, 241, 0.1));
+}
+
+/* Title row */
+.title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+/* Field styles */
+.field {
+  display: inline-block;
+  outline: none;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  transition: all 0.2s ease;
+}
+
+.field:focus {
+  background: var(--primary-50, #eef2ff);
+  box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
+}
+
+.field:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder, #94a3b8);
+  pointer-events: none;
+}
+
+.field-primary {
+  font-weight: 600;
+  font-size: 1em;
+  color: var(--text-primary, #1e293b);
+}
+
+/* Description section */
+.description-section {
+  margin-top: 2px;
+}
+</style>

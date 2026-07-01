@@ -240,14 +240,21 @@ async function captureCanvas(
     useCORS: true,
     allowTaint: true,
     backgroundColor: sharedConfig.includeBackground ? '#FFFFFF' : null,
-    logging: true,
+    logging: false,
     removeContainer: false,
     imageTimeout: 30000,
     onclone: (clonedDoc) => {
       const clonedCanvas = clonedDoc.getElementById('resume-canvas')
       if (!clonedCanvas) return
 
-      clonedCanvas.classList.add('export-clean')
+      // Force exact A4 width (210mm) to ensure consistent text wrapping
+      const a4WidthPx = Math.round(210 * 2.83465) // 210mm to px at 96dpi
+      clonedCanvas.style.width = `${a4WidthPx}px`
+      clonedCanvas.style.flex = 'none'
+      clonedCanvas.style.transform = 'none'
+
+      clonedCanvas.classList.add('print-clean')
+      clonedCanvas.classList.add('export-force-width')
 
       clonedCanvas.querySelectorAll<HTMLElement>('.module-section').forEach(section => {
         section.classList.remove('is-selected')

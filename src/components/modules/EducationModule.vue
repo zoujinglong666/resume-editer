@@ -101,14 +101,16 @@
           </div>
         </div>
 
-        <!-- 描述内容区域 -->
+        <!-- 描述内容区域 (纯文本，无需列表) -->
         <div class="edu-description-section">
-          <DescWithToolbar
-            :model-value="item.description || ''"
-            placeholder="主修课程、荣誉奖项、GPA等..."
-            @update:model-value="store.updateItem(module.id, item.id, 'description', $event)"
-            @blur="updateField(item.id, 'description', $event)"
-          />
+          <div
+            class="edu-description-text"
+            contenteditable="true"
+            :data-placeholder="'主修课程、荣誉奖项、GPA等...'"
+            @blur="onDescBlur(item.id, $event)"
+            @paste="onPaste"
+            @keydown="onDescKeydown($event)"
+          >{{ cleanDesc(item.description) }}</div>
         </div>
       </div>
     </div>
@@ -131,7 +133,6 @@ import { useResumeStore } from '../../stores/resume'
 import type { ResumeModule } from '../../types'
 import ContextMenu from '../ContextMenu.vue'
 import type { ContextMenuItem } from '../ContextMenu.vue'
-import DescWithToolbar from './DescWithToolbar.vue'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
@@ -234,7 +235,7 @@ function onPaste(e: ClipboardEvent) {
 }
 
 // ---- Field Navigation with Tab ----
-function onFieldKeydown(e: KeyboardEvent, itemId: string, currentField: string) {
+function onFieldKeydown(e: KeyboardEvent, _itemId: string, currentField: string) {
   if (e.key === 'Tab') {
     e.preventDefault()
     const fieldOrder = ['school', 'degree', 'major']
@@ -264,6 +265,40 @@ function onFieldKeydown(e: KeyboardEvent, itemId: string, currentField: string) 
     // Enter 键移动到描述区域
     const descEl = document.querySelector('.edu-description-section .item-desc') as HTMLElement
     if (descEl) descEl.focus()
+  }
+}
+
+// ---- Description plain-text editor ----
+function cleanDesc(html: string | boolean | undefined): string {
+  if (!html) return ''
+  const s = String(html)
+  // Strip list tags, keep text content
+  const div = document.createElement('div')
+  div.innerHTML = s
+  // Replace <li> with text + newline delimiter
+  const lis = div.querySelectorAll('li')
+  if (lis.length > 0) {
+    const texts: string[] = []
+    lis.forEach(li => {
+      const t = li.textContent?.trim()
+      if (t) texts.push(t)
+    })
+    return texts.join(', ')
+  }
+  return div.textContent?.trim?.() || ''
+}
+
+function onDescBlur(itemId: string, e: FocusEvent) {
+  const el = e.target as HTMLElement
+  const text = el.innerText?.trim() || ''
+  // Store as plain text with <br> for line breaks
+  store.updateItem(props.module.id, itemId, 'description', text)
+}
+
+function onDescKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    // Allow Enter for new paragraph in plain text
+    // Do nothing - contenteditable will handle it
   }
 }
 
@@ -373,8 +408,8 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
 .edu-edit-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
+  gap: 6px;
+  padding: 8px 10px;
   border: 1px solid transparent;
   border-radius: 8px;
   transition: all 0.2s ease;
@@ -390,13 +425,13 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
 .edu-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
 }
 
 .edu-header-fields {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 4px;
   flex: 1;
   min-width: 0;
@@ -404,15 +439,12 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
 
 /* 字段样式 */
 .edu-field {
-  display: inline-block;
+  display: inline;
   outline: none;
-  border-radius: 4px;
-  padding: 2px 4px;
-  margin: -2px -4px;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-radius: 3px;
+  padding: 1px 3px;
+  margin: -1px -3px;
+  transition: all 0.15s ease;
 }
 
 .edu-field:focus {
@@ -441,26 +473,29 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
 
 .edu-separator {
   color: var(--text-tertiary, #94a3b8);
-  margin: 0 2px;
   user-select: none;
+  line-height: 1;
 }
 
 /* 日期部分 */
 .edu-date-section {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .edu-date {
   font-size: 0.85em;
   color: var(--text-secondary, #64748b);
   white-space: nowrap;
+  line-height: 1;
 }
 
 .edu-date-clickable {
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: 4px;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .edu-date-clickable:hover {
@@ -476,6 +511,32 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
 /* 描述内容区域 */
 .edu-description-section {
   margin-top: 4px;
+}
+
+/* Education description: plain text style */
+.edu-description-text {
+  min-height: 1.5em;
+  outline: none;
+  line-height: 1.55;
+  font-size: 0.95em;
+  color: var(--text-secondary, #64748b);
+  padding: 4px 0;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  word-break: break-word;
+}
+
+.edu-description-text:focus {
+  background: var(--primary-50, #eef2ff);
+  box-shadow: 0 0 0 2px var(--primary-200, #c7d2fe);
+  padding: 4px 6px;
+  margin: 0 -6px;
+}
+
+.edu-description-text:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-placeholder, #94a3b8);
+  pointer-events: none;
 }
 
 /* 响应式调整 */

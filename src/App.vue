@@ -27,6 +27,12 @@
     <!-- Status Bar -->
     <StatusBar :char-count="store.charCount" />
 
+    <!-- Floating Toolbar -->
+    <FloatingToolbar />
+
+    <!-- Floating AI -->
+    <FloatingAI />
+
     <!-- PDF Export Dialog -->
     <PdfExportDialog v-if="showPdfDialog" :canvas-ref="canvasRef" @close="showPdfDialog = false" />
 
@@ -50,6 +56,8 @@ import GuidePanel from './components/GuidePanel.vue'
 import Canvas from './components/Canvas.vue'
 import EditorPanel from './components/EditorPanel.vue'
 import StatusBar from './components/StatusBar.vue'
+import FloatingToolbar from './components/FloatingToolbar.vue'
+import FloatingAI from './components/FloatingAI.vue'
 import PdfExportDialog from './components/PdfExportDialog.vue'
 import ResumePreviewDialog from './components/ResumePreviewDialog.vue'
 import { exportPreviewPdf } from './utils/previewPdf'

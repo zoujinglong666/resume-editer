@@ -93,10 +93,11 @@
       </button>
     </div>
 
-    <!-- No selection -->
-    <div v-else class="panel-section flex-1 flex items-center justify-center text-gray-400 text-sm">
-      选择一个模块进行编辑
-    </div>
+    <!-- AI Feedback -->
+    <AIFeedbackPanel />
+
+    <!-- ATS Checker -->
+    <AtsChecker />
   </div>
 </template>
 
@@ -104,6 +105,8 @@
 import { ref, computed } from 'vue'
 import { useResumeStore } from '../stores/resume'
 import type { ModuleType } from '../types'
+import AIFeedbackPanel from './AIFeedbackPanel.vue'
+import AtsChecker from './AtsChecker.vue'
 
 const store = useResumeStore()
 const selectedModuleId = ref(store.modules[0]?.id || '')

@@ -368,7 +368,7 @@ onUnmounted(() => document.removeEventListener('click', onDocClick))
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 12px;
+  padding: 8px 10px;
   border: 1px solid transparent;
   border-radius: 8px;
   transition: all 0.2s ease;

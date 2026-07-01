@@ -70,6 +70,22 @@
           class="w-full accent-[var(--primary-color)]"
         />
       </label>
+      <label class="block" style="margin-top: var(--form-field-gap);">
+        <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">模块间距: {{ store.config.moduleGap || 12 }}px</span>
+        <input
+          type="range" min="4" max="32" step="2" :value="store.config.moduleGap || 12"
+          @input="updateModuleGap(Number(($event.target as HTMLInputElement).value))"
+          class="w-full accent-[var(--primary-color)]"
+        />
+      </label>
+      <label class="block" style="margin-top: var(--form-field-gap);">
+        <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">条目间距: {{ store.config.itemGap || 6 }}px</span>
+        <input
+          type="range" min="2" max="20" step="1" :value="store.config.itemGap || 6"
+          @input="updateItemGap(Number(($event.target as HTMLInputElement).value))"
+          class="w-full accent-[var(--primary-color)]"
+        />
+      </label>
     </div>
 
     <!-- Templates -->
@@ -193,5 +209,15 @@ function updateLineHeight(val: number) {
 function updatePageMargin(val: number) {
   store.config.pageMargin = val
   document.documentElement.style.setProperty('--page-margin', `${val}px`)
+}
+
+function updateModuleGap(val: number) {
+  store.config.moduleGap = val
+  document.documentElement.style.setProperty('--module-gap', `${val}px`)
+}
+
+function updateItemGap(val: number) {
+  store.config.itemGap = val
+  document.documentElement.style.setProperty('--item-gap', `${val}px`)
 }
 </script>

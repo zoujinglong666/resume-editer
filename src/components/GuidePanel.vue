@@ -35,11 +35,6 @@
       <VersionHistory />
     </template>
 
-    <!-- Account Tab -->
-    <template v-if="activeSidebarTab === 'account'">
-      <AccountPanel />
-    </template>
-
     <!-- Main Content Tab (Phase-based) -->
     <template v-if="activeSidebarTab === 'main'">
     <!-- Phase 1: Fill mode -->
@@ -399,14 +394,13 @@ import AiPanel from './AiPanel.vue'
 import ScoringPanel from './ScoringPanel.vue'
 import TemplateMarket from './TemplateMarket.vue'
 import VersionHistory from './VersionHistory.vue'
-import AccountPanel from './AccountPanel.vue'
 
 const store = useResumeStore()
 const themes = THEME_PRESETS
 const hoverExportCard = ref<string | null>(null)
 
 // Sidebar tab system
-type SidebarTab = 'main' | 'ai' | 'score' | 'templates' | 'history' | 'account'
+type SidebarTab = 'main' | 'ai' | 'score' | 'templates' | 'history'
 const activeSidebarTab = ref<SidebarTab>('main')
 
 const sidebarTabs = [
@@ -415,7 +409,6 @@ const sidebarTabs = [
   { key: 'score' as const, label: '评分', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' },
   { key: 'templates' as const, label: '模板', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
   { key: 'history' as const, label: '历史', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' },
-  { key: 'account' as const, label: '账号', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
 ]
 
 // Font size quick presets

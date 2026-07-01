@@ -253,6 +253,41 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         添加{{ getModuleTypeName(store.selectedModule.type) }}条目
       </button>
+
+      <!-- AI Generate Section (for experience/project modules) -->
+      <div
+        v-if="store.selectedModule.type === 'experience' || store.selectedModule.type === 'project'"
+        class="editor-ai-generate-section"
+      >
+        <div class="editor-ai-generate-title">✨ AI 智能生成</div>
+        <input
+          v-model="aiGenerateForm.jobTitle"
+          type="text"
+          placeholder="目标职位（如：高级前端工程师）"
+          class="editor-input"
+        />
+        <input
+          v-model="aiGenerateForm.company"
+          type="text"
+          placeholder="公司名称（如：字节跳动）"
+          class="editor-input"
+        />
+        <textarea
+          v-model="aiGenerateForm.jdText"
+          rows="4"
+          placeholder="粘贴职位描述（JD）..."
+          class="editor-textarea"
+        ></textarea>
+        <button
+          class="editor-ai-generate-btn"
+          :disabled="isAiGenerating || !aiGenerateForm.jobTitle || !aiGenerateForm.jdText"
+          @click="handleAiGenerate"
+        >
+          <svg v-if="!isAiGenerating" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14h.01"/><path d="M8 14h.01"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+          <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56" class="ai-spinner"/></svg>
+          {{ isAiGenerating ? '生成中...' : 'AI 生成工作经历' }}
+        </button>
+      </div>
     </div>
 
     <!-- No selection -->
@@ -484,6 +519,46 @@ function getBadgeClass(modId: string): string {
 
 function isLongField(key: string): boolean {
   return ['description', 'summary', 'content'].includes(key)
+}
+
+// ---- AI Generate ----
+import { loadAiConfig, aiGenerateFromJD } from '../utils/ai'
+const isAiGenerating = ref(false)
+const aiGenerateForm = ref({
+  jobTitle: '',
+  company: '',
+  jdText: '',
+})
+
+async function handleAiGenerate() {
+  const config = loadAiConfig()
+  if (!config) {
+    alert('请先配置 AI API Key')
+    return
+  }
+
+  const { jobTitle, company, jdText } = aiGenerateForm.value
+  if (!jobTitle || !jdText) {
+    alert('请填写目标职位和职位描述（JD）')
+    return
+  }
+
+  isAiGenerating.value = true
+  try {
+    const result = await aiGenerateFromJD(config, jobTitle, company, jdText)
+    // Add a new item with the generated content
+    store.addItem(store.selectedModule!.id)
+    // Get the last item
+    const items = store.selectedModule!.items
+    const newItem = items[items.length - 1]
+    if (newItem) {
+      store.updateItem(store.selectedModule!.id, newItem.id, 'description', result)
+    }
+  } catch (err: unknown) {
+    alert(`AI 生成失败: ${err instanceof Error ? err.message : String(err)}`)
+  } finally {
+    isAiGenerating.value = false
+  }
 }
 
 function isRequired(type: ModuleType, key: string): boolean {

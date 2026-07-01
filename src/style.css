@@ -142,9 +142,9 @@
   --line-height-relaxed: 1.65;
 
   /* ── Layout ── */
-  --page-margin: var(--space-7);       /* 28px A4 page margin */
-  --module-gap: var(--space-4);        /* inter-module on canvas */
-  --item-gap: var(--space-2_5);        /* inter-item within module */
+  --page-margin: var(--space-5);       /* 20px A4 page margin */
+  --module-gap: 12px;                  /* inter-module on canvas */
+  --item-gap: 6px;                     /* inter-item within module */
 
   /* ── Radii ── */
   --radius-sm: 6px;
@@ -771,14 +771,20 @@ html, body, #app {
 .a4-canvas .item-desc ul,
 .a4-canvas .item-desc ol {
   margin: 4px 0;
-  padding-left: 1.4em;
+  padding-left: 0.8em;
 }
 .a4-canvas .item-desc li {
-  margin-bottom: 3px;
-  line-height: var(--line-height-relaxed, 1.6);
+  margin-bottom: 0;
+  line-height: 1.35;
 }
+
 .a4-canvas .item-desc li:last-child {
   margin-bottom: 0;
+}
+
+/* Education list items - compact */
+.a4-canvas .item-desc li::marker {
+  font-size: 0.9em;
 }
 .a4-canvas .item-desc ul > li::marker {
   color: var(--primary-500, #4f46e5);
@@ -922,7 +928,7 @@ html, body, #app {
 .a4-canvas .custom-content ul,
 .a4-canvas .custom-content ol {
   margin: 6px 0;
-  padding-left: 20px;
+  padding-left: 16px;
 }
 .a4-canvas .item-desc li,
 .a4-canvas .personal-summary li,
@@ -2217,6 +2223,60 @@ html, body, #app {
 }
 .editor-add-item-btn:active {
   transform: scale(0.99);
+}
+
+/* AI Generate Section */
+.editor-ai-generate-section {
+  margin-top: var(--normal-gap);
+  padding: var(--normal-gap);
+  background: var(--surface-active, rgba(99, 102, 241, 0.02));
+  border: 1px solid var(--primary-200, #c7d2fe);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--form-field-gap);
+}
+
+.editor-ai-generate-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--primary-600, #4f46e5);
+  margin-bottom: var(--space-0_5);
+}
+
+.editor-ai-generate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: var(--space-1_5) var(--space-2);
+  border: 1px solid var(--primary-400, #818cf8);
+  border-radius: var(--radius-sm);
+  background: var(--primary-500, #6366f1);
+  color: white;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.editor-ai-generate-btn:hover:not(:disabled) {
+  background: var(--primary-600, #4f46e5);
+  border-color: var(--primary-500, #6366f1);
+}
+
+.editor-ai-generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-spinner {
+  animation: ai-spin 1s linear infinite;
+}
+
+@keyframes ai-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Entry number badge in editor */
@@ -3805,6 +3865,11 @@ html { scroll-behavior: smooth; }
 }
 .sidebar-tab-btn svg {
   flex-shrink: 0;
+  display: block;
+}
+.sidebar-tab-btn span:first-child {
+  display: inline-flex;
+  align-items: center;
 }
 .sidebar-tab-label {
   font-size: 11px;
