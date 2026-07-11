@@ -4,7 +4,7 @@
     <div class="app-header-left">
       <span class="app-logo">
         <span class="app-logo-dot" />
-        简历编辑器
+        闪聘
       </span>
 
       <div class="phase-stepper" style="border-left: 1px solid var(--sidebar-border); padding-left: var(--space-4);">

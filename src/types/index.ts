@@ -63,7 +63,10 @@ export interface ResumeConfig {
   fontSize: number
   lineHeight: number
   pageMargin: number
+  moduleGap: number
+  itemGap: number
   titleStyle: TitleStyle
+  underlineWidth: number
 }
 
 // ===== Meta =====
@@ -128,12 +131,22 @@ export type ElementType =
 
 // 元素布局
 export interface ElementLayout {
-  mode: 'flow' | 'absolute'
+  mode: 'flow' | 'absolute' | 'inline'
   x?: number
   y?: number
   width?: number | 'auto'
   height?: number | 'auto'
   zIndex?: number
+  // Flex 容器属性（row / column 使用）
+  flexDirection?: 'row' | 'column'
+  flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse'
+  justifyContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around'
+  alignItems?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline'
+  gap?: number
+  // Flex 子项属性
+  flexGrow?: number
+  flexShrink?: number
+  flexBasis?: number | 'auto'
 }
 
 // 元素样式（原子化，每个元素独立）
