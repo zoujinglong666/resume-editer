@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div v-for="item in module.items" :key="item.id" class="module-item" @contextmenu.prevent="onItemContextMenu($event, item.id)">
+    <ItemContextMenu v-for="item in module.items" :key="item.id" :items="menuItemsFor(item.id)">
+        <div class="module-item">
       <div class="item-header">
         <span
           class="item-title"
@@ -9,24 +10,18 @@
           @blur="updateField(item.id, 'name', $event)"
           @paste="onPaste"
         >{{ item.name }}</span>
-        <span class="item-date-picker-wrap">
-          <span
-            class="item-date item-date-clickable"
-            @click.stop="toggleDatePicker(item.id)"
-            :title="'点击编辑日期'"
-          >{{ item.dateRange || '点击设置时间' }}</span>
-
-          <!-- Date Picker Popup -->
-          <Teleport to="body">
-            <div
-              v-if="datePickerItemId === item.id"
-              class="date-picker-popup"
-              :style="datePickerStyle"
-              @click.stop
-            >
+        <PopoverRoot>
+          <PopoverTrigger as-child>
+            <span
+              class="item-date item-date-clickable"
+              :title="'点击编辑日期'"
+            >{{ item.dateRange || '点击设置时间' }}</span>
+          </PopoverTrigger>
+          <PopoverPortal>
+            <PopoverContent class="date-picker-popup" align="end" :side-offset="6">
               <div class="date-picker-header">
                 <span>选择时间范围</span>
-                <button class="date-picker-close" @click="datePickerItemId = null">×</button>
+                <PopoverClose class="date-picker-close" aria-label="关闭">×</PopoverClose>
               </div>
               <div class="date-picker-body">
                 <div class="date-picker-field">
@@ -61,9 +56,28 @@
                   <div v-else class="date-picker-present-label">至今</div>
                 </div>
               </div>
-            </div>
-          </Teleport>
-        </span>
+            </PopoverContent>
+          </PopoverPortal>
+        </PopoverRoot>
+      </div>
+
+      <div class="mt-1">
+        <a
+          v-if="item.link"
+          :href="String(item.link)"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="item-link"
+        >{{ item.link }}</a>
+        <!-- 编辑态占位符：仅在编辑模式下显示，导出时隐藏 -->
+        <span
+          v-else
+          class="item-date text-sm opacity-50 no-print"
+          contenteditable="true"
+          :data-placeholder="'项目链接（可选）'"
+          @blur="updateField(item.id, 'link', $event)"
+          @paste="onPaste"
+        ></span>
       </div>
 
       <div>
@@ -77,7 +91,7 @@
       </div>
 
       <div
-        class="item-desc"
+        class="item-desc project-desc"
         contenteditable="true"
         :data-placeholder="'项目简介和技术栈...'"
         @blur="updateField(item.id, 'description', $event)"
@@ -85,62 +99,23 @@
         @keydown="onKeydown"
         v-sync-html="item.description"
       ></div>
-
-      <div class="mt-1">
-        <a
-          v-if="item.link"
-          :href="String(item.link)"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="item-link"
-        >🔗 {{ item.link }}</a>
-        <!-- 编辑态占位符：仅在编辑模式下显示，导出时隐藏 -->
-        <span
-          v-else
-          class="item-date text-sm opacity-50 no-print"
-          contenteditable="true"
-          :data-placeholder="'项目链接（可选）'"
-          @blur="updateField(item.id, 'link', $event)"
-          @paste="onPaste"
-        ></span>
-      </div>
     </div>
-
-    <!-- Item Context Menu -->
-    <ContextMenu
-      :visible="itemMenuVisible"
-      :x="itemMenuX"
-      :y="itemMenuY"
-      :items="itemMenuItems"
-      @update:visible="itemMenuVisible = $event"
-      @close="onItemMenuClose"
-    />
+  </ItemContextMenu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
 import { useResumeStore } from '../../stores/resume'
 import type { ResumeModule } from '../../types'
-import ContextMenu from '../ContextMenu.vue'
-import type { ContextMenuItem } from '../ContextMenu.vue'
+import ItemContextMenu, { type ContextMenuItem } from '../ItemContextMenu.vue'
 import { smartPasteText, handleListEnter } from '../../utils/smartPaste'
+import { PopoverRoot, PopoverTrigger, PopoverPortal, PopoverContent, PopoverClose } from 'reka-ui'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
 
 // ---- Item Context Menu ----
-const itemMenuVisible = ref(false)
-const itemMenuX = ref(0)
-const itemMenuY = ref(0)
-const itemMenuItems = ref<ContextMenuItem[]>([])
-const itemMenuTargetId = ref<string | null>(null)
-
-function onItemContextMenu(e: MouseEvent, itemId: string) {
-  e.preventDefault()
-  e.stopPropagation()
-  itemMenuTargetId.value = itemId
-
+function menuItemsFor(itemId: string): ContextMenuItem[] {
   const idx = props.module.items.findIndex(i => i.id === itemId)
   const isFirst = idx <= 0
   const isLast = idx >= props.module.items.length - 1
@@ -193,15 +168,7 @@ function onItemContextMenu(e: MouseEvent, itemId: string) {
     }
   })
 
-  itemMenuItems.value = items
-  itemMenuX.value = e.clientX
-  itemMenuY.value = e.clientY
-  itemMenuVisible.value = true
-}
-
-function onItemMenuClose() {
-  itemMenuVisible.value = false
-  itemMenuTargetId.value = null
+  return items
 }
 
 // ---- Field Update ----
@@ -238,28 +205,7 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
-// ---- Date Picker ----
-const datePickerItemId = ref<string | null>(null)
-const datePickerStyle = ref<Record<string, string>>({})
-
-function toggleDatePicker(itemId: string) {
-  if (datePickerItemId.value === itemId) {
-    datePickerItemId.value = null
-    return
-  }
-  const el = document.querySelector(`.item-date-clickable`) as HTMLElement
-  if (el) {
-    const rect = el.getBoundingClientRect()
-    datePickerStyle.value = {
-      position: 'fixed',
-      top: `${rect.bottom + 6}px`,
-      right: `${window.innerWidth - rect.right}px`,
-      zIndex: '1000',
-    }
-  }
-  datePickerItemId.value = itemId
-}
-
+// ---- Date Picker (Reka Popover) ----
 function getStartMonth(dateRange?: string): string {
   if (!dateRange) return ''
   return dateRange.split(' ~ ')[0] || ''
@@ -292,10 +238,4 @@ function onPresentToggle(itemId: string, checked: boolean) {
   const start = getStartMonth(item.dateRange) || ''
   store.updateItem(props.module.id, itemId, 'dateRange', checked ? `${start} ~ 至今` : `${start} ~ `)
 }
-
-function onDocClick() {
-  if (datePickerItemId.value) datePickerItemId.value = null
-}
-onMounted(() => document.addEventListener('click', onDocClick))
-onUnmounted(() => document.removeEventListener('click', onDocClick))
 </script>

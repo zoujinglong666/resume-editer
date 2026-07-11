@@ -125,7 +125,7 @@
       <div v-if="store.avatar.url" class="flex items-center justify-center" style="gap: 4px; margin-top: 4px;">
         <button class="avatar-shape-btn text-xs" :class="{ active: store.avatar.shape === 'circle' }" @click="setShape('circle')">圆</button>
         <button class="avatar-shape-btn text-xs" :class="{ active: store.avatar.shape === 'rounded' }" @click="setShape('rounded')">方</button>
-        <button class="avatar-shape-btn text-xs text-red-400" @click="removeAvatar">删</button>
+        <button class="avatar-shape-btn text-xs text-[var(--color-error)]" @click="removeAvatar">删</button>
       </div>
     </div>
   </div>

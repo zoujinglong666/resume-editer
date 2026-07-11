@@ -2,12 +2,12 @@
   <div>
     <!-- Mode: List (类别：关键词) -->
     <template v-if="isListMode">
-      <div
+      <ItemContextMenu
         v-for="item in module.items"
         :key="item.id"
-        class="skill-list-item"
-        @contextmenu.prevent="onItemContextMenu($event, item.id)"
+        :items="menuItemsFor(item.id)"
       >
+        <div class="skill-list-item">
         <span
           class="skill-list-category"
           contenteditable="true"
@@ -24,16 +24,17 @@
           @paste="onPaste"
         >{{ item.content }}</span>
       </div>
+    </ItemContextMenu>
     </template>
 
     <!-- Mode: Bars (progress bars) -->
     <template v-else>
-      <div
+      <ItemContextMenu
         v-for="item in module.items"
         :key="item.id"
-        class="skill-bar-container"
-        @contextmenu.prevent="onItemContextMenu($event, item.id)"
+        :items="menuItemsFor(item.id)"
       >
+        <div class="skill-bar-container">
         <span
           class="skill-bar-label font-medium text-[var(--text-primary)]"
           contenteditable="true"
@@ -59,31 +60,21 @@
           </div>
         </div>
       </div>
+      </ItemContextMenu>
     </template>
 
     <!-- Empty state -->
     <div v-if="module.items.length === 0" class="text-sm text-[var(--text-muted)] py-3 text-center">
       点击 "+ 添加{{ isListMode ? '技能' : '技能' }}" 开始填写
     </div>
-
-    <!-- Item Context Menu -->
-    <ContextMenu
-      :visible="itemMenuVisible"
-      :x="itemMenuX"
-      :y="itemMenuY"
-      :items="itemMenuItems"
-      @update:visible="itemMenuVisible = $event"
-      @close="onItemMenuClose"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useResumeStore } from '../../stores/resume'
 import type { ResumeModule } from '../../types'
-import ContextMenu from '../ContextMenu.vue'
-import type { ContextMenuItem } from '../ContextMenu.vue'
+import ItemContextMenu, { type ContextMenuItem } from '../ItemContextMenu.vue'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
@@ -91,17 +82,7 @@ const store = useResumeStore()
 const isListMode = computed(() => props.module.displayMode === 'list')
 
 // ---- Item Context Menu ---
-const itemMenuVisible = ref(false)
-const itemMenuX = ref(0)
-const itemMenuY = ref(0)
-const itemMenuItems = ref<ContextMenuItem[]>([])
-const itemMenuTargetId = ref<string | null>(null)
-
-function onItemContextMenu(e: MouseEvent, itemId: string) {
-  e.preventDefault()
-  e.stopPropagation()
-  itemMenuTargetId.value = itemId
-
+function menuItemsFor(itemId: string): ContextMenuItem[] {
   const idx = props.module.items.findIndex(i => i.id === itemId)
   const isFirst = idx <= 0
   const isLast = idx >= props.module.items.length - 1
@@ -154,15 +135,7 @@ function onItemContextMenu(e: MouseEvent, itemId: string) {
     }
   })
 
-  itemMenuItems.value = items
-  itemMenuX.value = e.clientX
-  itemMenuY.value = e.clientY
-  itemMenuVisible.value = true
-}
-
-function onItemMenuClose() {
-  itemMenuVisible.value = false
-  itemMenuTargetId.value = null
+  return items
 }
 
 // ---- Field Update ----

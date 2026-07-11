@@ -9,7 +9,7 @@
           :key="mod.id"
           class="flex items-center rounded-md cursor-pointer transition-all hover:bg-gray-50"
           style="gap: var(--tight-gap); padding: var(--list-item-padding-y) var(--list-item-padding-x);"
-          :class="{ 'bg-blue-50': selectedModuleId === mod.id }"
+          :class="{ 'bg-[var(--primary-50)]': selectedModuleId === mod.id }"
           @click="selectedModuleId = mod.id"
         >
           <span
@@ -21,7 +21,7 @@
             <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
           </span>
           <span class="text-sm flex-1 truncate">{{ mod.title }}</span>
-          <span class="text-xs text-gray-400">#{{ mod.order + 1 }}</span>
+          <span class="text-xs text-[var(--text-muted)]">#{{ mod.order + 1 }}</span>
         </div>
       </div>
     </div>
@@ -32,7 +32,7 @@
 
       <!-- Module Title Edit -->
       <label class="block" style="margin-bottom: var(--normal-gap);">
-        <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">模块标题</span>
+        <span class="text-xs text-[var(--text-secondary)] block" style="margin-bottom: var(--form-label-gap);">模块标题</span>
         <input
           type="text"
           :value="selectedModule.title"
@@ -50,14 +50,14 @@
           <div class="flex items-center justify-between" style="margin-bottom: var(--tight-gap);">
             <span class="text-xs font-medium text-[var(--primary-color)]">条目 {{ idx + 1 }}</span>
             <button
-              class="text-xs text-red-400 hover:text-red-600 opacity-0 group-hover/item:opacity-100 transition-all"
+              class="text-xs text-[var(--color-error)] hover:opacity-80 opacity-0 group-hover/item:opacity-100 transition-all"
               @click="store.removeItem(selectedModule.id, item.id)"
             >删除</button>
           </div>
           <div style="display: flex; flex-direction: column; gap: var(--tight-gap);">
             <template v-for="(val, key) in item" :key="key">
               <label v-if="key !== 'id' && typeof val === 'string'" class="block">
-                <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">{{ getFieldLabel(selectedModule.type, key) }}</span>
+                <span class="text-xs text-[var(--text-secondary)] block" style="margin-bottom: var(--form-label-gap);">{{ getFieldLabel(selectedModule.type, key) }}</span>
                 <textarea
                   v-if="isLongField(key)"
                   :value="val"
@@ -94,7 +94,7 @@
     </div>
 
     <!-- No selection -->
-    <div v-else class="panel-section flex-1 flex items-center justify-center text-gray-400 text-sm">
+    <div v-else class="panel-section flex-1 flex items-center justify-center text-[var(--text-muted)] text-sm">
       选择一个模块进行编辑
     </div>
   </div>

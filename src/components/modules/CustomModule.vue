@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div v-for="item in module.items" :key="item.id" class="module-item" @contextmenu.prevent="onItemContextMenu($event, item.id)">
+    <ItemContextMenu v-for="item in module.items" :key="item.id" :items="menuItemsFor(item.id)">
+        <div class="module-item">
       <div
         class="item-title"
         contenteditable="true"
@@ -18,41 +19,20 @@
         v-sync-html="item.content"
       ></div>
     </div>
-
-    <!-- Item Context Menu -->
-    <ContextMenu
-      :visible="itemMenuVisible"
-      :x="itemMenuX"
-      :y="itemMenuY"
-      :items="itemMenuItems"
-      @update:visible="itemMenuVisible = $event"
-      @close="onItemMenuClose"
-    />
+  </ItemContextMenu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useResumeStore } from '../../stores/resume'
 import type { ResumeModule } from '../../types'
-import ContextMenu from '../ContextMenu.vue'
-import type { ContextMenuItem } from '../ContextMenu.vue'
+import ItemContextMenu, { type ContextMenuItem } from '../ItemContextMenu.vue'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
 
 // ---- Item Context Menu ----
-const itemMenuVisible = ref(false)
-const itemMenuX = ref(0)
-const itemMenuY = ref(0)
-const itemMenuItems = ref<ContextMenuItem[]>([])
-const itemMenuTargetId = ref<string | null>(null)
-
-function onItemContextMenu(e: MouseEvent, itemId: string) {
-  e.preventDefault()
-  e.stopPropagation()
-  itemMenuTargetId.value = itemId
-
+function menuItemsFor(itemId: string): ContextMenuItem[] {
   const idx = props.module.items.findIndex(i => i.id === itemId)
   const isFirst = idx <= 0
   const isLast = idx >= props.module.items.length - 1
@@ -105,15 +85,7 @@ function onItemContextMenu(e: MouseEvent, itemId: string) {
     }
   })
 
-  itemMenuItems.value = items
-  itemMenuX.value = e.clientX
-  itemMenuY.value = e.clientY
-  itemMenuVisible.value = true
-}
-
-function onItemMenuClose() {
-  itemMenuVisible.value = false
-  itemMenuTargetId.value = null
+  return items
 }
 
 // ---- Field Update ----

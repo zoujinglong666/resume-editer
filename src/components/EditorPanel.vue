@@ -45,7 +45,7 @@
           >
             {{ store.completionByModule[mod.id].filled }}/{{ store.completionByModule[mod.id].total }}
           </span>
-          <span v-else class="text-xs text-gray-400">#{{ mod.order + 1 }}</span>
+          <span v-else class="text-xs text-[var(--text-muted)]">#{{ mod.order + 1 }}</span>
         </div>
       </div>
     </div>
@@ -102,15 +102,32 @@
                 class="pf-label-input"
                 :readonly="field.key === 'name'"
               />
-              <!-- Icon selector -->
-              <select
-                :value="field.icon || ''"
-                @change="store.updatePersonalFieldIcon(field.id, ($event.target as HTMLSelectElement).value)"
-                class="pf-icon-select"
-                title="选择图标"
+              <!-- Icon selector (Reka Select) -->
+              <SelectRoot
+                :model-value="field.icon || ''"
+                @update:model-value="store.updatePersonalFieldIcon(field.id, ($event as string))"
               >
-                <option v-for="ic in AVAILABLE_ICONS" :key="ic.name" :value="ic.name">{{ ic.label }}</option>
-              </select>
+                <SelectTrigger class="rk-select-trigger" title="选择图标">
+                  <SelectValue placeholder="图标" />
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectContent class="rk-select-content" :position="'popper'" :side-offset="4">
+                    <SelectViewport>
+                      <SelectItem
+                        v-for="ic in AVAILABLE_ICONS"
+                        :key="ic.name"
+                        :value="ic.name"
+                        class="rk-select-item"
+                      >
+                        <SelectItemIndicator class="rk-select-item-indicator">
+                          <span>✓</span>
+                        </SelectItemIndicator>
+                        <SelectItemText>{{ ic.label }}</SelectItemText>
+                      </SelectItem>
+                    </SelectViewport>
+                  </SelectContent>
+                </SelectPortal>
+              </SelectRoot>
               <!-- Delete (only for non-builtin) -->
               <button
                 v-if="!field.isBuiltin"
@@ -155,9 +172,9 @@
         style="gap: var(--card-gap);"
       >
         <template #item="{ element: item, index: idx }">
+          <ItemContextMenu :items="menuItemsFor(item.id)">
           <div
             class="editor-card relative group/item"
-            @contextmenu.prevent="onItemContextMenu($event, item.id)"
           >
             <div class="flex items-center justify-between" style="margin-bottom: var(--normal-gap);">
               <div class="flex items-center" style="gap: var(--tight-gap);">
@@ -168,7 +185,7 @@
                 <span class="text-xs font-semibold" style="color: var(--primary-600);">条目</span>
               </div>
               <button
-                class="text-xs font-medium transition-all opacity-0 group-hover/item:opacity-100 px-2 py-1 rounded hover:bg-red-50"
+                class="text-xs font-medium transition-all opacity-0 group-hover/item:opacity-100 px-2 py-1 rounded hover:bg-[var(--color-error-50)]"
                 style="color: var(--color-error);"
                 @click="store.removeItem(store.selectedModule!.id, item.id)"
               >删除</button>
@@ -190,7 +207,7 @@
                       :value="dateRangeStart(val)"
                       @change="updateDateRange(String(item.id), 'start', ($event.target as HTMLInputElement).value)"
                     />
-                    <span class="text-xs text-gray-400">~</span>
+                    <span class="text-xs text-[var(--text-muted)]">~</span>
                     <template v-if="dateRangeIsPresent(val)">
                       <label class="flex items-center gap-1 text-xs cursor-pointer select-none">
                         <input
@@ -236,12 +253,13 @@
                   <!-- Validation Error Message -->
                   <span
                     v-if="validationErrors[errorKey(String(item.id), String(key))]"
-                    class="text-xs text-red-500 mt-0.5"
+                    class="text-xs text-[var(--color-error)] mt-0.5"
                   >{{ validationErrors[errorKey(String(item.id), String(key))] }}</span>
                 </label>
               </template>
             </div>
           </div>
+          </ItemContextMenu>
         </template>
       </draggable>
 
@@ -263,16 +281,6 @@
         <div class="text-xs" style="margin-top: var(--space-1); opacity: 0.6;">或在画布中直接点击模块</div>
       </div>
     </div>
-
-    <!-- Item Context Menu (Editor Panel) -->
-    <ContextMenu
-      :visible="itemMenuVisible"
-      :x="itemMenuX"
-      :y="itemMenuY"
-      :items="itemMenuItems"
-      @update:visible="itemMenuVisible = $event"
-      @close="onItemMenuClose"
-    />
   </div>
 </template>
 
@@ -281,9 +289,19 @@ import { ref, computed } from 'vue'
 import draggable from 'vuedraggable'
 import { useResumeStore } from '../stores/resume'
 import type { ModuleType } from '../types'
-import ContextMenu from './ContextMenu.vue'
-import type { ContextMenuItem } from './ContextMenu.vue'
+import ItemContextMenu, { type ContextMenuItem } from './ItemContextMenu.vue'
 import RichTextEditor from './RichTextEditor.vue'
+import {
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectPortal,
+  SelectContent,
+  SelectViewport,
+  SelectItem,
+  SelectItemText,
+  SelectItemIndicator,
+} from 'reka-ui'
 
 // Available icons for personal fields
 const AVAILABLE_ICONS = [
@@ -333,12 +351,7 @@ function onPersonalFieldsReordered() {
   store.reorderPersonalFields(personalFieldsList.value)
 }
 
-// ---- Item Context Menu (Editor Panel) ----
-const itemMenuVisible = ref(false)
-const itemMenuX = ref(0)
-const itemMenuY = ref(0)
-const itemMenuItems = ref<ContextMenuItem[]>([])
-const itemMenuTargetId = ref<string | null>(null)
+// ---- Item Context Menu (Reka UI) ----
 
 // ---- Validation ----
 const validationErrors = ref<Record<string, string>>({})
@@ -404,13 +417,10 @@ function toggleDatePresent(itemId: string, present: boolean) {
   }
 }
 
-function onItemContextMenu(e: MouseEvent, itemId: string) {
-  e.preventDefault()
-  e.stopPropagation()
-  itemMenuTargetId.value = itemId
-  if (!store.selectedModule) return
-
+function menuItemsFor(itemId: string): ContextMenuItem[] {
   const mod = store.selectedModule
+  if (!mod) return []
+
   const idx = mod.items.findIndex(i => i.id === itemId)
   const isFirst = idx <= 0
   const isLast = idx >= mod.items.length - 1
@@ -463,15 +473,7 @@ function onItemContextMenu(e: MouseEvent, itemId: string) {
     }
   })
 
-  itemMenuItems.value = items
-  itemMenuX.value = e.clientX
-  itemMenuY.value = e.clientY
-  itemMenuVisible.value = true
-}
-
-function onItemMenuClose() {
-  itemMenuVisible.value = false
-  itemMenuTargetId.value = null
+  return items
 }
 
 function getBadgeClass(modId: string): string {

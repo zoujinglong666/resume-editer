@@ -1,10 +1,9 @@
 /**
- * Preview-style PDF export utility.
- * Generates clean preview HTML from store data and exports as A4 PDF.
+ * Resume preview HTML builder.
+ * The actual PDF export is done via the browser's native print
+ * (window.print → "Save as PDF"), which keeps text as vectors.
  */
-import html2canvas from 'html2canvas'
-import { jsPDF } from 'jspdf'
-import type { ResumeModule, AvatarConfig, ResumeConfig } from '../types'
+import type { ResumeModule, AvatarConfig } from '../types'
 
 /** Format plain text description: detect numbered/bulleted lines and convert to HTML lists */
 function formatDesc(text: string): string {
@@ -142,101 +141,25 @@ export function generatePreviewHtml(
     html += `<div class="preview-module-section">`
     html += `<h2 class="preview-module-title">${mod.title}</h2>`
     for (const item of mod.items) {
+      // 「专业经历」(project 类型) 复用工作经历的布局渲染
+      let effectiveType = mod.type
+      let renderItem: any = item
+      if (mod.type === 'project' && mod.title === '专业经历') {
+        effectiveType = 'experience'
+        renderItem = { ...item, company: item.name, position: item.role }
+      }
       if (mod.type === 'personal' && avatar.url) {
         const shape = avatar.shape === 'circle' ? 'border-radius:50%' : 'border-radius:8px'
-        html += renderItemHtml(mod.type, {
-          ...item,
+        html += renderItemHtml(effectiveType, {
+          ...renderItem,
           _avatarHtml: `<img src="${avatar.url}" style="width:80px;height:80px;object-fit:cover;${shape};box-shadow:0 2px 8px rgba(0,0,0,0.1);" />`,
         })
       } else {
-        html += renderItemHtml(mod.type, item)
+        html += renderItemHtml(effectiveType, renderItem)
       }
     }
     html += `</div>`
   }
 
   return html
-}
-
-/** Export resume preview as PDF directly (no dialog needed) */
-export async function exportPreviewPdf(
-  modules: ResumeModule[],
-  avatar: AvatarConfig,
-  config: ResumeConfig,
-): Promise<void> {
-  // Create temporary off-screen element matching resume-preview-page
-  const container = document.createElement('div')
-  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;background:#fff;'
-
-  const page = document.createElement('div')
-  page.className = 'resume-preview-page'
-  page.style.cssText = `
-    width: 210mm;
-    min-height: 297mm;
-    background: #fff;
-    box-shadow: none;
-  `
-
-  const canvas = document.createElement('div')
-  canvas.className = 'resume-canvas-preview'
-  canvas.style.cssText = `
-    padding: ${config.pageMargin}px;
-    font-family: ${config.fontFamily};
-    font-size: ${config.fontSize}px;
-    line-height: ${config.lineHeight};
-    color: #333;
-  `
-  canvas.innerHTML = generatePreviewHtml(modules, avatar)
-
-  page.appendChild(canvas)
-  container.appendChild(page)
-  document.body.appendChild(container)
-
-  try {
-    await document.fonts.ready
-    await new Promise(r => requestAnimationFrame(r))
-    await new Promise(r => setTimeout(r, 100))
-
-    const capturedCanvas = await html2canvas(page, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#FFFFFF',
-    })
-
-    const imgData = capturedCanvas.toDataURL('image/png')
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-
-    const pageW = 210
-    const pageH = 297
-    const contentW = pageW
-    const imgAspect = capturedCanvas.width / capturedCanvas.height
-    const imgW = contentW
-    const imgH = imgW / imgAspect
-
-    if (imgH <= pageH) {
-      pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH)
-    } else {
-      // Multi-page
-      const pages = Math.ceil(imgH / pageH)
-      for (let i = 0; i < pages; i++) {
-        if (i > 0) pdf.addPage()
-        const srcY = (i * pageH / imgH) * capturedCanvas.height
-        const srcH = Math.min((pageH / imgH) * capturedCanvas.height, capturedCanvas.height - srcY)
-        const tmp = document.createElement('canvas')
-        tmp.width = capturedCanvas.width
-        tmp.height = srcH
-        const ctx = tmp.getContext('2d')!
-        ctx.drawImage(capturedCanvas, 0, srcY, capturedCanvas.width, srcH, 0, 0, capturedCanvas.width, srcH)
-        const pageImg = tmp.toDataURL('image/png')
-        const pageImgH = (srcH / capturedCanvas.width) * contentW
-        pdf.addImage(pageImg, 'PNG', 0, 0, contentW, pageImgH)
-      }
-    }
-
-    const name = modules.find(m => m.type === 'personal')?.items[0]?.name || 'resume'
-    pdf.save(`${name}-resume.pdf`)
-  } finally {
-    document.body.removeChild(container)
-  }
 }

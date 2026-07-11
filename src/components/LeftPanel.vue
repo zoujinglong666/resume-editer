@@ -15,11 +15,11 @@
       </div>
       <!-- Custom Color -->
       <div class="flex items-center" style="margin-top: var(--normal-gap); gap: var(--tight-gap);">
-        <span class="text-xs text-gray-500">自定义色:</span>
+        <span class="text-xs text-[var(--text-secondary)]">自定义色:</span>
         <div class="color-picker-wrapper">
           <input type="color" :value="store.config.primaryColor" @input="store.setPrimaryColor(($event.target as HTMLInputElement).value)" />
         </div>
-        <span class="text-xs font-mono text-gray-400">{{ store.config.primaryColor }}</span>
+        <span class="text-xs font-mono text-[var(--text-muted)]">{{ store.config.primaryColor }}</span>
       </div>
     </div>
 
@@ -27,7 +27,7 @@
     <div class="panel-section">
       <div class="panel-section-title">🔤 字体</div>
       <label class="block" style="margin-bottom: var(--tight-gap);">
-        <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">字体族</span>
+        <span class="text-xs text-[var(--text-secondary)] block" style="margin-bottom: var(--form-label-gap);">字体族</span>
         <select
           :value="store.config.fontFamily"
           @change="updateConfig('fontFamily', ($event.target as HTMLSelectElement).value)"
@@ -42,7 +42,7 @@
         </select>
       </label>
       <label class="block" style="margin-bottom: var(--tight-gap);">
-        <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">字号: {{ store.config.fontSize }}px</span>
+        <span class="text-xs text-[var(--text-secondary)] block" style="margin-bottom: var(--form-label-gap);">字号: {{ store.config.fontSize }}px</span>
         <input
           type="range" min="10" max="20" step="1" :value="store.config.fontSize"
           @input="updateFontSize(Number(($event.target as HTMLInputElement).value))"
@@ -50,7 +50,7 @@
         />
       </label>
       <label class="block" style="margin-bottom: var(--tight-gap);">
-        <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">行高: {{ store.config.lineHeight }}</span>
+        <span class="text-xs text-[var(--text-secondary)] block" style="margin-bottom: var(--form-label-gap);">行高: {{ store.config.lineHeight }}</span>
         <input
           type="range" min="1.2" max="2.0" step="0.1" :value="store.config.lineHeight"
           @input="updateLineHeight(Number(($event.target as HTMLInputElement).value))"
@@ -63,7 +63,7 @@
     <div class="panel-section">
       <div class="panel-section-title">📐 间距</div>
       <label class="block">
-        <span class="text-xs text-gray-500 block" style="margin-bottom: var(--form-label-gap);">页边距: {{ store.config.pageMargin }}px</span>
+        <span class="text-xs text-[var(--text-secondary)] block" style="margin-bottom: var(--form-label-gap);">页边距: {{ store.config.pageMargin }}px</span>
         <input
           type="range" min="8" max="40" step="2" :value="store.config.pageMargin"
           @input="updatePageMargin(Number(($event.target as HTMLInputElement).value))"
@@ -113,20 +113,20 @@
           @click="store.loadTemplate(tpl.id)"
         >
           <span class="text-sm flex-1 truncate">{{ tpl.name }}</span>
-          <span class="text-xs text-gray-400 shrink-0">{{ formatDate(tpl.updatedAt) }}</span>
+          <span class="text-xs text-[var(--text-muted)] shrink-0">{{ formatDate(tpl.updatedAt) }}</span>
           <button
             class="text-xs opacity-0 group-hover/tpl:opacity-100 transition-all shrink-0"
             style="padding: 2px 6px; color: var(--primary-color); background: rgba(99,102,241,0.08); border-radius: 4px;"
-            @click.stop="previewTemplate = tpl"
+            @click.stop="previewTemplate = tpl; previewTemplateOpen = true"
           >查看</button>
           <button
-            class="text-xs text-red-400 hover:text-red-600 opacity-0 group-hover/tpl:opacity-100 transition-all shrink-0"
+            class="text-xs text-[var(--color-error)] hover:opacity-80 opacity-0 group-hover/tpl:opacity-100 transition-all shrink-0"
             style="padding: 2px 4px;"
             @click.stop="store.deleteTemplate(tpl.id)"
           >删除</button>
         </div>
 
-        <div v-if="store.templates.length === 0" class="text-xs text-gray-400 text-center" style="padding: var(--space-2);">
+        <div v-if="store.templates.length === 0" class="text-xs text-[var(--text-muted)] text-center" style="padding: var(--space-2);">
           暂无保存的模板
         </div>
       </div>
@@ -136,8 +136,8 @@
   <!-- Template Preview Dialog -->
   <TemplatePreviewDialog
     v-if="previewTemplate"
+    v-model:open="previewTemplateOpen"
     :template="previewTemplate"
-    @close="previewTemplate = null"
     @load="handleLoadFromPreview"
   />
 </template>
@@ -152,6 +152,7 @@ const store = useResumeStore()
 const themes = THEME_PRESETS
 const newTemplateName = ref('')
 const previewTemplate = ref<ResumeTemplate | null>(null)
+const previewTemplateOpen = ref(false)
 
 function handleSaveTemplate() {
   if (!newTemplateName.value.trim()) return
@@ -170,6 +171,7 @@ function handleLoadFromPreview() {
   if (previewTemplate.value) {
     store.loadTemplate(previewTemplate.value.id)
     previewTemplate.value = null
+    previewTemplateOpen.value = false
   }
 }
 

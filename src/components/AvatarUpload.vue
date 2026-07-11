@@ -9,7 +9,7 @@
       >
         <img :src="store.avatar.url" alt="头像" style="width:100%;height:100%;" />
       </div>
-      <button @click="removeAvatar" class="text-xs text-red-500 hover:underline">移除</button>
+      <button @click="removeAvatar" class="text-xs text-[var(--color-error)] hover:underline">移除</button>
     </div>
 
     <!-- Upload Button -->

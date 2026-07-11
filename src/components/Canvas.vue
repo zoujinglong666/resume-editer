@@ -8,7 +8,7 @@
       </label>
       <button
         v-if="!store.docRef"
-        class="text-sm px-2 py-1 bg-blue-500 text-white rounded"
+        class="text-sm px-2 py-1 bg-[var(--primary-500)] text-white rounded"
         @click="store.migrateToNewModel()"
       >迁移到新模型</button>
     </div>
@@ -36,47 +36,58 @@
           @end="onElementDragEnd"
         >
           <template #item="{ element: el }">
-            <div
-              class="element-wrapper relative group"
-              :class="{ 'is-selected': store.selectedElementId === el.id }"
-              :data-element-id="el.id"
-              @click.stop="onElementClick(el.id)"
-              @contextmenu.prevent="onElementContextMenu($event, el.id)"
-            >
-              <!-- Selection Indicator -->
-              <div
-                v-if="store.selectedElementId === el.id"
-                class="absolute -inset-1 rounded pointer-events-none"
-                style="border: 2px solid var(--accent-color); border-radius: 6px;"
-              />
+            <ContextMenuRoot @update:open="(o: boolean) => o && store.selectElement(el.id)">
+              <ContextMenuTrigger as-child>
+                <div
+                  class="element-wrapper relative group"
+                  :class="{ 'is-selected': store.selectedElementId === el.id }"
+                  :data-element-id="el.id"
+                  @click.stop="onElementClick(el.id)"
+                >
+                  <!-- Selection Indicator -->
+                  <div
+                    v-if="store.selectedElementId === el.id"
+                    class="absolute -inset-1 rounded pointer-events-none"
+                    style="border: 2px solid var(--accent-color); border-radius: 6px;"
+                  />
 
-              <!-- Drag Handle -->
-              <span class="drag-handle absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity z-20" title="拖拽排序" style="cursor: move;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
-              </span>
+                  <!-- Drag Handle -->
+                  <span class="drag-handle absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity z-20" title="拖拽排序" style="cursor: move;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
+                  </span>
 
-              <!-- Render Node -->
-              <RenderNode
-                :element="el"
-                :is-selected="store.selectedElementId === el.id"
-                @select="onElementSelect"
-              />
-            </div>
+                  <!-- Render Node -->
+                  <RenderNode
+                    :element="el"
+                    :is-selected="store.selectedElementId === el.id"
+                    @select="onElementSelect"
+                  />
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuPortal>
+                <ContextMenuContent class="rk-context-content" :collision-padding="8">
+                  <template v-for="(item, idx) in elementMenuItemsFor(el.id)" :key="idx">
+                    <ContextMenuSeparator v-if="item.divider" class="rk-context-separator" />
+                    <ContextMenuItem
+                      v-else
+                      class="rk-context-item"
+                      :disabled="item.disabled"
+                      :data-danger="item.danger ? '' : undefined"
+                      @select="item.action?.()"
+                    >
+                      <span v-if="item.icon" class="rk-context-icon" v-html="item.icon" />
+                      <span class="rk-context-label">{{ item.label }}</span>
+                      <span v-if="item.shortcut" class="rk-context-shortcut">{{ item.shortcut }}</span>
+                    </ContextMenuItem>
+                  </template>
+                </ContextMenuContent>
+              </ContextMenuPortal>
+            </ContextMenuRoot>
           </template>
         </draggable>
 
-        <!-- Element Context Menu -->
-        <ContextMenu
-          :visible="elementMenuVisible"
-          :x="elementMenuX"
-          :y="elementMenuY"
-          :items="elementMenuItems"
-          @update:visible="elementMenuVisible = $event"
-          @close="onElementMenuClose"
-        />
-
         <!-- Empty state -->
-        <div v-if="store.getElements.length === 0" class="text-center py-20 text-gray-400">
+        <div v-if="store.getElements.length === 0" class="text-center py-20 text-[var(--text-muted)]">
           暂无元素，请添加内容
         </div>
       </template>
@@ -94,17 +105,18 @@
           @end="onDragEnd"
         >
           <template #item="{ element: mod }">
-            <div
-              v-show="mod.visible"
-              class="module-section relative group"
-              :class="[
-                store.selectedModuleId === mod.id ? 'is-selected' : '',
-                `title-style-${store.config.titleStyle || 'underline'}`
-              ]"
-              :data-module-id="mod.id"
-              @click.stop="onModuleClick(mod.id)"
-              @contextmenu.prevent="onModuleContextMenu($event, mod.id)"
-            >
+            <ContextMenuRoot @update:open="(o: boolean) => o && store.selectModule(mod.id)">
+              <ContextMenuTrigger as-child>
+                <div
+                  v-show="mod.visible"
+                  class="module-section relative group"
+                  :class="[
+                    store.selectedModuleId === mod.id ? 'is-selected' : '',
+                    `title-style-${store.config.titleStyle || 'underline'}`
+                  ]"
+                  :data-module-id="mod.id"
+                  @click.stop="onModuleClick(mod.id)"
+                >
               <!-- Selection outline indicator -->
               <div
                 v-if="store.selectedModuleId === mod.id"
@@ -150,7 +162,7 @@
               <div class="relative z-10">
                 <PersonalInfoModule v-if="mod.type === 'personal'" :module="mod" />
                 <EducationModule v-else-if="mod.type === 'education'" :module="mod" />
-                <ExperienceModule v-else-if="mod.type === 'experience'" :module="mod" />
+                <ExperienceModule v-else-if="mod.type === 'experience' || (mod.type === 'project' && mod.title === '专业经历')" :module="mod" />
                 <ProjectModule v-else-if="mod.type === 'project'" :module="mod" />
                 <SkillModule v-else-if="mod.type === 'skill'" :module="mod" />
                 <StrengthModule v-else-if="mod.type === 'strength'" :module="mod" />
@@ -178,22 +190,32 @@
                 class="add-item-btn no-print"
                 @click.stop="store.addItem(mod.id)"
               >+ 添加条目</button>
-            </div>
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuPortal>
+                <ContextMenuContent class="rk-context-content" :collision-padding="8">
+                  <template v-for="(item, idx) in moduleMenuItemsFor(mod.id)" :key="idx">
+                    <ContextMenuSeparator v-if="item.divider" class="rk-context-separator" />
+                    <ContextMenuItem
+                      v-else
+                      class="rk-context-item"
+                      :disabled="item.disabled"
+                      :data-danger="item.danger ? '' : undefined"
+                      @select="item.action?.()"
+                    >
+                      <span v-if="item.icon" class="rk-context-icon" v-html="item.icon" />
+                      <span class="rk-context-label">{{ item.label }}</span>
+                      <span v-if="item.shortcut" class="rk-context-shortcut">{{ item.shortcut }}</span>
+                    </ContextMenuItem>
+                  </template>
+                </ContextMenuContent>
+              </ContextMenuPortal>
+            </ContextMenuRoot>
           </template>
         </draggable>
 
-        <!-- Module Context Menu -->
-        <ContextMenu
-          :visible="moduleMenuVisible"
-          :x="moduleMenuX"
-          :y="moduleMenuY"
-          :items="moduleMenuItems"
-          @update:visible="moduleMenuVisible = $event"
-          @close="onModuleMenuClose"
-        />
-
         <!-- Empty state hint -->
-        <div v-if="!store.modules.some(m => m.visible)" class="text-center py-20 text-gray-400">
+        <div v-if="!store.modules.some(m => m.visible)" class="text-center py-20 text-[var(--text-muted)]">
           所有模块已隐藏，请在左侧面板开启显示
         </div>
       </template>
@@ -214,8 +236,15 @@ import ProjectModule from './modules/ProjectModule.vue'
 import SkillModule from './modules/SkillModule.vue'
 import StrengthModule from './modules/StrengthModule.vue'
 import CustomModule from './modules/CustomModule.vue'
-import ContextMenu from './ContextMenu.vue'
-import type { ContextMenuItem } from './ContextMenu.vue'
+import {
+  ContextMenuRoot,
+  ContextMenuTrigger,
+  ContextMenuPortal,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+} from 'reka-ui'
+import type { ContextMenuItem as MenuItem } from './ItemContextMenu.vue'
 import type { ResumeElement } from '../types'
 
 const store = useResumeStore()
@@ -238,19 +267,9 @@ onMounted(() => {
   if (canvasEl.value) ro.observe(canvasEl.value)
 })
 
-// ---- Element Context Menu State (New Model) ----
-const elementMenuVisible = ref(false)
-const elementMenuX = ref(0)
-const elementMenuY = ref(0)
-const elementMenuItems = ref<ContextMenuItem[]>([])
-const elementMenuTargetId = ref<string | null>(null)
+// ---- Element Context Menu (Reka UI) ----
 
-// ---- Module Context Menu State (Old Model) ----
-const moduleMenuVisible = ref(false)
-const moduleMenuX = ref(0)
-const moduleMenuY = ref(0)
-const moduleMenuItems = ref<ContextMenuItem[]>([])
-const moduleMenuTargetId = ref<string | null>(null)
+// ---- Module Context Menu (Reka UI) ----
 
 // ---- Computed ----
 
@@ -272,29 +291,25 @@ const elementsList = computed<ResumeElement[]>({
   }
 })
 
-function onModuleContextMenu(e: MouseEvent, moduleId: string) {
-  e.preventDefault()
-  store.selectModule(moduleId)
-  moduleMenuTargetId.value = moduleId
-
+function moduleMenuItemsFor(moduleId: string): MenuItem[] {
   const mod = store.modules.find(m => m.id === moduleId)
-  if (!mod) return
+  if (!mod) return []
 
-  const isFirst = store.modules.filter(m => m.visible).findIndex(m => m.id === moduleId) === 0
-  const isLast = store.modules.filter(m => m.visible).findIndex(m => m.id === moduleId) === store.modules.filter(m => m.visible).length - 1
+  const visModules = store.modules.filter(m => m.visible)
+  const idx = visModules.findIndex(m => m.id === moduleId)
+  const isFirst = idx <= 0
+  const isLast = idx >= visModules.length - 1
 
-  const items: ContextMenuItem[] = []
+  const items: MenuItem[] = []
 
-  // Visibility toggle
   items.push({
     label: mod.visible ? '隐藏模块' : '显示模块',
-    icon: mod.visible ? '👁️' : '👁️',
+    icon: '👁️',
     action: () => store.toggleModuleVisibility(moduleId)
   })
 
   items.push({ label: '', divider: true })
 
-  // Rename
   items.push({
     label: '重命名模块',
     icon: '📝',
@@ -308,46 +323,23 @@ function onModuleContextMenu(e: MouseEvent, moduleId: string) {
 
   items.push({ label: '', divider: true })
 
-  // Move up/down
   if (!isFirst) {
     items.push({
       label: '上移模块',
       icon: '⬆️',
-      action: () => {
-        const visModules = store.modules.filter(m => m.visible)
-        const idx = visModules.findIndex(m => m.id === moduleId)
-        if (idx > 0) {
-          // Swap order with previous visible module
-          const prev = visModules[idx - 1]
-          const curr = visModules[idx]
-          const tmp = prev.order
-          prev.order = curr.order
-          curr.order = tmp
-        }
-      }
+      action: () => swapModuleOrder(moduleId, 'up')
     })
   }
   if (!isLast) {
     items.push({
       label: '下移模块',
       icon: '⬇️',
-      action: () => {
-        const visModules = store.modules.filter(m => m.visible)
-        const idx = visModules.findIndex(m => m.id === moduleId)
-        if (idx < visModules.length - 1) {
-          const curr = visModules[idx]
-          const next = visModules[idx + 1]
-          const tmp = curr.order
-          curr.order = next.order
-          next.order = tmp
-        }
-      }
+      action: () => swapModuleOrder(moduleId, 'down')
     })
   }
 
   items.push({ label: '', divider: true })
 
-  // Add item (not for personal)
   if (mod.type !== 'personal') {
     const typeNames: Record<string, string> = {
       education: '教育条目', experience: '工作条目',
@@ -361,7 +353,6 @@ function onModuleContextMenu(e: MouseEvent, moduleId: string) {
     })
   }
 
-  // Delete module (not for personal)
   if (mod.type !== 'personal') {
     items.push({ label: '', divider: true })
     items.push({
@@ -372,15 +363,27 @@ function onModuleContextMenu(e: MouseEvent, moduleId: string) {
     })
   }
 
-  moduleMenuItems.value = items
-  moduleMenuX.value = e.clientX
-  moduleMenuY.value = e.clientY
-  moduleMenuVisible.value = true
+  return items
 }
 
-function onModuleMenuClose() {
-  moduleMenuVisible.value = false
-  moduleMenuTargetId.value = null
+function swapModuleOrder(moduleId: string, dir: 'up' | 'down') {
+  const visModules = store.modules.filter(m => m.visible)
+  const idx = visModules.findIndex(m => m.id === moduleId)
+  if (idx < 0) return
+  if (dir === 'up' && idx > 0) {
+    const prev = visModules[idx - 1]
+    const curr = visModules[idx]
+    const tmp = prev.order
+    prev.order = curr.order
+    curr.order = tmp
+  }
+  if (dir === 'down' && idx < visModules.length - 1) {
+    const curr = visModules[idx]
+    const next = visModules[idx + 1]
+    const tmp = curr.order
+    curr.order = next.order
+    next.order = tmp
+  }
 }
 
 // ---- New Model: Element Operations ----
@@ -400,17 +403,10 @@ function onElementSelect(elementId: string) {
   store.selectElement(elementId)
 }
 
-function onElementContextMenu(e: MouseEvent, elementId: string) {
-  e.preventDefault()
-  store.selectElement(elementId)
-  elementMenuTargetId.value = elementId
+function elementMenuItemsFor(elementId: string): MenuItem[] {
+  const element = store.getElements.find(e => e.id === elementId)
+  if (!element) return []
 
-  const element = store.selectedElement
-  if (!element) return
-
-  const items: ContextMenuItem[] = []
-
-  // Element type display
   const typeNames: Record<string, string> = {
     'text': '文本',
     'heading': '标题',
@@ -426,15 +422,16 @@ function onElementContextMenu(e: MouseEvent, elementId: string) {
     'skill-bar': '技能条'
   }
 
+  const items: MenuItem[] = []
+
   items.push({
     label: `元素类型: ${typeNames[element.type] || element.type}`,
     icon: '📄',
-    action: () => {}
+    disabled: true
   })
 
   items.push({ label: '', divider: true })
 
-  // Edit (for text types)
   if (['text', 'heading', 'paragraph', 'rich-text'].includes(element.type)) {
     items.push({
       label: '编辑内容',
@@ -446,7 +443,6 @@ function onElementContextMenu(e: MouseEvent, elementId: string) {
     items.push({ label: '', divider: true })
   }
 
-  // Delete element
   items.push({
     label: '删除元素',
     icon: '🗑️',
@@ -454,15 +450,7 @@ function onElementContextMenu(e: MouseEvent, elementId: string) {
     action: () => store.removeElement(elementId)
   })
 
-  elementMenuItems.value = items
-  elementMenuX.value = e.clientX
-  elementMenuY.value = e.clientY
-  elementMenuVisible.value = true
-}
-
-function onElementMenuClose() {
-  elementMenuVisible.value = false
-  elementMenuTargetId.value = null
+  return items
 }
 
 function onElementDragEnd() {
@@ -553,7 +541,7 @@ watch(() => store.selectedElementId, (newId) => {
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 2px dashed #cbd5e1;
+  border-top: 2px dashed var(--border-color);
   pointer-events: none;
   z-index: 5;
 }
@@ -562,7 +550,7 @@ watch(() => store.selectedElementId, (newId) => {
   right: 8px;
   top: -18px;
   font-size: 10px;
-  color: #94a3b8;
+  color: var(--text-muted);
   background: var(--surface-color);
   padding: 0 4px;
   border-radius: 2px;

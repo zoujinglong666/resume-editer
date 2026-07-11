@@ -1,8 +1,8 @@
 <template>
-  <div class="h-screen flex flex-col overflow-hidden">
+  <div class="app h-screen flex flex-col overflow-hidden">
     <!-- Header -->
     <PhaseBar
-      @export-pdf="showPdfDialog = true"
+      @export-pdf="exportVectorPdf"
       @import-json="handleImport"
       @export-json="handleExport"
       @reset="handleReset"
@@ -13,49 +13,62 @@
     <!-- Main Content -->
     <div class="app-main">
       <GuidePanel
-        @export-pdf="showPdfDialog = true"
+        @export-pdf="exportVectorPdf"
         @export-json="handleExport"
         @import-json="handleImport"
       />
-      <Canvas ref="canvasRef" />
+      <Canvas />
       <EditorPanel />
     </div>
 
     <!-- Status Bar -->
     <StatusBar :char-count="store.charCount" />
 
-    <!-- PDF Export Dialog -->
-    <PdfExportDialog v-if="showPdfDialog" :canvas-ref="canvasRef" @close="showPdfDialog = false" />
-
     <!-- Resume Preview Dialog -->
-    <ResumePreviewDialog
-      v-if="showPreview"
-      @close="showPreview = false"
-      @export="showPreview = false; showPdfDialog = true"
-    />
+    <ResumePreviewDialog v-model:open="showPreview" />
 
     <!-- Hidden file input -->
     <input ref="fileInputRef" type="file" accept=".json" class="hidden" @change="onFileSelected" />
+
+    <!-- 画布内浮动富文本工具栏 -->
+    <FloatingToolbar />
+  </div>
+
+  <!-- 矢量导出专用根节点：平时隐藏，打印（另存为 PDF）时显示 -->
+  <div class="resume-print-root" aria-hidden="true">
+    <div class="resume-canvas-preview" :style="printStyle" v-html="printHtml" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useResumeStore } from './stores/resume'
 import PhaseBar from './components/PhaseBar.vue'
 import GuidePanel from './components/GuidePanel.vue'
 import Canvas from './components/Canvas.vue'
 import EditorPanel from './components/EditorPanel.vue'
 import StatusBar from './components/StatusBar.vue'
-import PdfExportDialog from './components/PdfExportDialog.vue'
 import ResumePreviewDialog from './components/ResumePreviewDialog.vue'
-import { exportPreviewPdf } from './utils/previewPdf'
+import FloatingToolbar from './components/FloatingToolbar.vue'
+import { generatePreviewHtml } from './utils/previewPdf'
 
 const store = useResumeStore()
-const canvasRef = ref<InstanceType<typeof Canvas> | null>(null)
-const showPdfDialog = ref(false)
 const showPreview = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
+
+// 矢量导出：把同一份简洁预览 HTML 渲染到打印专用根节点，
+// 由浏览器原生打印（另存为 PDF）输出，文字为矢量、放大不模糊。
+const printHtml = computed(() => generatePreviewHtml(store.modules, store.avatar))
+const printStyle = computed(() => ({
+  fontFamily: store.config.fontFamily,
+  fontSize: `${store.config.fontSize}px`,
+  lineHeight: String(store.config.lineHeight),
+  color: 'var(--text-primary)',
+}))
+
+function exportVectorPdf() {
+  window.print()
+}
 
 // Initialize CSS vars from persisted config
 onMounted(() => {
@@ -85,10 +98,10 @@ function handleKeydown(e: KeyboardEvent) {
     e.preventDefault()
     handleExport()
   }
-  // Ctrl/Cmd + P: Export PDF
+  // Ctrl/Cmd + P: 浏览器原生矢量打印导出 PDF
   if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
     e.preventDefault()
-    showPdfDialog.value = true
+    exportVectorPdf()
   }
 }
 
@@ -129,14 +142,11 @@ function handleReset() {
 }
 
 const isQuickExporting = ref(false)
-async function handleQuickExportPdf() {
+function handleQuickExportPdf() {
   if (isQuickExporting.value) return
   isQuickExporting.value = true
   try {
-    await exportPreviewPdf(store.modules, store.avatar, store.config)
-  } catch (err) {
-    console.error('Quick PDF export failed:', err)
-    alert('导出失败，请重试')
+    exportVectorPdf()
   } finally {
     isQuickExporting.value = false
   }

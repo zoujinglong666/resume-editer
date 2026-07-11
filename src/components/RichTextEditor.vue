@@ -71,7 +71,8 @@
           ref="foreColorRef"
           type="color"
           class="rte-color-input"
-          @input="exec('foreColor', ($event.target as HTMLInputElement).value)"
+          @input="onColor($event, 'foreColor')"
+          @change="onColor($event, 'foreColor')"
         />
       </div>
 
@@ -84,7 +85,8 @@
           ref="hiliteColorRef"
           type="color"
           class="rte-color-input"
-          @input="exec('hiliteColor', ($event.target as HTMLInputElement).value)"
+          @input="onColor($event, 'hiliteColor')"
+          @change="onColor($event, 'hiliteColor')"
         />
       </div>
 
@@ -140,6 +142,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import {
+  applyRichCommand,
+  saveSelection,
+  restoreSelection,
+  queryRichState,
+} from '../utils/richText'
 
 const props = defineProps<{
   modelValue: string
@@ -184,59 +192,43 @@ let isTyping = false
 let updateTimer: ReturnType<typeof setTimeout> | null = null
 
 function exec(command: string, value?: string) {
-  editorRef.value?.focus()
-  document.execCommand(command, false, value ?? undefined)
+  // 选区已由工具栏 @mousedown.prevent 保留在编辑器内，无需再 focus（focus 会折叠选区）
+  applyRichCommand(command, value)
   updateStates()
   emitUpdate()
 }
 
 function insertLink() {
-  editorRef.value?.focus()
   const url = window.prompt('请输入链接地址:', 'https://')
   if (url && url.trim()) {
-    document.execCommand('createLink', false, url.trim())
+    applyRichCommand('createLink', url.trim())
+    updateStates()
     emitUpdate()
   }
 }
 
 function openColorPicker(type: 'foreColor' | 'hiliteColor') {
-  editorRef.value?.focus()
+  // 保存当前选区，原生颜色选择器会抢走焦点
+  saveSelection()
   const ref = type === 'foreColor' ? foreColorRef.value : hiliteColorRef.value
   if (ref) {
     ref.click()
   }
 }
 
+function onColor(e: Event, type: 'foreColor' | 'hiliteColor') {
+  e.stopPropagation()
+  // 恢复选区后再应用颜色命令
+  restoreSelection()
+  const value = (e.target as HTMLInputElement).value
+  applyRichCommand(type, value)
+  updateStates()
+  emitUpdate()
+}
+
 function updateStates() {
   if (!editorRef.value) return
-  const cmds = ['bold', 'italic', 'underline', 'strikeThrough', 'insertUnorderedList', 'insertOrderedList', 'justifyLeft', 'justifyCenter', 'justifyRight']
-  const newStates: Record<string, boolean | string> = {}
-  for (const cmd of cmds) {
-    try {
-      newStates[cmd] = document.queryCommandState(cmd)
-    } catch {
-      newStates[cmd] = false
-    }
-  }
-  // Color values
-  try {
-    newStates.foreColor = document.queryCommandValue('foreColor')
-  } catch {
-    newStates.foreColor = ''
-  }
-  try {
-    newStates.hiliteColor = document.queryCommandValue('hiliteColor')
-  } catch {
-    newStates.hiliteColor = ''
-  }
-  // Block format
-  try {
-    const block = document.queryCommandValue('formatBlock')
-    newStates.formatBlock = typeof block === 'string' ? block.toLowerCase().replace(/[<>]/g, '') : ''
-  } catch {
-    newStates.formatBlock = ''
-  }
-  states.value = newStates
+  states.value = queryRichState()
 }
 
 function emitUpdate() {

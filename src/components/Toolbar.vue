@@ -36,13 +36,13 @@
       <button @click="$emit('import-json')" class="rounded-md text-sm border border-[var(--border-color)] hover:bg-gray-50 transition-all" style="padding: var(--space-1_5) var(--normal-gap);">
         导入 JSON
       </button>
-      <button @click="$emit('reset')" class="rounded-md text-sm text-red-500 border border-red-200 hover:bg-red-50 transition-all" style="padding: var(--space-1_5) var(--normal-gap);">
+      <button @click="$emit('reset')" class="rounded-md text-sm text-[var(--color-error)] border border-[var(--color-error-200)] hover:bg-[var(--color-error-50)] transition-all" style="padding: var(--space-1_5) var(--normal-gap);">
         重置
       </button>
     </div>
 
     <!-- Right: spacer -->
-    <div class="w-32 text-right text-xs text-gray-400">
+    <div class="w-32 text-right text-xs text-[var(--text-muted)]">
       <span v-if="store.lastSaved">自动保存 {{ formatTime(store.lastSaved) }}</span>
     </div>
   </div>

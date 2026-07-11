@@ -93,6 +93,8 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
+  --color-error-50: #fef2f2;   /* danger hover bg (≈ red-50) */
+  --color-error-200: #fecaca;  /* danger border (≈ red-200) */
 
   /* ── Spacing (4px base grid) ── */
   --space-0: 0px;
@@ -461,6 +463,23 @@ html, body, #app {
   word-wrap: break-word;
 }
 
+/* PDF 导出时（克隆节点上加此 class）隐藏编辑器专属元素，
+   使导出的 PDF 与屏幕上看到的简历完全一致 */
+.a4-canvas.pdf-capturing {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+.a4-canvas.pdf-capturing .no-print,
+.a4-canvas.pdf-capturing .drag-handle {
+  display: none !important;
+}
+.a4-canvas.pdf-capturing .is-selected > div[style*="border: 2px solid"],
+.a4-canvas.pdf-capturing .module-section.is-selected > div[style*="border: 2px solid"],
+.a4-canvas.pdf-capturing .element-wrapper.is-selected > div[style*="border: 2px solid"] {
+  display: none !important;
+}
+
 .a4-canvas .item-desc,
 .a4-canvas .personal-summary,
 .a4-canvas .custom-content,
@@ -498,13 +517,20 @@ html, body, #app {
 }
 
 .a4-canvas .item-date,
-.a4-canvas .item-subtitle,
 .a4-canvas .personal-contact-item {
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+}
+
+/* 学历 · 专业等副标题允许换行，避免长内容被 nowrap 截断 */
+.a4-canvas .item-subtitle {
+  flex-shrink: 1;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -758,12 +784,51 @@ html, body, #app {
   margin-top: 6px;
 }
 
+/* 项目经历模块：描述以无序列表（●）展示，多条内容更规整 */
+.a4-canvas .project-desc > div,
+.a4-canvas .project-desc > p {
+  display: list-item;
+  list-style: disc outside;
+  margin-left: 1.3em;
+  margin-bottom: 3px;
+  line-height: var(--line-height-relaxed, 1.6);
+}
+.a4-canvas .project-desc > div:last-child,
+.a4-canvas .project-desc > p:last-child {
+  margin-bottom: 0;
+}
+
+/* 教育经历模块：更紧凑，避免占用过多版面 */
+.a4-canvas .education-module .module-item {
+  margin-bottom: var(--space-1_5);
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.a4-canvas .education-module .item-desc {
+  line-height: var(--line-height-normal);
+  margin-top: var(--space-0_5);
+}
+.a4-canvas .education-module .item-desc ul,
+.a4-canvas .education-module .item-desc ol {
+  margin: 2px 0;
+  padding-left: 1.3em;
+}
+.a4-canvas .education-module .item-desc li {
+  margin-bottom: 1px;
+  line-height: var(--line-height-normal);
+}
+.a4-canvas .education-module .item-desc li:last-child {
+  margin-bottom: 0;
+}
+.a4-canvas .education-module .item-desc :not(ul):not(ol) + ul,
+.a4-canvas .education-module .item-desc :not(ul):not(ol) + ol {
+  margin-top: 3px;
+}
+
 .a4-canvas .item-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
+  display: block;
   font-size: var(--font-size-sm);
-  color: var(--primary-500);
+  color: inherit;
   text-decoration: none;
   margin-top: var(--space-1);
   word-break: break-all;
@@ -1907,10 +1972,14 @@ html, body, #app {
   max-width: 100% !important;
 }
 .export-clean .item-date,
-.export-clean .item-subtitle,
 .export-clean .personal-contact-item {
   white-space: nowrap !important;
   overflow: visible !important;
+}
+.export-clean .item-subtitle {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
 }
 
 /* Rich text in export */
@@ -1955,6 +2024,26 @@ html, body, #app {
 .export-clean .personal-summary li,
 .export-clean .custom-content li {
   margin: 2px 0;
+}
+
+/* 教育经历模块：导出同样更紧凑 */
+.export-clean .education-module .module-item {
+  margin-bottom: var(--space-1_5);
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.export-clean .education-module .item-desc {
+  line-height: var(--line-height-normal);
+  margin-top: var(--space-0_5);
+}
+.export-clean .education-module .item-desc ul,
+.export-clean .education-module .item-desc ol {
+  margin: 2px 0;
+  padding-left: 18px;
+}
+.export-clean .education-module .item-desc li {
+  margin: 1px 0;
+  line-height: var(--line-height-normal);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -3003,6 +3092,7 @@ html { scroll-behavior: smooth; }
     0 4px 16px -8px rgba(0,0,0,0.1);
   padding: var(--space-4);
   min-width: 280px;
+  z-index: 2001;
   animation: menu-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .date-picker-header {
@@ -3129,18 +3219,22 @@ html { scroll-behavior: smooth; }
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(4px);
   z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   animation: fadeIn 0.2s ease;
 }
 .tpl-preview-dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2001;
   background: #fff;
   border-radius: 12px;
   width: 640px;
+  max-width: 92vw;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 20px 60px -12px rgba(0,0,0,0.25);
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -3363,9 +3457,16 @@ html { scroll-behavior: smooth; }
   background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(6px);
   z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+/* Reka DialogContent（全屏预览） */
+.resume-preview-content {
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  animation: fadeIn 0.2s ease;
+  z-index: 2001;
+  outline: none;
 }
 .resume-preview-container {
   display: flex;
@@ -3504,6 +3605,30 @@ html { scroll-behavior: smooth; }
   color: rgba(255,255,255,0.5);
   background: #1e293b;
   flex-shrink: 0;
+}
+
+/* 预览区：直接克隆真实画布，所见即所得 */
+.preview-host {
+  display: flex;
+  justify-content: center;
+}
+.preview-host .preview-clone {
+  margin: 0 auto;
+  box-shadow: none;
+  border-radius: 0;
+}
+/* 隐藏编辑器专属控件（与导出一致） */
+.preview-clone .no-print,
+.preview-clone .drag-handle {
+  display: none !important;
+}
+.preview-clone .is-selected > div[style*="border: 2px solid"],
+.preview-clone .module-section.is-selected > div[style*="border: 2px solid"],
+.preview-clone .element-wrapper.is-selected > div[style*="border: 2px solid"] {
+  display: none !important;
+}
+.preview-clone [contenteditable] {
+  cursor: default;
 }
 
 /* Preview Content Styles */
@@ -3658,4 +3783,230 @@ html { scroll-behavior: smooth; }
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Vector PDF Export (browser native print → "Save as PDF")
+   文字由浏览器直接写成矢量，放大不模糊；长内容自动分页。
+   ═══════════════════════════════════════════════════════════════ */
+.resume-print-root {
+  display: none;
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  /* 关键：打印时解除视口高度限制与 overflow:hidden，否则内容会被裁成一页 */
+  html, body, #app {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  /* 隐藏整个编辑器 UI（含预览弹窗），只保留打印专用简历根节点 */
+  .app {
+    display: none !important;
+  }
+  /* 显示矢量简历内容 */
+  .resume-print-root {
+    display: block !important;
+    width: 210mm;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin: 0;
+    background: #ffffff;
+  }
+  .resume-print-root .resume-canvas-preview {
+    padding: 12mm 12mm !important;
+    color: var(--text-primary) !important;
+  }
+  /* 关键：确保主题色、头像底色等被打印出来 */
+  .resume-print-root,
+  .resume-print-root * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  /* 极致紧凑：允许模块与单条条目自由跨页，不再整块跳页留白 */
+  .resume-print-root .preview-module-section,
+  .resume-print-root .preview-item {
+    break-inside: auto;
+  }
+  /* 仅让条目标题行 / 姓名行与紧随的内容保持同行，避免割裂感 */
+  .resume-print-root .preview-item-header,
+  .resume-print-root .preview-name-row {
+    break-after: avoid;
+  }
+  /* 模块标题不孤立在页尾 */
+  .resume-print-root .preview-module-title {
+    break-after: avoid;
+  }
+  .resume-print-root img {
+    object-fit: cover;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Reka UI — 全局统一样式（Portal 内容需全局，不能用 scoped）
+   ═════════════════════════════════════════════════════════════ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Context Menu (Reka ContextMenu) ── */
+.rk-context-content {
+  z-index: 99999;
+  min-width: 180px;
+  max-width: 240px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--border-color, #E5E7EB);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+  padding: 4px;
+  font-size: 13px;
+  user-select: none;
+  animation: menu-in 0.12s ease;
+}
+.rk-context-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  background: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  color: var(--text-primary, #1F2937);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.1s;
+}
+.rk-context-item[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.rk-context-item[data-highlighted] {
+  background: var(--primary-500);
+  color: #fff;
+}
+.rk-context-item[data-danger] {
+  color: var(--color-error);
+}
+.rk-context-item[data-danger][data-highlighted] {
+  background: var(--color-error);
+  color: #fff;
+}
+.rk-context-item[data-highlighted] .rk-context-shortcut {
+  color: rgba(255, 255, 255, 0.7);
+}
+.rk-context-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.rk-context-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rk-context-shortcut {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-muted, #9CA3AF);
+  margin-left: 16px;
+}
+.rk-context-separator {
+  height: 1px;
+  background: var(--border-color, #E5E7EB);
+  margin: 4px 8px;
+}
+
+/* ── Select (Reka Select) ── */
+.rk-select-trigger {
+  width: 88px;
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-1_5);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background: #fafafb;
+  color: var(--text-secondary);
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.rk-select-trigger:hover {
+  border-color: #d0d0d8;
+}
+.rk-select-trigger[data-state="open"] {
+  border-color: var(--primary-400);
+}
+.rk-select-trigger[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.rk-select-content {
+  min-width: 88px;
+  width: var(--reka-select-trigger-width);
+  background: #fff;
+  border: 1px solid var(--border-color, #E5E7EB);
+  border-radius: 6px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+  padding: 4px;
+  z-index: 2001;
+  animation: menu-in 0.12s ease;
+}
+.rk-select-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 6px 10px 6px 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-primary);
+  user-select: none;
+}
+.rk-select-item[data-highlighted] {
+  background: var(--primary-50);
+  color: var(--primary-700);
+}
+.rk-select-item[data-state="checked"] {
+  color: var(--primary-600);
+  font-weight: 600;
+}
+.rk-select-item-indicator {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  flex-shrink: 0;
 }

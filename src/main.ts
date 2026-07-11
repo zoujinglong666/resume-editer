@@ -76,6 +76,8 @@ function formatTextForHtml(text: string): string {
  */
 app.directive('sync-html', {
   mounted(el: HTMLElement, binding) {
+    // 标记为富文本可编辑区域，供浮动工具栏识别（仅对 description/summary/content 生效）
+    el.classList.add('rich-editable')
     el.innerHTML = formatTextForHtml(binding.value ?? '')
   },
   updated(el: HTMLElement, binding) {

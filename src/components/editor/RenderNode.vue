@@ -344,11 +344,12 @@ const textStyle = computed(() => {
 
 const titleStyle = computed(() => {
   const s = props.element.style || {}
+  // 不写死默认值，交由全局 .a4-canvas .module-title 统一定义（与新模型一致）
   return {
-    fontSize: s.fontSize ? `${s.fontSize}px` : '18px',
-    fontWeight: s.fontWeight || 'bold',
+    fontSize: s.fontSize ? `${s.fontSize}px` : undefined,
+    fontWeight: s.fontWeight || undefined,
     color: s.color || undefined,
-    marginBottom: '8px',
+    marginBottom: s.marginBottom || undefined,
   }
 })
 
@@ -356,7 +357,7 @@ const dividerStyle = computed(() => {
   const s = props.element.style || {}
   return {
     border: 'none',
-    borderTop: `1px solid ${s.color || '#e5e7eb'}`,
+    borderTop: `1px solid ${s.color || 'var(--border-light)'}`,
     margin: (s as any).margin || '8px 0',
   } as any
 })
@@ -373,7 +374,7 @@ const shapeStyle = computed(() => {
   const s = props.element.style || {}
   const l = props.element.layout || {}
   return {
-    background: s.background || '#3b82f6',
+    background: s.background || 'var(--primary-500)',
     width: `${l.width || 100}px`,
     height: `${l.height || 100}px`,
     borderRadius: s.borderRadius ? `${s.borderRadius}px` : '0',
@@ -383,18 +384,18 @@ const shapeStyle = computed(() => {
 const iconStyle = computed(() => {
   const s = props.element.style || {}
   return {
-    fontSize: s.fontSize ? `${s.fontSize}px` : '16px',
+    fontSize: s.fontSize ? `${s.fontSize}px` : 'var(--font-size-lg)',
     color: s.color || undefined,
   }
 })
 
 const placeholderStyle = computed(() => {
   return {
-    border: '2px dashed #d1d5db',
+    border: '2px dashed var(--border-color)',
     borderRadius: '8px',
     padding: '20px',
     textAlign: 'center' as const,
-    color: '#9ca3af',
+    color: 'var(--text-muted)',
   }
 })
 
@@ -629,12 +630,12 @@ function onItemInput(_e: InputEvent) {
 }
 
 .render-node:hover {
-  outline: 1px dashed #94a3b8;
+  outline: 1px dashed var(--text-muted);
   outline-offset: 2px;
 }
 
 .render-node.is-selected {
-  outline: 2px solid var(--accent-color, #3b82f6);
+  outline: 2px solid var(--accent-color, #6366f1);
   outline-offset: 2px;
 }
 
@@ -646,7 +647,7 @@ function onItemInput(_e: InputEvent) {
 
 .node-text-content:empty::before {
   content: attr(data-placeholder);
-  color: #9ca3af;
+  color: var(--text-muted);
   pointer-events: none;
 }
 
@@ -657,7 +658,7 @@ function onItemInput(_e: InputEvent) {
 
 .node-divider {
   border: none;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-light);
   margin: 8px 0;
 }
 
@@ -670,14 +671,16 @@ function onItemInput(_e: InputEvent) {
   margin-bottom: 0;
 }
 
-/* Module title styling */
+/* Module title styling — 与全局 .a4-canvas .module-title 保持一致 */
 .module-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--primary-color, #333333);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--primary-600);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
   margin: 0 0 8px 0;
   padding-bottom: 4px;
-  border-bottom: 2px solid var(--accent-color, #3498DB);
+  border-bottom: 2px solid var(--primary-600);
   min-height: 1em;
 }
 
@@ -691,7 +694,7 @@ function onItemInput(_e: InputEvent) {
 /* Each module item row - consistent spacing */
 .module-item-row {
   padding: 0;
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
 }
 
 /* Item header layout (title + date) */
@@ -706,21 +709,22 @@ function onItemInput(_e: InputEvent) {
 
 .item-title {
   font-weight: 600;
-  color: var(--text-primary, #333333);
-  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
 }
 
 .item-date {
-  color: var(--text-secondary, #7F8C8D);
-  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
   white-space: nowrap;
 }
 
-/* Description text */
+/* Description text — 与全局 .a4-canvas .item-desc 保持一致 */
 .item-desc {
-  color: var(--text-secondary, #5a6c7d);
-  font-size: 0.9rem;
-  line-height: 1.7;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
 }
 .item-desc :deep(ul),
 .item-desc :deep(ol) {
@@ -729,32 +733,32 @@ function onItemInput(_e: InputEvent) {
 }
 .item-desc :deep(li) {
   margin-bottom: 3px;
-  line-height: 1.7;
+  line-height: var(--line-height-relaxed);
 }
 .item-desc :deep(li:last-child) {
   margin-bottom: 0;
 }
 .item-desc :deep(ul > li)::marker {
-  color: var(--primary-color, #4f46e5);
+  color: var(--primary-500);
 }
 .item-desc :deep(ol > li)::marker {
-  color: var(--primary-color, #4f46e5);
+  color: var(--primary-500);
   font-weight: 600;
 }
 
 .item-desc :deep(strong) {
-  color: var(--text-primary, #333333);
+  color: var(--text-primary);
   font-weight: 600;
 }
 .item-desc :deep(p) {
   margin: 4px 0 8px;
-  line-height: 1.7;
+  line-height: var(--line-height-relaxed);
 }
 
-/* Link styling */
+/* Link styling — 与全局 .a4-canvas .item-link 保持一致 */
 .item-link {
-  color: var(--accent-color, #3498DB);
-  font-size: 0.85rem;
+  color: var(--primary-500);
+  font-size: var(--font-size-sm);
   text-decoration: none;
   word-break: break-all;
 }
@@ -769,27 +773,29 @@ function onItemInput(_e: InputEvent) {
 }
 
 .personal-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary-color, #333333);
+  font-size: var(--font-size-4xl);
+  font-weight: 800;
+  color: var(--primary-700);
+  line-height: var(--line-height-tight);
   margin-bottom: var(--space-1);
+  letter-spacing: -0.5px;
 }
 
 .personal-meta {
-  color: var(--text-secondary, #7F8C8D);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
   margin-bottom: var(--space-1);
 }
 
 .meta-sep {
   margin: 0 8px;
-  color: var(--border-color, #E1E8ED);
+  color: var(--border-color);
 }
 
 .personal-summary {
-  color: var(--text-secondary, #5a6c7d);
-  font-size: 0.9rem;
-  line-height: 1.7;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
   text-align: left;
   margin-top: var(--space-2);
 }
@@ -816,21 +822,21 @@ function onItemInput(_e: InputEvent) {
 }
 
 .skill-compact {
-  font-size: 0.9rem;
-  color: var(--text-secondary, #5a6c7d);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
   padding: 2px 0;
 }
 
 /* Skill list mode (类别：关键词) */
 .skill-list-row {
-  font-size: 0.85rem;
-  line-height: 1.7;
-  color: var(--text-secondary, #5a6c7d);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
   margin-bottom: 3px;
 }
 
 .skill-list-row strong {
-  color: var(--text-primary, #333333);
+  color: var(--text-primary);
   font-weight: 600;
 }
 .skill-list-row :deep(ol),
@@ -840,13 +846,13 @@ function onItemInput(_e: InputEvent) {
 }
 .skill-list-row :deep(li) {
   margin-bottom: 2px;
-  line-height: 1.7;
+  line-height: var(--line-height-relaxed);
 }
 .skill-list-row :deep(li:last-child) {
   margin-bottom: 0;
 }
 .skill-list-row :deep(ol > li)::marker {
-  color: var(--primary-color, #4f46e5);
+  color: var(--primary-500);
   font-weight: 600;
 }
 .skill-list-row :deep(p) {
@@ -855,14 +861,14 @@ function onItemInput(_e: InputEvent) {
 
 /* Strength module (能力标签：量化事实) */
 .strength-row {
-  font-size: 0.85rem;
-  line-height: 1.7;
-  color: var(--text-secondary, #5a6c7d);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
   margin-bottom: 3px;
 }
 
 .strength-row strong {
-  color: var(--text-primary, #333333);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -873,15 +879,15 @@ function onItemInput(_e: InputEvent) {
 
 .custom-title {
   font-weight: 600;
-  color: var(--text-primary, #333333);
+  color: var(--text-primary);
   margin-bottom: 4px;
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
 }
 
 /* Fallback */
 .item-fallback {
-  color: var(--text-secondary, #5a6c7d);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .node-image {
@@ -890,11 +896,11 @@ function onItemInput(_e: InputEvent) {
 }
 
 .node-image-placeholder {
-  border: 2px dashed #d1d5db;
+  border: 2px dashed var(--border-color);
   border-radius: 8px;
   padding: 20px;
   text-align: center;
-  color: #9ca3af;
+  color: var(--text-muted);
   cursor: pointer;
 }
 
@@ -909,21 +915,21 @@ function onItemInput(_e: InputEvent) {
 /* Item element (child of module) */
 .node-item {
   padding: 2px 0;
-  line-height: 1.7;
+  line-height: var(--line-height-relaxed);
 }
 
 .node-item .item-html-content.editing,
 .node-item .item-text-content.editing {
-  outline: 2px solid var(--accent-color, #3b82f6);
+  outline: 2px solid var(--accent-color, #6366f1);
   outline-offset: 1px;
   border-radius: 2px;
   cursor: text;
 }
 
 .item-html-content {
-  font-size: 0.9rem;
-  color: var(--text-secondary, #5a6c7d);
-  line-height: 1.7;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
   cursor: pointer;
 }
 
@@ -937,23 +943,23 @@ function onItemInput(_e: InputEvent) {
 }
 
 .item-html-content :deep(strong) {
-  color: var(--text-primary, #333333);
+  color: var(--text-primary);
 }
 
 .item-text-content {
-  font-size: 0.9rem;
-  color: var(--text-secondary, #5a6c7d);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
 }
 
 /* Skill bar element */
 .node-skill-bar {
-  font-size: 0.9rem;
-  color: var(--text-secondary, #5a6c7d);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
   padding: 2px 0;
 }
 
 .node-skill-bar .skill-bar-name.editing {
-  outline: 2px solid var(--accent-color, #3b82f6);
+  outline: 2px solid var(--accent-color, #6366f1);
   outline-offset: 1px;
   border-radius: 2px;
   cursor: text;
@@ -965,8 +971,8 @@ function onItemInput(_e: InputEvent) {
 
 /* Fallback for unhandled types */
 .node-fallback {
-  font-size: 0.9rem;
-  color: var(--text-secondary, #5a6c7d);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
   padding: 2px 0;
   min-height: 1em;
 }
@@ -981,7 +987,7 @@ function onItemInput(_e: InputEvent) {
   position: absolute;
   width: 8px;
   height: 8px;
-  background-color: var(--accent-color, #3b82f6);
+  background-color: var(--accent-color, #6366f1);
   border: 1px solid white;
   border-radius: 1px;
 }
