@@ -46,16 +46,17 @@
 
 <script setup lang="ts">
 import { useResumeStore } from '../stores/resume'
+import { showAlert } from '../utils/confirm'
 
 const store = useResumeStore()
 
-function onFileChange(e: Event) {
+async function onFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
 
   // Validate size (max 2MB)
   if (file.size > 2 * 1024 * 1024) {
-    alert('图片大小不能超过 2MB')
+    await showAlert({ title: '图片过大', description: '图片大小不能超过 2MB。' })
     return
   }
 

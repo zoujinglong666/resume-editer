@@ -62,6 +62,7 @@ import type { ResumeTemplate } from '../types'
 import { useResumeStore } from '../stores/resume'
 import { INDUSTY_TEMPLATES, type BuiltInTemplate } from '../templates/industryTemplates'
 import TemplatePreviewDialog from './TemplatePreviewDialog.vue'
+import { showConfirm } from '../utils/confirm'
 
 defineProps<{ open: boolean }>()
 const emit = defineEmits<{ (e: 'update:open', value: boolean): void }>()
@@ -100,8 +101,12 @@ function applyPreview() {
   }
 }
 
-function useTemplate(tpl: BuiltInTemplate) {
-  if (confirm(`使用「${tpl.name}」模板将替换当前简历内容，确定继续？`)) {
+async function useTemplate(tpl: BuiltInTemplate) {
+  const ok = await showConfirm({
+    title: '使用模板',
+    description: `使用「${tpl.name}」模板将替换当前简历内容，确定继续？`,
+  })
+  if (ok) {
     store.importData(tpl.data)
     emit('update:open', false)
   }

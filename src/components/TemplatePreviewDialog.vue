@@ -156,6 +156,7 @@
 import { computed } from 'vue'
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from 'reka-ui'
 import type { ResumeTemplate, ModuleType } from '../types'
+import { showConfirm } from '../utils/confirm'
 
 const props = defineProps<{ template: ResumeTemplate; open: boolean }>()
 const emit = defineEmits<{
@@ -167,10 +168,12 @@ const sortedModules = computed(() => {
   return [...(props.template.data.modules || [])].sort((a, b) => a.order - b.order)
 })
 
-function handleLoad() {
-  if (confirm('加载此模板将覆盖当前内容，确定继续？')) {
-    emit('load')
-  }
+async function handleLoad() {
+  const ok = await showConfirm({
+    title: '加载模板',
+    description: '加载此模板将覆盖当前内容，确定继续？',
+  })
+  if (ok) emit('load')
 }
 
 function formatDate(iso: string): string {

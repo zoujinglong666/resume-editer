@@ -133,6 +133,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useResumeStore } from '../../stores/resume'
+import { showAlert } from '../../utils/confirm'
 import type { ResumeModule, ModuleItem, PersonalFieldConfig } from '../../types'
 import {
   Phone, Mail, MapPin, Globe, Link, Briefcase, User, MessageCircle,
@@ -233,11 +234,11 @@ function onPaste(e: ClipboardEvent) {
   document.execCommand('insertText', false, text)
 }
 
-function onAvatarChange(e: Event) {
+async function onAvatarChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
   if (file.size > 2 * 1024 * 1024) {
-    alert('图片大小不能超过 2MB')
+    await showAlert({ title: '图片过大', description: '图片大小不能超过 2MB。' })
     return
   }
   const reader = new FileReader()

@@ -52,6 +52,7 @@ import StatusBar from './components/StatusBar.vue'
 import ResumePreviewDialog from './components/ResumePreviewDialog.vue'
 import FloatingToolbar from './components/FloatingToolbar.vue'
 import { generatePreviewHtml, exportResumeImage } from './utils/previewPdf'
+import { showAlert, showConfirm } from './utils/confirm'
 
 const store = useResumeStore()
 const showPreview = ref(false)
@@ -114,12 +115,14 @@ function onFileSelected(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
   const reader = new FileReader()
-  reader.onload = () => {
+  reader.onload = async () => {
     try {
       const data = JSON.parse(reader.result as string)
       store.importData(data)
-      alert('导入成功！')
-    } catch { alert('文件格式错误，请选择有效的 JSON 文件') }
+      await showAlert({ title: '导入成功', description: '简历数据已成功导入。' })
+    } catch {
+      await showAlert({ title: '导入失败', description: '文件格式错误，请选择有效的 JSON 文件。' })
+    }
   }
   reader.readAsText(file)
   if (fileInputRef.value) fileInputRef.value.value = ''
@@ -136,10 +139,12 @@ function handleExport() {
   URL.revokeObjectURL(url)
 }
 
-function handleReset() {
-  if (confirm('确定要重置所有内容吗？此操作不可撤销。')) {
-    store.resetToDefault()
-  }
+async function handleReset() {
+  const ok = await showConfirm({
+    title: '重置内容',
+    description: '确定要重置所有内容吗？此操作不可撤销。',
+  })
+  if (ok) store.resetToDefault()
 }
 
 const isQuickExporting = ref(false)
@@ -167,7 +172,7 @@ async function handleExportImage() {
     })
   } catch (err) {
     console.error('导出图片失败', err)
-    alert('导出图片失败，请重试')
+    await showAlert({ title: '导出失败', description: '导出图片失败，请重试。' })
   } finally {
     isExportingImage.value = false
   }

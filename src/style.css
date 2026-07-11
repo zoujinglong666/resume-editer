@@ -4413,6 +4413,86 @@ html { scroll-behavior: smooth; }
   to { opacity: 1; transform: translate(-50%, -50%); }
 }
 
+/* ═══ Command-style confirm / alert / prompt (reka-ui AlertDialog) ═══ */
+.app-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 3000;
+  animation: fadeIn 0.18s ease;
+}
+.app-confirm-dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3001;
+  width: min(420px, 90vw);
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 14px;
+  padding: 22px 22px 18px;
+  box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.35);
+  animation: fadeIn 0.18s ease;
+}
+.app-confirm-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  margin: 0 0 8px;
+}
+.app-confirm-desc {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary, #475569);
+  margin: 0 0 16px;
+}
+.app-confirm-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: var(--text-primary, #1e293b);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
+  outline: none;
+  margin-bottom: 16px;
+}
+.app-confirm-input:focus {
+  border-color: var(--primary-500, #6366f1);
+  box-shadow: 0 0 0 3px var(--primary-100, #e0e7ff);
+}
+.app-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.app-confirm-btn {
+  padding: 8px 18px;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.app-confirm-btn--ghost {
+  background: #fff;
+  border-color: var(--border-color, #e2e8f0);
+  color: var(--text-secondary, #475569);
+}
+.app-confirm-btn--ghost:hover {
+  background: #f1f5f9;
+}
+.app-confirm-btn--primary {
+  background: var(--primary-600, #4f46e5);
+  color: #fff;
+}
+.app-confirm-btn--primary:hover {
+  background: var(--primary-500, #6366f1);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Vector PDF Export (browser native print → "Save as PDF")
    文字由浏览器直接写成矢量，放大不模糊；长内容自动分页。

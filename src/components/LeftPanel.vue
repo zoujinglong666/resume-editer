@@ -240,6 +240,7 @@ import type { ResumeTemplate, ResumeVersion } from '../types'
 import TemplatePreviewDialog from './TemplatePreviewDialog.vue'
 import TemplateCompareDialog from './TemplateCompareDialog.vue'
 import { exportResumeHtml, exportResumeWord, exportResumeMarkdown } from '../utils/exportResume'
+import { showPrompt } from '../utils/confirm'
 
 const store = useResumeStore()
 const themes = THEME_PRESETS
@@ -266,8 +267,12 @@ function handleSaveVersion() {
   newVersionName.value = ''
 }
 
-function handleRenameVersion(ver: ResumeVersion) {
-  const name = prompt('重命名版本', ver.name)
+async function handleRenameVersion(ver: ResumeVersion) {
+  const name = await showPrompt({
+    title: '重命名版本',
+    description: '输入新的版本名称',
+    defaultValue: ver.name,
+  })
   if (name != null) store.renameVersion(ver.id, name)
 }
 

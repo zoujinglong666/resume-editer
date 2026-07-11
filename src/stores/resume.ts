@@ -5,6 +5,7 @@ import type {
   ResumeDocument, ResumePage, ResumeElement, ElementType, ResumeTemplate, ResumeVersion, PersonalFieldConfig,
 } from '../types'
 import { migrateResumeDataToDocument } from '../types'
+import { showConfirm } from '../utils/confirm'
 
 // ===== Helper: generate UUID =====
 function uuid(): string {
@@ -843,8 +844,12 @@ export const useResumeStore = defineStore('resume', () => {
     mod.items[targetIdx] = temp
   }
 
-  function removeModule(moduleId: string) {
-    if (!confirm('确定要删除整个模块吗？此操作不可撤销。')) return
+  async function removeModule(moduleId: string) {
+    const ok = await showConfirm({
+      title: '删除模块',
+      description: '确定要删除整个模块吗？此操作不可撤销。',
+    })
+    if (!ok) return
     modules.value = modules.value.filter(m => m.id !== moduleId)
     if (selectedModuleId.value === moduleId) selectedModuleId.value = null
   }
