@@ -562,7 +562,8 @@ export const useResumeStore = defineStore('resume', () => {
   // ---- State ----
   const config = ref<ResumeConfig>({
     theme: 'default', primaryColor: '#2D5F7C', fontFamily: 'system-ui, -apple-system, sans-serif',
-    fontSize: 14, lineHeight: 1.6, pageMargin: 20, titleStyle: 'underline'
+    fontSize: 14, lineHeight: 1.6, pageMargin: 20, titleStyle: 'underline',
+    moduleGap: 16, itemGap: 8, underlineWidth: 2
   })
   const avatar = ref<AvatarConfig>({ url: '', shape: 'circle' })
   const modules = ref<ResumeModule[]>(createDefaultModules())
@@ -579,6 +580,7 @@ export const useResumeStore = defineStore('resume', () => {
   const docRef = ref<ResumeDocument | null>(null)
   const useNewModel = ref(false)
   const selectedElementId = ref<string | null>(null)
+  const recycleBin = ref<ResumeElement[]>([])
 
   // ---- Templates ----
   const templates = ref<ResumeTemplate[]>([])
@@ -980,6 +982,15 @@ export const useResumeStore = defineStore('resume', () => {
     useNewModel.value = true
   }
 
+  function toggleModel() {
+    if (useNewModel.value) {
+      useNewModel.value = false
+    } else {
+      if (!docRef.value) migrateToNewModel()
+      else useNewModel.value = true
+    }
+  }
+
   function addElement(type: ElementType, parentId?: string | null, props?: Partial<ResumeElement>) {
     if (!docRef.value) return
     const page = docRef.value.pages[0]
@@ -1195,7 +1206,7 @@ export const useResumeStore = defineStore('resume', () => {
   return {
     // Phase 1 新文档模型状态
     config, avatar, modules, lastSaved,
-    docRef, useNewModel, selectedElementId,
+    docRef, useNewModel, selectedElementId, recycleBin,
     selectedModuleId, currentPhase, saveStatus,
     selectedModule,
     // Phase 1 新 computed
@@ -1211,7 +1222,7 @@ export const useResumeStore = defineStore('resume', () => {
     undo, redo,
     exportData, importData, resetToDefault,
     // Phase 1 新 actions
-    initDocument, migrateToNewModel, addElement, updateElement, removeElement, selectElement,
+    initDocument, migrateToNewModel, toggleModel, addElement, updateElement, removeElement, selectElement,
     // Template actions
     templates, saveAsTemplate, deleteTemplate, loadTemplate, loadDefaultTemplate,
     // Resume version actions

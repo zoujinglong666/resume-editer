@@ -50,6 +50,9 @@ function buildData(input: TplInput, color: string, config: Partial<ResumeConfig>
     lineHeight: config.lineHeight ?? 1.6,
     pageMargin: config.pageMargin ?? 20,
     titleStyle: (config.titleStyle ?? 'underline') as ResumeConfig['titleStyle'],
+    moduleGap: config.moduleGap ?? 16,
+    itemGap: config.itemGap ?? 8,
+    underlineWidth: config.underlineWidth ?? 2,
   }
   const modules: ResumeModule[] = [
     {
