@@ -95,10 +95,10 @@ export function renderItemHtml(type: string, item: any): string {
     }
     case 'education': {
       let h = '<div class="preview-item">'
-      h += `<div class="preview-item-header">`
-      h += `<span class="preview-item-title">${item.school || ''}</span>`
-      if (item.dateRange) h += `<span class="preview-item-date">${item.dateRange}</span>`
-      h += `</div>`
+      h += `<table class="preview-item-header"><tr>`
+      h += `<td class="preview-item-title">${item.school || ''}</td>`
+      if (item.dateRange) h += `<td class="preview-item-date">${item.dateRange}</td>`
+      h += `</tr></table>`
       const sub = [item.degree, item.major].filter(Boolean).join(' · ')
       const descLine = flattenDescToLine(item.description || '')
       const meta = [sub, descLine].filter(Boolean).join(' | ')
@@ -107,20 +107,20 @@ export function renderItemHtml(type: string, item: any): string {
     }
     case 'experience': {
       let h = '<div class="preview-item">'
-      h += `<div class="preview-item-header">`
-      h += `<span class="preview-item-title">${item.company || ''}</span>`
-      if (item.dateRange) h += `<span class="preview-item-date">${item.dateRange}</span>`
-      h += `</div>`
+      h += `<table class="preview-item-header"><tr>`
+      h += `<td class="preview-item-title">${item.company || ''}</td>`
+      if (item.dateRange) h += `<td class="preview-item-date">${item.dateRange}</td>`
+      h += `</tr></table>`
       if (item.position) h += `<div class="preview-item-sub">${item.position}</div>`
       if (item.description) h += `<div class="preview-item-desc">${formatDesc(item.description)}</div>`
       return h + '</div>'
     }
     case 'project': {
       let h = '<div class="preview-item">'
-      h += `<div class="preview-item-header">`
-      h += `<span class="preview-item-title">${item.name || ''}</span>`
-      if (item.dateRange) h += `<span class="preview-item-date">${item.dateRange}</span>`
-      h += `</div>`
+      h += `<table class="preview-item-header"><tr>`
+      h += `<td class="preview-item-title">${item.name || ''}</td>`
+      if (item.dateRange) h += `<td class="preview-item-date">${item.dateRange}</td>`
+      h += `</tr></table>`
       if (item.role) h += `<div class="preview-item-sub">${item.role}</div>`
       if (item.description) h += `<div class="preview-item-desc">${formatDesc(item.description)}</div>`
       if (item.link) h += `<div class="preview-item-link">🔗 ${item.link}</div>`

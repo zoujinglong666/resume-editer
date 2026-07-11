@@ -164,11 +164,13 @@ body { margin:0; background:#eef2f7; padding:24px 0; font-family:${cfg.fontFamil
 
 /* 条目 */
 .preview-item { margin-bottom:10px; }
-.preview-item-header { display:flex; justify-content:space-between; align-items:baseline; }
+.preview-item-header { width:100%; border-collapse:collapse; }
 .preview-item-title { font-size:14px; font-weight:600; color:#1e293b; }
-.preview-item-date { font-size:12px; color:#8a9099; flex-shrink:0; }
+.preview-item-header .preview-item-title { text-align:left; vertical-align:baseline; }
+.preview-item-date { font-size:12px; color:#8a9099; }
+.preview-item-header .preview-item-date { text-align:right; white-space:nowrap; vertical-align:baseline; }
 .preview-item-sub { font-size:13px; color:#64748b; margin-top:2px; }
-.preview-item-sub.edu-meta { white-space:nowrap; }
+.preview-item-sub.edu-meta { white-space:normal; line-height:1.6; word-break:break-word; overflow-wrap:break-word; }
 .preview-item-desc { font-size:13px; color:#64748b; margin-top:4px; line-height:1.6; }
 .preview-item-desc ul, .preview-item-desc ol { margin:4px 0; padding-left:1.4em; }
 .preview-item-desc li { margin-bottom:3px; line-height:1.6; }
@@ -177,6 +179,43 @@ body { margin:0; background:#eef2f7; padding:24px 0; font-family:${cfg.fontFamil
 .preview-item-desc ol > li::marker { color:var(--pc); font-weight:600; }
 .preview-item-desc p { margin:4px 0 8px; line-height:1.6; }
 .preview-item-link { font-size:12px; color:var(--pc); margin-top:4px; }
+.preview-skill-name { font-size:13px; font-weight:500; color:#1e293b; }
+.preview-skill-sep { font-size:13px; color:#1e293b; }
+.preview-skill-content { font-size:13px; color:#64748b; }
+.preview-skill-level { font-size:13px; color:#64748b; }
+`
+}
+
+// ——— Word 专用兼容样式表（不使用 CSS 变量/渐变/flex/伪元素，标题统一实色下划线） ———
+function buildWordCss(cfg: ExportConfig): string {
+  const pc = cfg.primaryColor || '#2D5F7C'
+  return `
+* { box-sizing: border-box; }
+body { margin:0; font-family:${cfg.fontFamily}; }
+.resume-doc { width:100%; background:#fff; padding:${cfg.pageMargin}px; color:#1e293b; font-size:${cfg.fontSize}px; line-height:${cfg.lineHeight}; }
+.module { margin-bottom:20px; }
+.module:last-child { margin-bottom:0; }
+.preview-module-title { font-size:16px; font-weight:700; color:${pc}; margin:0 0 12px; padding-bottom:6px; border-bottom:1.5px solid ${pc}; }
+.preview-name-row { margin-bottom:6px; }
+.preview-personal-avatar { margin-bottom:8px; }
+.preview-personal-avatar img { display:block; }
+.preview-name { font-size:22px; font-weight:700; color:#1e293b; margin-bottom:2px; }
+.preview-position { font-size:14px; color:#64748b; margin-bottom:6px; }
+.preview-contacts { font-size:13px; color:#64748b; margin-bottom:8px; }
+.preview-summary { font-size:13px; color:#64748b; line-height:1.6; }
+.preview-item { margin-bottom:10px; }
+.preview-item-header { width:100%; border-collapse:collapse; }
+.preview-item-title { font-size:14px; font-weight:600; color:#1e293b; }
+.preview-item-header .preview-item-title { text-align:left; vertical-align:baseline; }
+.preview-item-date { font-size:12px; color:#8a9099; }
+.preview-item-header .preview-item-date { text-align:right; white-space:nowrap; vertical-align:baseline; }
+.preview-item-sub { font-size:13px; color:#64748b; margin-top:2px; }
+.preview-item-sub.edu-meta { white-space:normal; line-height:1.6; word-break:break-word; overflow-wrap:break-word; }
+.preview-item-desc { font-size:13px; color:#64748b; margin-top:4px; line-height:1.6; }
+.preview-item-desc ul, .preview-item-desc ol { margin:4px 0; padding-left:1.4em; }
+.preview-item-desc li { margin-bottom:3px; line-height:1.6; }
+.preview-item-desc p { margin:4px 0 8px; line-height:1.6; }
+.preview-item-link { font-size:12px; color:${pc}; margin-top:4px; }
 .preview-skill-name { font-size:13px; font-weight:500; color:#1e293b; }
 .preview-skill-sep { font-size:13px; color:#1e293b; }
 .preview-skill-content { font-size:13px; color:#64748b; }
@@ -300,7 +339,7 @@ export function exportResumeWord(
   cfg: ExportConfig,
 ): void {
   const body = buildBodyHtml(modules, avatar, cfg)
-  const css = buildCss(cfg)
+  const css = buildWordCss(cfg)
   const html = `<!DOCTYPE html>
 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
 <head>

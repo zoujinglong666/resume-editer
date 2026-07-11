@@ -68,6 +68,18 @@ function createDefaultPersonalFields(): PersonalFieldConfig[] {
 // Bump this when updating default template content format
 const CURRENT_CONTENT_VERSION = 2
 
+// 安全序列化：避免循环引用导致 persist 静默失败（默认 debug=false 时错误会被吞掉）
+function getCircularReplacer() {
+  const seen = new WeakSet()
+  return (_key: string, value: any) => {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) return undefined
+      seen.add(value)
+    }
+    return value
+  }
+}
+
 // ===== Shared Default Resume Data =====
 // Single source of truth for default template content
 // Organized following the "codefather" resume structure:
@@ -1213,14 +1225,24 @@ export const useResumeStore = defineStore('resume', () => {
   persist: {
     key: 'resume-editor-data',
     storage: localStorage,
+    debug: true,
+    serializer: {
+      serialize: (data: any) => JSON.stringify(data, getCircularReplacer()),
+      deserialize: (data: string) => {
+        try { return JSON.parse(data) } catch { return {} }
+      },
+    },
     pick: ['config', 'avatar', 'modules', 'lastSaved', 'selectedModuleId', 'currentPhase', 'docRef', 'useNewModel', 'selectedElementId', 'templates', 'contentVersion', 'versions', 'activeVersionId'],
     afterHydrate: (ctx: any) => {
-      // Migrate old persisted data to new content format
+      // 迁移旧数据：保留用户已有内容，仅在为空时补默认，并升级版本号
       const version = ctx.store.contentVersion ?? 0
       if (version < CURRENT_CONTENT_VERSION) {
-        const freshModules = createDefaultModules()
-        ctx.store.modules = freshModules
+        if (!ctx.store.modules || ctx.store.modules.length === 0) {
+          ctx.store.modules = createDefaultModules()
+        }
         ctx.store.contentVersion = CURRENT_CONTENT_VERSION
+        // 立即落盘，避免下次刷新因 contentVersion 未持久化而再次触发重置
+        ctx.store.$persist()
       }
     }
   }

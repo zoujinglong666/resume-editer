@@ -237,6 +237,54 @@
           </div>
           <div
             class="export-option-card"
+            :class="{ active: hoverExportCard === 'html' }"
+            @click="onExportHtml"
+            @mouseenter="hoverExportCard = 'html'"
+            @mouseleave="hoverExportCard = null"
+          >
+            <div class="export-option-icon html">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <div class="export-option-body">
+              <div class="export-option-title">HTML 格式</div>
+              <div class="export-option-desc">网页版简历，可二次编辑或发布</div>
+            </div>
+            <svg class="export-option-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div
+            class="export-option-card"
+            :class="{ active: hoverExportCard === 'word' }"
+            @click="onExportWord"
+            @mouseenter="hoverExportCard = 'word'"
+            @mouseleave="hoverExportCard = null"
+          >
+            <div class="export-option-icon word">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+            </div>
+            <div class="export-option-body">
+              <div class="export-option-title">Word 格式</div>
+              <div class="export-option-desc">.docx 文档，适合招聘系统上传</div>
+            </div>
+            <svg class="export-option-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div
+            class="export-option-card"
+            :class="{ active: hoverExportCard === 'md' }"
+            @click="onExportMarkdown"
+            @mouseenter="hoverExportCard = 'md'"
+            @mouseleave="hoverExportCard = null"
+          >
+            <div class="export-option-icon markdown">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M8 13h2l1 3 1-6 1 3h2"/></svg>
+            </div>
+            <div class="export-option-body">
+              <div class="export-option-title">Markdown 格式</div>
+              <div class="export-option-desc">纯文本，便于粘贴到各类平台</div>
+            </div>
+            <svg class="export-option-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <div
+            class="export-option-card"
             :class="{ active: hoverExportCard === 'json' }"
             @click="$emit('export-json')"
             @mouseenter="hoverExportCard = 'json'"
@@ -251,6 +299,25 @@
             </div>
             <svg class="export-option-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
+        </div>
+      </div>
+
+      <div class="panel-section" style="border-bottom: none;">
+        <div class="panel-section-title">保存快照</div>
+        <div style="display: flex; flex-direction: column; gap: var(--tight-gap);">
+          <input
+            v-model="snapshotName"
+            type="text"
+            placeholder="给当前简历起个名，如：字节内推"
+            class="flex-1 text-sm border border-[var(--border-color)] rounded-md"
+            style="padding: var(--space-1_5) var(--space-2); background: rgba(255,255,255,0.04); color: var(--sidebar-text);"
+            @keydown.enter="handleSaveSnapshot"
+          />
+          <button
+            class="rounded-md text-sm text-white hover:opacity-90 transition-all"
+            style="padding: var(--space-1_5) var(--space-2); background: var(--primary-color);"
+            @click="handleSaveSnapshot"
+          >保存为快照</button>
         </div>
       </div>
 
@@ -291,6 +358,7 @@ import AvatarUpload from './AvatarUpload.vue'
 import ProgressRing from './ProgressRing.vue'
 import FontTestDialog from './FontTestDialog.vue'
 import TemplateGalleryDialog from './TemplateGalleryDialog.vue'
+import { exportToMarkdown, exportToHtml, exportToDocx } from '../utils/exportFormats'
 
 const store = useResumeStore()
 const themes = THEME_PRESETS
@@ -298,6 +366,56 @@ const fonts = FONT_PRESETS
 const hoverExportCard = ref<string | null>(null)
 const fontTestOpen = ref(false)
 const templateGalleryOpen = ref(false)
+const snapshotName = ref('')
+
+// 触发浏览器下载
+function download(content: string, name: string, mime: string) {
+  const blob = new Blob([content], { type: `${mime};charset=utf-8` })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = name
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+function fileName(prefix: string): string {
+  const d = new Date()
+  const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  return `${prefix}-${ymd}`
+}
+
+function onExportHtml() {
+  const html = exportToHtml(store.modules, store.config)
+  download(html, `${fileName('简历')}.html`, 'text/html')
+}
+function onExportWord() {
+  exportToDocx(store.modules, store.config).then((blob) => {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${fileName('简历')}.docx`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  })
+}
+function onExportMarkdown() {
+  const md = exportToMarkdown(store.modules)
+  download(md, `${fileName('简历')}.md`, 'text/markdown')
+}
+function handleSaveSnapshot() {
+  const name = snapshotName.value.trim()
+  if (!name) {
+    store.saveVersion(`快照 ${new Date().toLocaleString('zh-CN')}`)
+    return
+  }
+  store.saveVersion(name)
+  snapshotName.value = ''
+}
 
 // Font size quick presets
 const fontSizePresets = [12, 13, 14, 15, 16]

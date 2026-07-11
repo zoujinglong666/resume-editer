@@ -239,7 +239,7 @@ import { useResumeStore, THEME_PRESETS } from '../stores/resume'
 import type { ResumeTemplate, ResumeVersion } from '../types'
 import TemplatePreviewDialog from './TemplatePreviewDialog.vue'
 import TemplateCompareDialog from './TemplateCompareDialog.vue'
-import { exportResumeHtml, exportResumeWord, exportResumeMarkdown } from '../utils/exportResume'
+import { exportToMarkdown, exportToHtml, exportToDocx } from '../utils/exportFormats'
 import { showPrompt } from '../utils/confirm'
 
 const store = useResumeStore()
@@ -313,27 +313,44 @@ function updatePageMargin(val: number) {
   document.documentElement.style.setProperty('--page-margin', `${val}px`)
 }
 
-function exportConfig() {
-  const c = store.config
-  return {
-    fontFamily: c.fontFamily,
-    fontSize: c.fontSize,
-    lineHeight: c.lineHeight,
-    pageMargin: c.pageMargin,
-    primaryColor: c.primaryColor,
-    titleStyle: c.titleStyle || 'underline',
-  }
+function download(content: string, name: string, mime: string) {
+  const blob = new Blob([content], { type: `${mime};charset=utf-8` })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = name
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+function fileName(prefix: string): string {
+  const d = new Date()
+  const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  return `${prefix}-${ymd}`
 }
 
 function onExportHtml() {
-  exportResumeHtml(store.modules, store.avatar, exportConfig())
+  const html = exportToHtml(store.modules, store.config)
+  download(html, `${fileName('简历')}.html`, 'text/html')
 }
 
 function onExportWord() {
-  exportResumeWord(store.modules, store.avatar, exportConfig())
+  exportToDocx(store.modules, store.config).then((blob) => {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${fileName('简历')}.docx`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  })
 }
 
 function onExportMarkdown() {
-  exportResumeMarkdown(store.modules)
+  const md = exportToMarkdown(store.modules)
+  download(md, `${fileName('简历')}.md`, 'text/markdown')
 }
 </script>

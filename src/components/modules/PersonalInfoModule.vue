@@ -298,9 +298,7 @@ function removeAvatar() {
   color: var(--text-secondary);
   margin-bottom: 12px;
   padding: var(--editor-personal-row-py) var(--editor-personal-row-px);
-  background: rgba(99, 102, 241, 0.03);
   border-radius: var(--editor-card-br);
-  border: 1px solid var(--border-light);
 }
 
 .personal-info-item {
@@ -397,8 +395,6 @@ function removeAvatar() {
   margin-top: 8px;
   padding: 6px 8px;
   border-radius: 6px;
-  background: rgba(99, 102, 241, 0.02);
-  border: 1px solid var(--border-light);
   transition: all 0.2s ease;
   outline: none;
 }
