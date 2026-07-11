@@ -1,5 +1,11 @@
 <template>
   <div class="app-sidebar no-print">
+    <!-- Template Gallery Entry (persistent) -->
+    <button class="template-gallery-trigger" @click="templateGalleryOpen = true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      模板库 · 各行业专业简历
+    </button>
+
     <!-- Phase 1: Fill mode -->
     <template v-if="store.currentPhase === 'fill'">
       <div class="panel-section">
@@ -121,15 +127,17 @@
               @change="updateFontFamily(($event.target as HTMLSelectElement).value)"
               class="sidebar-select"
             >
-              <option value="system-ui, -apple-system, sans-serif">系统默认</option>
-              <option value="'SimSun', 'Songti SC', serif">宋体</option>
-              <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
-              <option value="'PingFang SC', sans-serif">苹方</option>
-              <option value="Georgia, serif">Georgia</option>
+              <option v-for="f in fonts" :key="f.value" :value="f.value">{{ f.name }}</option>
             </select>
             <svg class="sidebar-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
         </label>
+
+        <!-- Font Test Entry -->
+        <button class="font-test-trigger" @click="fontTestOpen = true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+          字体测试对比
+        </button>
 
         <!-- Font Size with Quick Presets -->
         <div class="font-control-group">
@@ -268,17 +276,28 @@
       </div>
     </template>
   </div>
+
+  <!-- Font Test Dialog -->
+  <FontTestDialog v-model:open="fontTestOpen" />
+
+  <!-- Template Gallery Dialog -->
+  <TemplateGalleryDialog v-model:open="templateGalleryOpen" />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useResumeStore, THEME_PRESETS } from '../stores/resume'
+import { useResumeStore, THEME_PRESETS, FONT_PRESETS } from '../stores/resume'
 import AvatarUpload from './AvatarUpload.vue'
 import ProgressRing from './ProgressRing.vue'
+import FontTestDialog from './FontTestDialog.vue'
+import TemplateGalleryDialog from './TemplateGalleryDialog.vue'
 
 const store = useResumeStore()
 const themes = THEME_PRESETS
+const fonts = FONT_PRESETS
 const hoverExportCard = ref<string | null>(null)
+const fontTestOpen = ref(false)
+const templateGalleryOpen = ref(false)
 
 // Font size quick presets
 const fontSizePresets = [12, 13, 14, 15, 16]
@@ -308,6 +327,16 @@ const titleStyles = [
   { id: 'grad-pill', name: '渐变胶囊' },
   { id: 'grad-shadow', name: '阴影' },
   { id: 'grad-fade', name: '渐变字' },
+  { id: 'thin-underline', name: '细下划线' },
+  { id: 'thin-double', name: '细双线' },
+  { id: 'thin-leftbar', name: '细左条' },
+  { id: 'thin-overline', name: '细顶线' },
+  { id: 'thin-box', name: '细框' },
+  { id: 'thin-framed', name: '细卡框' },
+  { id: 'thin-corner', name: '细直角' },
+  { id: 'thin-bracket', name: '细竖框' },
+  { id: 'thin-center', name: '居中细线' },
+  { id: 'thin-underline-soft', name: '淡细线' },
 ]
 
 defineEmits(['export-pdf', 'export-json', 'import-json'])
@@ -321,8 +350,7 @@ function getBadgeClass(modId: string): string {
 }
 
 function updateFontFamily(val: string) {
-  store.config.fontFamily = val
-  document.documentElement.style.setProperty('--font-family', val)
+  store.setFontFamily(val)
 }
 function updateFontSize(val: number) {
   store.config.fontSize = val

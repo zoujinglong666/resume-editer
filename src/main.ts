@@ -14,7 +14,7 @@ app.use(pinia)
  * Format plain text to HTML: convert \n to <br>, detect numbered/bulleted lists.
  * If already contains HTML tags, returns as-is.
  */
-function formatTextForHtml(text: string): string {
+function formatTextForHtml(text: string, list?: 'ul' | 'ol'): string {
   if (!text) return ''
   // Already HTML? return as-is
   if (/<[a-z][\s\S]*>/i.test(text)) return text
@@ -23,6 +23,12 @@ function formatTextForHtml(text: string): string {
   if (lines.length >= 2) {
     const numberedRe = /^\s*[\(（]?\d{1,3}[\)）]?\s*[.、．。\)）]\s*/
     const bulletRe = /^\s*[•\-*·●◦▪▸►]\s*/
+    // 强制列表模式（如项目经历：多条内容统一以无序列表展示）
+    if (list) {
+      const strip = (l: string) => l.replace(numberedRe, '').replace(bulletRe, '').trim()
+      const tag = list === 'ol' ? 'ol' : 'ul'
+      return `<${tag}>${lines.map(l => `<li>${strip(l)}</li>`).join('')}</${tag}>`
+    }
     let listStart = -1
     let listEnd = -1
     let isNumbered = false
@@ -78,17 +84,26 @@ app.directive('sync-html', {
   mounted(el: HTMLElement, binding) {
     // 标记为富文本可编辑区域，供浮动工具栏识别（仅对 description/summary/content 生效）
     el.classList.add('rich-editable')
-    el.innerHTML = formatTextForHtml(binding.value ?? '')
+    const { value, list } = normalizeSyncHtmlBinding(binding.value)
+    el.innerHTML = formatTextForHtml(value ?? '', list)
   },
   updated(el: HTMLElement, binding) {
     if (binding.value === binding.oldValue) return
     // Don't override if user is actively editing this exact element
     if (document.activeElement === el) return
-    const newVal = formatTextForHtml(binding.value ?? '')
+    const { value, list } = normalizeSyncHtmlBinding(binding.value)
+    const newVal = formatTextForHtml(value ?? '', list)
     if (el.innerHTML !== newVal) {
       el.innerHTML = newVal
     }
   }
 })
+
+/** 支持字符串或 { value, list } 形式的绑定 */
+function normalizeSyncHtmlBinding(v: unknown): { value: string; list?: 'ul' | 'ol' } {
+  if (typeof v === 'string' || v == null) return { value: (v as string) ?? '' }
+  const obj = v as { value?: string; list?: 'ul' | 'ol' }
+  return { value: obj.value ?? '', list: obj.list }
+}
 
 app.mount('#app')

@@ -62,34 +62,35 @@
         </PopoverRoot>
       </div>
 
-      <div class="flex items-center" style="gap: var(--tight-gap);">
+      <!-- 第二行：学历·专业 | 描述，全部合并在同一行（不换行） -->
+      <div class="edu-meta">
         <span
-          class="item-subtitle"
+          class="item-subtitle edu-field"
           contenteditable="true"
           :data-placeholder="'学历'"
           @blur="updateField(item.id, 'degree', $event)"
           @paste="onPaste"
         >{{ item.degree }}</span>
-        <span v-if="item.major" class="text-[var(--text-muted)]">·</span>
+        <span v-if="item.major" class="edu-sep">·</span>
         <span
           v-if="item.major"
-          class="item-subtitle"
+          class="item-subtitle edu-field"
           contenteditable="true"
           :data-placeholder="'专业'"
           @blur="updateField(item.id, 'major', $event)"
           @paste="onPaste"
         >{{ item.major }}</span>
+        <span v-if="(item.degree || item.major) && hasDescription(item)" class="edu-sep">|</span>
+        <span
+          class="item-subtitle item-desc edu-desc"
+          contenteditable="true"
+          :data-placeholder="'排名、奖项、证书...'"
+          @blur="updateField(item.id, 'description', $event)"
+          @paste="onPaste"
+          @keydown="onKeydown"
+          v-sync-html="item.description"
+        ></span>
       </div>
-
-      <div
-        class="item-desc"
-        contenteditable="true"
-        :data-placeholder="'主修课程、荣誉奖项、GPA等...'"
-        @blur="updateField(item.id, 'description', $event)"
-        @paste="onPaste"
-        @keydown="onKeydown"
-        v-sync-html="item.description"
-      ></div>
     </div>
   </ItemContextMenu>
   </div>
@@ -168,6 +169,12 @@ const RICH_FIELDS = ['description', 'summary', 'content']
 function normalizeHtml(html: string): string {
   if (!html || html === '<br>' || html === '<div><br></div>' || html === '<p><br></p>') return ''
   return html
+}
+
+// 描述是否有实际文本内容（用于决定是否显示分隔符 | ）
+function hasDescription(item: any): boolean {
+  const d = item.description || ''
+  return d.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim().length > 0
 }
 
 function updateField(itemId: string, field: string, e: FocusEvent) {

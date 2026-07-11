@@ -8,6 +8,7 @@
       @reset="handleReset"
       @preview="showPreview = true"
       @quick-export-pdf="handleQuickExportPdf"
+      @export-image="handleExportImage"
     />
 
     <!-- Main Content -->
@@ -50,7 +51,7 @@ import EditorPanel from './components/EditorPanel.vue'
 import StatusBar from './components/StatusBar.vue'
 import ResumePreviewDialog from './components/ResumePreviewDialog.vue'
 import FloatingToolbar from './components/FloatingToolbar.vue'
-import { generatePreviewHtml } from './utils/previewPdf'
+import { generatePreviewHtml, exportResumeImage } from './utils/previewPdf'
 
 const store = useResumeStore()
 const showPreview = ref(false)
@@ -149,6 +150,26 @@ function handleQuickExportPdf() {
     exportVectorPdf()
   } finally {
     isQuickExporting.value = false
+  }
+}
+
+const isExportingImage = ref(false)
+async function handleExportImage() {
+  if (isExportingImage.value) return
+  isExportingImage.value = true
+  try {
+    await exportResumeImage(store.modules, store.avatar, {
+      fontFamily: store.config.fontFamily,
+      fontSize: store.config.fontSize,
+      lineHeight: store.config.lineHeight,
+      pageMargin: store.config.pageMargin,
+      primaryColor: store.config.primaryColor,
+    })
+  } catch (err) {
+    console.error('导出图片失败', err)
+    alert('导出图片失败，请重试')
+  } finally {
+    isExportingImage.value = false
   }
 }
 </script>

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import type {
   ResumeData, ResumeModule, ResumeConfig, AvatarConfig, ThemePreset, ModuleItem, ModuleType,
-  ResumeDocument, ResumePage, ResumeElement, ElementType, ResumeTemplate, PersonalFieldConfig,
+  ResumeDocument, ResumePage, ResumeElement, ElementType, ResumeTemplate, ResumeVersion, PersonalFieldConfig,
 } from '../types'
 import { migrateResumeDataToDocument } from '../types'
 
@@ -37,7 +37,7 @@ function adjustColor(hex: string, amount: number): string {
     rgb.b * factor + (amount > 0 ? 255 : 0) * Math.abs(amount) * (amount > 0 ? 1 : 0.3),
   )
 }
-function generateColorScale(baseColor: string): Record<string, string> {
+export function generateColorScale(baseColor: string): Record<string, string> {
   return {
     50: adjustColor(baseColor, 0.92),
     100: adjustColor(baseColor, 0.78),
@@ -390,7 +390,152 @@ export const THEME_PRESETS: ThemePreset[] = [
     primaryColor: '#6B4E3D', accentColor: '#A1887F',
     bgColor: '#F9F6F4', surfaceColor: '#FFFFFF',
     textPrimary: '#333333', textSecondary: '#7A6E68', borderColor: '#E0D8D2'
+  },
+  {
+    name: '黛蓝', id: 'slate',
+    primaryColor: '#334155', accentColor: '#64748B',
+    bgColor: '#F6F8FA', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#64748B', borderColor: '#D6DEE7'
+  },
+  {
+    name: '石墨', id: 'graphite',
+    primaryColor: '#2B2B2B', accentColor: '#555555',
+    bgColor: '#F6F6F6', surfaceColor: '#FFFFFF',
+    textPrimary: '#2B2B2B', textSecondary: '#6B6B6B', borderColor: '#DBDBDB'
+  },
+  {
+    name: '深海', id: 'ocean',
+    primaryColor: '#155E75', accentColor: '#0891B2',
+    bgColor: '#F1F9FB', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#5F8896', borderColor: '#C7E1E8'
+  },
+  {
+    name: '钴蓝', id: 'cobalt',
+    primaryColor: '#1E4FA3', accentColor: '#2563EB',
+    bgColor: '#F2F6FD', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6178A0', borderColor: '#CBD9F0'
+  },
+  {
+    name: '天青', id: 'sky',
+    primaryColor: '#0369A1', accentColor: '#0EA5E9',
+    bgColor: '#F0F8FE', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#5C86A0', borderColor: '#C6E0F2'
+  },
+  {
+    name: '松柏', id: 'pine',
+    primaryColor: '#1F5D46', accentColor: '#10B981',
+    bgColor: '#F1F9F5', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#5F8676', borderColor: '#C7E3D6'
+  },
+  {
+    name: '橄榄', id: 'olive',
+    primaryColor: '#5A6B2D', accentColor: '#7B8C3A',
+    bgColor: '#F8F9F1', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#77805F', borderColor: '#DDE2CC'
+  },
+  {
+    name: '琥珀', id: 'amber',
+    primaryColor: '#A16207', accentColor: '#D97706',
+    bgColor: '#FDFAF0', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#867758', borderColor: '#ECE0C4'
+  },
+  {
+    name: '赤陶', id: 'terracotta',
+    primaryColor: '#9A3412', accentColor: '#C2410C',
+    bgColor: '#FDF6F2', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A6A5E', borderColor: '#EED7CB'
+  },
+  {
+    name: '绛紫', id: 'plum',
+    primaryColor: '#6D28D9', accentColor: '#8B5CF6',
+    bgColor: '#F8F5FE', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#7A6E96', borderColor: '#DFD5F2'
+  },
+  {
+    name: '梅红', id: 'magenta',
+    primaryColor: '#A21A73', accentColor: '#DB2777',
+    bgColor: '#FDF4FA', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A6480', borderColor: '#EFD3E6'
+  },
+  {
+    name: '青碧', id: 'cyan',
+    primaryColor: '#0E7490', accentColor: '#06B6D4',
+    bgColor: '#F0FAFC', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#5F8A93', borderColor: '#C6E5EB'
+  },
+  {
+    name: '青灰', id: 'steel',
+    primaryColor: '#3F5261', accentColor: '#607789',
+    bgColor: '#F5F7F9', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#66788A', borderColor: '#D5DDE4'
+  },
+  {
+    name: '枫叶', id: 'maple',
+    primaryColor: '#B91C1C', accentColor: '#DC2626',
+    bgColor: '#FEF4F4', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A6666', borderColor: '#F0D2D2'
+  },
+  {
+    name: '黄栌', id: 'gold',
+    primaryColor: '#8A6D0E', accentColor: '#CA8A04',
+    bgColor: '#FCFAF0', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#847653', borderColor: '#EAE0C2'
+  },
+  {
+    name: '靛青', id: 'denim',
+    primaryColor: '#3730A3', accentColor: '#4F46E5',
+    bgColor: '#F4F4FD', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6E6E9E', borderColor: '#D5D4EF'
+  },
+  {
+    name: '碧螺', id: 'emerald',
+    primaryColor: '#047857', accentColor: '#059669',
+    bgColor: '#F0FAF5', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#5F8776', borderColor: '#C6E4D5'
+  },
+  {
+    name: '沙褐', id: 'sand',
+    primaryColor: '#7C5E3B', accentColor: '#A87C4F',
+    bgColor: '#FAF7F2', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#7E7160', borderColor: '#E4DBCC'
+  },
+  {
+    name: '莓紫', id: 'mulberry',
+    primaryColor: '#86198F', accentColor: '#A21CAF',
+    bgColor: '#FBF4FC', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#82688A', borderColor: '#EAD3EE'
+  },
+  {
+    name: '墨绿', id: 'forest',
+    primaryColor: '#14532D', accentColor: '#15803D',
+    bgColor: '#F1F8F3', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#5D7A66', borderColor: '#C9E2D0'
   }
+]
+
+// ===== Font Presets (字体预设) =====
+// 集中管理可选字体，简历编辑器与「字体测试」对比对话框共用。
+export interface FontPreset {
+  name: string   // 显示名
+  value: string  // 应用到 --font-family 的 CSS 值
+}
+export const FONT_PRESETS: FontPreset[] = [
+  { name: '系统默认', value: 'system-ui, -apple-system, sans-serif' },
+  { name: '微软雅黑', value: "'Microsoft YaHei', 'PingFang SC', sans-serif" },
+  { name: '苹方', value: "'PingFang SC', sans-serif" },
+  { name: '思源黑体', value: "'Source Han Sans SC', 'Noto Sans SC', sans-serif" },
+  { name: '宋体', value: "'Songti SC', 'SimSun', serif" },
+  { name: '思源宋体', value: "'Source Han Serif SC', 'Noto Serif SC', serif" },
+  { name: '黑体', value: "'SimHei', 'Heiti SC', sans-serif" },
+  { name: '楷体', value: "'Kaiti SC', 'KaiTi', serif" },
+  { name: '仿宋', value: "'FangSong', 'STFangsong', serif" },
+  { name: 'Arial', value: 'Arial, Helvetica, sans-serif' },
+  { name: 'Helvetica', value: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
+  { name: 'Roboto', value: 'Roboto, sans-serif' },
+  { name: 'Georgia', value: 'Georgia, serif' },
+  { name: 'Times New Roman', value: "'Times New Roman', Times, serif" },
+  { name: 'Garamond', value: "'EB Garamond', Garamond, serif" },
+  { name: 'Calibri', value: "Calibri, 'Segoe UI', sans-serif" },
 ]
 
 // ===== History State for Undo/Redo =====
@@ -424,6 +569,10 @@ export const useResumeStore = defineStore('resume', () => {
 
   // ---- Templates ----
   const templates = ref<ResumeTemplate[]>([])
+
+  // ---- Resume Versions (multi-resume per job) ----
+  const versions = ref<ResumeVersion[]>([])
+  const activeVersionId = ref<string | null>(null)
 
   // ---- Undo/Redo State ----
   const history = ref<HistoryState[]>([])
@@ -629,6 +778,11 @@ export const useResumeStore = defineStore('resume', () => {
   function setTitleStyle(style: string) {
     config.value.titleStyle = style as ResumeConfig['titleStyle']
     document.documentElement.style.setProperty('--title-style', style)
+  }
+
+  function setFontFamily(font: string) {
+    config.value.fontFamily = font
+    document.documentElement.style.setProperty('--font-family', font)
   }
 
   function updateModule(moduleId: string, patch: Partial<ResumeModule>) {
@@ -881,6 +1035,49 @@ export const useResumeStore = defineStore('resume', () => {
     resetToDefault()
   }
 
+  // ---- Resume Version Actions (multi-resume per job) ----
+  function saveVersion(name: string): string {
+    const id = `ver_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+    const now = new Date().toISOString()
+    versions.value.push({
+      id,
+      name: name.trim() || `版本 ${versions.value.length + 1}`,
+      data: exportData(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    activeVersionId.value = id
+    return id
+  }
+
+  function updateActiveVersion() {
+    const id = activeVersionId.value
+    if (!id) return
+    const v = versions.value.find(x => x.id === id)
+    if (v) {
+      v.data = exportData()
+      v.updatedAt = new Date().toISOString()
+    }
+  }
+
+  function loadVersion(id: string) {
+    const v = versions.value.find(x => x.id === id)
+    if (!v) return
+    importData(v.data)
+    activeVersionId.value = id
+    applyCssVarsFromConfig()
+  }
+
+  function deleteVersion(id: string) {
+    versions.value = versions.value.filter(x => x.id !== id)
+    if (activeVersionId.value === id) activeVersionId.value = null
+  }
+
+  function renameVersion(id: string, name: string) {
+    const v = versions.value.find(x => x.id === id)
+    if (v) v.name = name.trim() || v.name
+  }
+
   // ---- Personal Field Management ----
   function getPersonalItem(mod?: ResumeModule | null): ModuleItem | null {
     const m = mod || modules.value.find(x => x.type === 'personal')
@@ -990,7 +1187,7 @@ export const useResumeStore = defineStore('resume', () => {
     completionByModule, overallCompletion, emptyModuleCount,
     canUndo, canRedo,
     selectModule, setPhase, markSaving,
-    applyTheme, applyCssVars, applyCssVarsFromConfig, setPrimaryColor, setTitleStyle,
+    applyTheme, applyCssVars, applyCssVarsFromConfig, setPrimaryColor, setTitleStyle, setFontFamily,
     updateModule, updateItem, addItem, removeItem,
     duplicateItem, moveItem, removeModule, addModule,
     toggleModuleVisibility, toggleModuleTitle, reorderModules, setAvatar,
@@ -1000,6 +1197,8 @@ export const useResumeStore = defineStore('resume', () => {
     initDocument, migrateToNewModel, addElement, updateElement, removeElement, selectElement,
     // Template actions
     templates, saveAsTemplate, deleteTemplate, loadTemplate, loadDefaultTemplate,
+    // Resume version actions
+    versions, activeVersionId, saveVersion, updateActiveVersion, loadVersion, deleteVersion, renameVersion,
     // Personal field management
     getPersonalItem, getPersonalFields,
     addPersonalField, removePersonalField, reorderPersonalFields,
@@ -1009,7 +1208,7 @@ export const useResumeStore = defineStore('resume', () => {
   persist: {
     key: 'resume-editor-data',
     storage: localStorage,
-    pick: ['config', 'avatar', 'modules', 'lastSaved', 'selectedModuleId', 'currentPhase', 'docRef', 'useNewModel', 'selectedElementId', 'templates', 'contentVersion'],
+    pick: ['config', 'avatar', 'modules', 'lastSaved', 'selectedModuleId', 'currentPhase', 'docRef', 'useNewModel', 'selectedElementId', 'templates', 'contentVersion', 'versions', 'activeVersionId'],
     afterHydrate: (ctx: any) => {
       // Migrate old persisted data to new content format
       const version = ctx.store.contentVersion ?? 0

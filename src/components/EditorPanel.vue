@@ -104,8 +104,8 @@
               />
               <!-- Icon selector (Reka Select) -->
               <SelectRoot
-                :model-value="field.icon || ''"
-                @update:model-value="store.updatePersonalFieldIcon(field.id, ($event as string))"
+                :model-value="field.icon ? field.icon : '__none__'"
+                @update:model-value="store.updatePersonalFieldIcon(field.id, (($event as string) === '__none__' ? '' : ($event as string)))"
               >
                 <SelectTrigger class="rk-select-trigger" title="选择图标">
                   <SelectValue placeholder="图标" />
@@ -305,7 +305,7 @@ import {
 
 // Available icons for personal fields
 const AVAILABLE_ICONS = [
-  { name: '', label: '无图标' },
+  { name: '__none__', label: '无图标' },
   { name: 'Phone', label: '📞 电话' },
   { name: 'Mail', label: '📧 邮件' },
   { name: 'MapPin', label: '📍 定位' },

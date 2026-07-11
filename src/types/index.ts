@@ -54,7 +54,7 @@ export interface AvatarConfig {
 }
 
 // ===== Config =====
-export type TitleStyle = 'underline' | 'leftbar' | 'pill' | 'centerline' | 'dots' | 'minimal' | 'grad-underline' | 'grad-leftbar' | 'grad-dual' | 'grad-pill' | 'grad-shadow' | 'grad-fade'
+export type TitleStyle = 'underline' | 'leftbar' | 'pill' | 'centerline' | 'dots' | 'minimal' | 'grad-underline' | 'grad-leftbar' | 'grad-dual' | 'grad-pill' | 'grad-shadow' | 'grad-fade' | 'thin-underline' | 'thin-double' | 'thin-leftbar' | 'thin-overline' | 'thin-box' | 'thin-framed' | 'thin-corner' | 'thin-bracket' | 'thin-center' | 'thin-underline-soft'
 
 export interface ResumeConfig {
   theme: string
@@ -363,6 +363,15 @@ export interface ResumeTemplate {
   createdAt: string
   updatedAt: string
   data: ResumeData
+}
+
+// ===== Resume Version (multi-resume per job) =====
+export interface ResumeVersion {
+  id: string
+  name: string
+  data: ResumeData
+  createdAt: string
+  updatedAt: string
 }
 
 // 需要在类型文件中引用 THEME_PRESETS，这里只做类型声明

@@ -97,7 +97,7 @@
         @blur="updateField(item.id, 'description', $event)"
         @paste="onPaste"
         @keydown="onKeydown"
-        v-sync-html="item.description"
+        v-sync-html="{ value: item.description, list: 'ul' }"
       ></div>
     </div>
   </ItemContextMenu>

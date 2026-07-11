@@ -58,6 +58,10 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13h6"/><path d="M9 17h3"/></svg>
           预览PDF
         </button>
+        <button class="header-btn" style="color:#0ea5e9;" @click="$emit('export-image')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          导出图片
+        </button>
         <button class="header-btn header-btn--primary" @click="$emit('export-pdf')">
           导出
         </button>
@@ -89,7 +93,7 @@ import { useResumeStore } from '../stores/resume'
 
 const store = useResumeStore()
 
-defineEmits(['export-pdf', 'import-json', 'export-json', 'reset', 'preview', 'quick-export-pdf'])
+defineEmits(['export-pdf', 'import-json', 'export-json', 'reset', 'preview', 'quick-export-pdf', 'export-image'])
 
 const phases = [
   { key: 'fill' as const, label: '填写信息' },

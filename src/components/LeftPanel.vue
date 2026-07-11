@@ -72,9 +72,97 @@
       </label>
     </div>
 
+    <!-- Export -->
+    <div class="panel-section">
+      <div class="panel-section-title">📤 导出</div>
+      <div class="flex flex-col" style="gap: var(--tight-gap);">
+        <button
+          @click="onExportHtml"
+          class="w-full rounded-md text-sm font-medium transition-all hover:opacity-90"
+          style="padding: var(--space-1_5) var(--space-2); background: var(--primary-color); color: #fff;"
+        >🌐 导出 HTML</button>
+        <button
+          @click="onExportWord"
+          class="w-full rounded-md text-sm font-medium transition-all hover:opacity-90"
+          style="padding: var(--space-1_5) var(--space-2); background: #2b5797; color: #fff;"
+        >📄 导出 Word</button>
+        <button
+          @click="onExportMarkdown"
+          class="w-full rounded-md text-sm font-medium border border-[var(--border-color)] hover:bg-gray-50 transition-all"
+          style="padding: var(--space-1_5) var(--space-2);"
+        >📝 导出 Markdown</button>
+      </div>
+    </div>
+
+    <!-- Resume Versions -->
+    <div class="panel-section">
+      <div class="panel-section-title">📑 简历版本</div>
+
+      <!-- Save current as new version -->
+      <div class="flex items-center" style="gap: var(--tight-gap); margin-bottom: var(--normal-gap);">
+        <input
+          v-model="newVersionName"
+          type="text"
+          placeholder="如：后端工程师 / 字节内推..."
+          class="flex-1 text-sm border border-[var(--border-color)] rounded-md"
+          style="padding: var(--space-1_5) var(--space-2);"
+          @keydown.enter="handleSaveVersion"
+        />
+        <button
+          @click="handleSaveVersion"
+          class="rounded-md text-sm text-white hover:opacity-90 transition-all shrink-0"
+          style="padding: var(--space-1_5) var(--space-2); background: var(--primary-color);"
+        >存为新版本</button>
+      </div>
+
+      <!-- Update active version -->
+      <button
+        v-if="store.activeVersionId"
+        @click="store.updateActiveVersion()"
+        class="w-full rounded-md text-sm transition-all"
+        style="padding: var(--space-1_5); margin-bottom: var(--space-1); border: 1px solid var(--border-color); color: var(--text-secondary);"
+      >💾 更新当前版本「{{ activeVersionName }}」</button>
+
+      <!-- Version list -->
+      <div style="display: flex; flex-direction: column; gap: var(--space-1);">
+        <div
+          v-for="ver in store.versions"
+          :key="ver.id"
+          class="flex items-center rounded-md cursor-pointer transition-all hover:bg-gray-50 group/ver"
+          :class="{ 'version-active': store.activeVersionId === ver.id }"
+          style="gap: var(--tight-gap); padding: var(--list-item-padding-y) var(--list-item-padding-x);"
+          @click="store.loadVersion(ver.id)"
+        >
+          <span class="text-sm flex-1 truncate">{{ ver.name }}</span>
+          <span class="text-xs text-[var(--text-muted)] shrink-0">{{ formatDate(ver.updatedAt) }}</span>
+          <button
+            class="text-xs opacity-0 group-hover/ver:opacity-100 transition-all shrink-0"
+            style="padding: 2px 4px; color: var(--primary-color); background: rgba(99,102,241,0.08); border-radius: 4px;"
+            @click.stop="handleRenameVersion(ver)"
+          >改名</button>
+          <button
+            class="text-xs text-[var(--color-error)] hover:opacity-80 opacity-0 group-hover/ver:opacity-100 transition-all shrink-0"
+            style="padding: 2px 4px;"
+            @click.stop="store.deleteVersion(ver.id)"
+          >删除</button>
+        </div>
+
+        <div v-if="store.versions.length === 0" class="text-xs text-[var(--text-muted)] text-center" style="padding: var(--space-2);">
+          暂无保存的版本，可把当前简历另存为多份（按岗位定制）
+        </div>
+      </div>
+    </div>
+
     <!-- Templates -->
     <div class="panel-section">
-      <div class="panel-section-title">📁 模板管理</div>
+      <div class="flex items-center justify-between" style="margin-bottom: var(--normal-gap);">
+        <div class="panel-section-title" style="margin: 0;">📁 模板管理</div>
+        <button
+          class="text-xs rounded-md transition-all hover:opacity-90"
+          style="padding: 3px 8px; color: #fff; background: var(--primary-color);"
+          @click="compareOpen = true"
+        >并排对比</button>
+      </div>
 
       <!-- Save current as template -->
       <div class="flex items-center" style="gap: var(--tight-gap); margin-bottom: var(--normal-gap);">
@@ -140,24 +228,47 @@
     :template="previewTemplate"
     @load="handleLoadFromPreview"
   />
+
+  <!-- Template Compare Dialog -->
+  <TemplateCompareDialog v-model:open="compareOpen" />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useResumeStore, THEME_PRESETS } from '../stores/resume'
-import type { ResumeTemplate } from '../types'
+import type { ResumeTemplate, ResumeVersion } from '../types'
 import TemplatePreviewDialog from './TemplatePreviewDialog.vue'
+import TemplateCompareDialog from './TemplateCompareDialog.vue'
+import { exportResumeHtml, exportResumeWord, exportResumeMarkdown } from '../utils/exportResume'
 
 const store = useResumeStore()
 const themes = THEME_PRESETS
 const newTemplateName = ref('')
+const newVersionName = ref('')
 const previewTemplate = ref<ResumeTemplate | null>(null)
 const previewTemplateOpen = ref(false)
+const compareOpen = ref(false)
+
+const activeVersionName = computed(() => {
+  const v = store.versions.find(x => x.id === store.activeVersionId)
+  return v?.name ?? ''
+})
 
 function handleSaveTemplate() {
   if (!newTemplateName.value.trim()) return
   store.saveAsTemplate(newTemplateName.value)
   newTemplateName.value = ''
+}
+
+function handleSaveVersion() {
+  if (!newVersionName.value.trim()) return
+  store.saveVersion(newVersionName.value)
+  newVersionName.value = ''
+}
+
+function handleRenameVersion(ver: ResumeVersion) {
+  const name = prompt('重命名版本', ver.name)
+  if (name != null) store.renameVersion(ver.id, name)
 }
 
 function formatDate(iso: string): string {
@@ -195,5 +306,29 @@ function updateLineHeight(val: number) {
 function updatePageMargin(val: number) {
   store.config.pageMargin = val
   document.documentElement.style.setProperty('--page-margin', `${val}px`)
+}
+
+function exportConfig() {
+  const c = store.config
+  return {
+    fontFamily: c.fontFamily,
+    fontSize: c.fontSize,
+    lineHeight: c.lineHeight,
+    pageMargin: c.pageMargin,
+    primaryColor: c.primaryColor,
+    titleStyle: c.titleStyle || 'underline',
+  }
+}
+
+function onExportHtml() {
+  exportResumeHtml(store.modules, store.avatar, exportConfig())
+}
+
+function onExportWord() {
+  exportResumeWord(store.modules, store.avatar, exportConfig())
+}
+
+function onExportMarkdown() {
+  exportResumeMarkdown(store.modules)
 }
 </script>

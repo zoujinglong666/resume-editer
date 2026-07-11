@@ -57,7 +57,27 @@ function formatDesc(text: string): string {
   return html.replace(/\n/g, '<br/>')
 }
 
-function renderItemHtml(type: string, item: any): string {
+/** 将描述（可能为列表）压平为单行文本，列表项用 “ | ” 连接 */
+export function flattenDescToLine(text: string): string {
+  if (!text) return ''
+  if (/<[uo]l[\s>]/i.test(text)) {
+    const tmp = document.createElement('div')
+    tmp.innerHTML = text
+    const items = Array.from(tmp.querySelectorAll('li'))
+      .map((li) => (li.textContent || '').trim())
+      .filter(Boolean)
+    if (items.length) return items.join(' | ')
+  }
+  return text
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join(' | ')
+}
+
+export function renderItemHtml(type: string, item: any): string {
   switch (type) {
     case 'personal': {
       let h = ''
@@ -80,8 +100,9 @@ function renderItemHtml(type: string, item: any): string {
       if (item.dateRange) h += `<span class="preview-item-date">${item.dateRange}</span>`
       h += `</div>`
       const sub = [item.degree, item.major].filter(Boolean).join(' · ')
-      if (sub) h += `<div class="preview-item-sub">${sub}</div>`
-      if (item.description) h += `<div class="preview-item-desc">${formatDesc(item.description)}</div>`
+      const descLine = flattenDescToLine(item.description || '')
+      const meta = [sub, descLine].filter(Boolean).join(' | ')
+      if (meta) h += `<div class="preview-item-sub edu-meta">${meta}</div>`
       return h + '</div>'
     }
     case 'experience': {
@@ -162,4 +183,58 @@ export function generatePreviewHtml(
   }
 
   return html
+}
+
+/**
+ * 导出简历为 PNG 图片：用干净的预览 HTML 离屏渲染，
+ * 再用 html2canvas 截图下载。与屏幕编辑器 DOM 解耦，输出无编辑控件。
+ */
+export async function exportResumeImage(
+  modules: ResumeModule[],
+  avatar: AvatarConfig,
+  config: { fontFamily: string; fontSize: number; lineHeight: number; pageMargin: number; primaryColor: string },
+): Promise<void> {
+  const html = generatePreviewHtml(modules, avatar)
+  // A4 宽度（96dpi ≈ 210mm）
+  const pageWidth = 794
+  const padding = config.pageMargin
+
+  const wrapper = document.createElement('div')
+  wrapper.style.position = 'fixed'
+  wrapper.style.left = '-99999px'
+  wrapper.style.top = '0'
+  wrapper.style.width = `${pageWidth}px`
+  wrapper.style.background = '#ffffff'
+  wrapper.style.color = 'var(--text-primary)'
+  wrapper.style.fontFamily = config.fontFamily
+  wrapper.style.fontSize = `${config.fontSize}px`
+  wrapper.style.lineHeight = String(config.lineHeight)
+  wrapper.style.padding = `${padding}px`
+  wrapper.style.boxSizing = 'border-box'
+  wrapper.innerHTML = html
+  document.body.appendChild(wrapper)
+
+  // 复制主题 CSS 变量，确保主色/描边等正确渲染
+  const rootStyles = getComputedStyle(document.documentElement)
+  for (const name of ['--primary-color', '--primary-600', '--primary-500', '--primary-400', '--primary-300', '--primary-200', '--text-primary', '--text-secondary', '--border-color', '--border-light', '--font-size-lg', '--module-gap', '--item-gap', '--space-1', '--space-2', '--space-3', '--line-height-relaxed']) {
+    const v = rootStyles.getPropertyValue(name)
+    if (v) wrapper.style.setProperty(name, v)
+  }
+
+  try {
+    const { default: html2canvas } = await import('html2canvas')
+    const canvas = await html2canvas(wrapper, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    })
+    const url = canvas.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `resume-${new Date().toISOString().slice(0, 10)}.png`
+    a.click()
+  } finally {
+    document.body.removeChild(wrapper)
+  }
 }
