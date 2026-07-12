@@ -1,0 +1,116 @@
+/* ════════════════════════════════════════════════════════════════
+   Unified reka-ui based UI primitives
+   所有基于 reka-ui 的封装组件（Tip / Switch / Slider / Dropdown /
+   Tabs / Collapse …）共享这一套视觉令牌，确保全仓交互控件风格一致。
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  --ui-accent: #6d28d9;        /* 与 header-btn--ai 的紫色保持一致 */
+  --ui-accent-weak: #c4b5fd;
+  --ui-accent-soft: #ede9fe;
+  --ui-border: #e4e4ec;
+  --ui-track: #e6e7ee;
+  --ui-tip-bg: #1f2233;
+  --ui-tip-fg: #ffffff;
+  --ui-surface: #ffffff;
+  --ui-surface-hover: #f4f5f7;
+  --ui-text: #1a1a2e;
+  --ui-text-2: #575a6b;
+  --ui-text-mute: #9a9db0;
+  --ui-radius: 8px;
+  --ui-shadow: 0 8px 28px rgba(15, 18, 40, 0.16);
+}
+
+/* ── Tooltip ───────────────────────────────────────────── */
+.ui-tip {
+  z-index: 2000;
+  background: var(--ui-tip-bg);
+  color: var(--ui-tip-fg);
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 6px 9px;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(15, 18, 40, 0.22);
+  max-width: 260px;
+  user-select: none;
+}
+.ui-tip[data-state='delayed-open'],
+.ui-tip[data-state='instant-open'] {
+  animation: ui-tip-in 0.12s ease-out;
+}
+@keyframes ui-tip-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.ui-tip-arrow { fill: var(--ui-tip-bg); }
+
+/* ── Switch ───────────────────────────────────────────── */
+.ui-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 38px;
+  height: 22px;
+  flex: 0 0 auto;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--ui-track);
+  border: 1px solid var(--ui-border);
+  transition: background 0.18s ease, border-color 0.18s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ui-switch[data-state='checked'] {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+}
+.ui-switch:disabled { opacity: 0.5; cursor: not-allowed; }
+.ui-switch:focus-visible { outline: 2px solid var(--ui-accent-weak); outline-offset: 2px; }
+.ui-switch-thumb {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transform: translateX(2px);
+  transition: transform 0.18s ease;
+  will-change: transform;
+}
+.ui-switch-thumb[data-state='checked'] { transform: translateX(18px); }
+
+/* ── Slider ───────────────────────────────────────────── */
+.ui-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 18px;
+  touch-action: none;
+  user-select: none;
+}
+.ui-slider[data-disabled] { opacity: 0.5; }
+.ui-slider-track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  background: var(--ui-track);
+  border-radius: 999px;
+}
+.ui-slider-range {
+  position: absolute;
+  height: 100%;
+  background: var(--ui-accent);
+  border-radius: 999px;
+}
+.ui-slider-thumb {
+  display: block;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 2px solid var(--ui-accent);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(15, 18, 40, 0.2);
+  cursor: grab;
+}
+.ui-slider-thumb:active { cursor: grabbing; }
+.ui-slider-thumb:focus-visible { outline: 2px solid var(--ui-accent-weak); outline-offset: 2px; }

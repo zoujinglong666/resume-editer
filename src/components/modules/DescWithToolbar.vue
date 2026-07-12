@@ -3,50 +3,68 @@
     <!-- Mini Toolbar — visible only when focused -->
     <div v-show="focused" class="desc-mini-toolbar no-print" @mousedown.prevent>
       <!-- Bold -->
-      <button type="button" class="desc-mini-btn" :class="{ active: states.bold }" title="加粗 (Ctrl+B)" @click="exec('bold')">
+      <Tip text="加粗 (Ctrl+B)">
+        <Button type="button" class="desc-mini-btn" :class="{ active: states.bold }" @click="exec('bold')">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z"/><path d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z"/></svg>
-      </button>
+      </Button>
+      </Tip>
       <!-- Italic -->
-      <button type="button" class="desc-mini-btn" :class="{ active: states.italic }" title="斜体 (Ctrl+I)" @click="exec('italic')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
-      </button>
+      <Tip text="斜体 (Ctrl+I)">
+        <Button type="button" class="desc-mini-btn" :class="{ active: states.italic }" @click="exec('italic')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+        </Button>
+      </Tip>
       <!-- Underline -->
-      <button type="button" class="desc-mini-btn" :class="{ active: states.underline }" title="下划线 (Ctrl+U)" @click="exec('underline')">
+      <Tip text="下划线 (Ctrl+U)">
+        <Button type="button" class="desc-mini-btn" :class="{ active: states.underline }" @click="exec('underline')">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a6 6 0 006 6 6 6 0 006-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
-      </button>
+      </Button>
+      </Tip>
       <!-- Strike -->
-      <button type="button" class="desc-mini-btn" :class="{ active: states.strikeThrough }" title="删除线" @click="exec('strikeThrough')">
+      <Tip text="删除线">
+        <Button type="button" class="desc-mini-btn" :class="{ active: states.strikeThrough }" @click="exec('strikeThrough')">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 00-2.83 4M14 12a4 4 0 010 8H6"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
-      </button>
+      </Button>
+      </Tip>
 
       <div class="desc-mini-sep"></div>
 
       <!-- Unordered list -->
-      <button type="button" class="desc-mini-btn" :class="{ active: states.insertUnorderedList }" title="无序列表" @click="toggleList('ul')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="7" r="1.4" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="4" cy="17" r="1.4" fill="currentColor" stroke="none"/><line x1="8" y1="7" x2="21" y2="7"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="17" x2="21" y2="17"/></svg>
-      </button>
+      <Tip text="无序列表">
+        <Button type="button" class="desc-mini-btn" :class="{ active: states.insertUnorderedList }" @click="toggleList('ul')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="4" cy="7" r="1.4" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="4" cy="17" r="1.4" fill="currentColor" stroke="none"/><line x1="8" y1="7" x2="21" y2="7"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="17" x2="21" y2="17"/></svg>
+        </Button>
+      </Tip>
       <!-- Ordered list -->
-      <button type="button" class="desc-mini-btn" :class="{ active: states.insertOrderedList }" title="有序列表" @click="toggleList('ol')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-      </button>
+      <Tip text="有序列表">
+        <Button type="button" class="desc-mini-btn" :class="{ active: states.insertOrderedList }" @click="toggleList('ol')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+        </Button>
+      </Tip>
 
       <div class="desc-mini-sep"></div>
 
       <!-- Align left -->
-      <button type="button" class="desc-mini-btn" :class="{ active: states.justifyLeft }" title="左对齐" @click="exec('justifyLeft')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
-      </button>
+      <Tip text="左对齐">
+        <Button type="button" class="desc-mini-btn" :class="{ active: states.justifyLeft }" @click="exec('justifyLeft')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+        </Button>
+      </Tip>
       <!-- Align center -->
-      <button type="button" class="desc-mini-btn" :class="{ active: states.justifyCenter }" title="居中" @click="exec('justifyCenter')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
-      </button>
+      <Tip text="居中">
+        <Button type="button" class="desc-mini-btn" :class="{ active: states.justifyCenter }" @click="exec('justifyCenter')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+        </Button>
+      </Tip>
 
       <div class="desc-mini-sep"></div>
 
       <!-- Clear format -->
-      <button type="button" class="desc-mini-btn desc-mini-btn-danger" title="清除格式" @click="exec('removeFormat')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-      </button>
+      <Tip text="清除格式">
+        <Button type="button" class="desc-mini-btn desc-mini-btn-danger" @click="exec('removeFormat')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+        </Button>
+      </Tip>
     </div>
 
     <!-- Content Editable Area -->
@@ -67,6 +85,8 @@
 </template>
 
 <script setup lang="ts">
+import Button from '../ui/Button.vue'
+import Tip from '../ui/Tip.vue'
 import { ref, reactive, nextTick } from 'vue'
 import { handleListEnter, isCursorInListItem, handlePaste } from '../../utils/smartPaste'
 

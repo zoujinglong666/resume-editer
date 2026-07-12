@@ -2,14 +2,14 @@
   <div class="app-editor no-print">
     <!-- Inline Toolbar -->
     <div class="inline-toolbar">
-      <button class="inline-toolbar-btn" :disabled="!store.canUndo" title="撤销 (Ctrl+Z)" @click="store.undo()">
+      <Button class="inline-toolbar-btn" :disabled="!store.canUndo" tip="撤销 (Ctrl+Z)" @click="store.undo()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
         <span>撤销</span>
-      </button>
-      <button class="inline-toolbar-btn" :disabled="!store.canRedo" title="重做 (Ctrl+Y)" @click="store.redo()">
+      </Button>
+      <Button class="inline-toolbar-btn" :disabled="!store.canRedo" tip="重做 (Ctrl+Y)" @click="store.redo()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3L21 13"/></svg>
         <span>重做</span>
-      </button>
+      </Button>
     </div>
 
     <!-- Module List -->
@@ -36,9 +36,11 @@
             @mouseleave="store.selectedModuleId !== mod.id && (($event.target as HTMLElement).style.background = '')"
             @click="store.selectModule(mod.id)"
           >
-            <span class="mod-drag-handle cursor-move shrink-0" title="拖拽排序" style="opacity: 0.45;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
-            </span>
+            <Tip text="拖拽排序">
+              <span class="mod-drag-handle cursor-move shrink-0" style="opacity: 0.45;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
+              </span>
+            </Tip>
             <span
               class="eye-toggle shrink-0"
               :class="{ hidden: !mod.visible }"
@@ -94,18 +96,20 @@
         >
           <template #item="{ element: field }">
             <div class="pf-row" :class="{ 'pf-hidden': !field.visible }">
-              <span class="pf-drag-handle cursor-move" title="拖拽排序">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
-              </span>
+              <Tip text="拖拽排序">
+                <span class="pf-drag-handle cursor-move">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
+                </span>
+              </Tip>
               <!-- Visibility toggle -->
-              <button
+              <Button
                 class="pf-eye-btn"
-                :title="field.visible ? '隐藏字段' : '显示字段'"
+                :tip="field.visible ? '隐藏字段' : '显示字段'"
                 @click="store.togglePersonalFieldVisibility(field.id)"
               >
                 <svg v-if="field.visible" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-              </button>
+              </Button>
               <!-- Label -->
               <input
                 type="text"
@@ -119,9 +123,11 @@
                 :model-value="field.icon ? field.icon : '__none__'"
                 @update:model-value="store.updatePersonalFieldIcon(field.id, (($event as string) === '__none__' ? '' : ($event as string)))"
               >
-                <SelectTrigger class="rk-select-trigger" title="选择图标">
+                <Tip text="选择图标">
+                  <SelectTrigger class="rk-select-trigger">
                   <SelectValue placeholder="图标" />
                 </SelectTrigger>
+                </Tip>
                 <SelectPortal>
                   <SelectContent class="rk-select-content" :position="'popper'" :side-offset="4">
                     <SelectViewport>
@@ -141,13 +147,13 @@
                 </SelectPortal>
               </SelectRoot>
               <!-- Delete (only for non-builtin) -->
-              <button
+              <Button
                 v-if="!field.isBuiltin"
                 class="pf-delete-btn"
-                title="删除字段"
+                tip="删除字段"
                 @click="store.removePersonalField(field.id)"
-              >×</button>
-              <span v-else class="pf-builtin-badge" title="内置字段">内置</span>
+              >×</Button>
+              <Tip v-else text="内置字段"><span class="pf-builtin-badge">内置</span></Tip>
             </div>
           </template>
         </draggable>
@@ -161,14 +167,14 @@
             class="editor-input flex-1"
             @keydown.enter="onAddPersonalField"
           />
-          <button
+          <Button
             class="pf-add-btn"
             :disabled="!newFieldLabel.trim()"
             @click="onAddPersonalField"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             添加
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -191,28 +197,32 @@
             :data-module-id="store.selectedModule!.id"
             @focusin="store.selectItem(item.id)"
           >
+            <CollapsibleRoot :open="!isCollapsed(item.id)" class="item-collapse-root">
             <div class="flex items-center justify-between">
               <div class="flex items-center" style="gap: var(--tight-gap);">
-                <button
-                  class="item-collapse-btn"
-                  type="button"
-                  :title="isCollapsed(item.id) ? '展开' : '折叠'"
-                  @click="toggleCollapse(item.id)"
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" :style="isCollapsed(item.id) ? 'transform: rotate(-90deg);' : ''"><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
-                <span class="item-drag-handle cursor-move opacity-0 group-hover/item:opacity-100 transition-opacity" title="拖拽排序">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
-                </span>
+                <CollapsibleTrigger as-child>
+                  <Button
+                    class="item-collapse-btn"
+                    type="button"
+                    @click="toggleCollapse(item.id)"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" :style="isCollapsed(item.id) ? 'transform: rotate(-90deg);' : ''"><polyline points="6 9 12 15 18 9"/></svg>
+                  </Button>
+                </CollapsibleTrigger>
+                <Tip text="拖拽排序">
+                  <span class="item-drag-handle cursor-move opacity-0 group-hover/item:opacity-100 transition-opacity">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
+                  </span>
+                </Tip>
                 <span class="entry-number">{{ idx + 1 }}</span>
                 <span class="text-xs font-semibold" style="color: var(--primary-600);">条目</span>
               </div>
-              <button
+              <Button
                 class="ui-btn ui-btn--danger ui-btn--sm opacity-0 group-hover/item:opacity-100"
                 @click="store.removeItem(store.selectedModule!.id, item.id)"
-              >删除</button>
+              >删除</Button>
             </div>
-            <div v-show="!isCollapsed(item.id)" style="display: flex; flex-direction: column; gap: var(--form-field-gap); margin-top: var(--normal-gap);">
+            <CollapsibleContent class="item-collapse-content">
               <template v-for="(val, key) in item" :key="String(key)">
                 <label
                   v-if="String(key) !== 'id' && String(key) !== 'personalFields' && typeof val === 'string'"
@@ -279,20 +289,21 @@
                   >{{ validationErrors[errorKey(String(item.id), String(key))] }}</span>
                 </label>
               </template>
-            </div>
+            </CollapsibleContent>
+          </CollapsibleRoot>
           </div>
           </ItemContextMenu>
         </template>
       </draggable>
 
       <!-- Add Item Button -->
-      <button
+      <Button
         class="editor-add-item-btn"
         @click="onAddItem"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         添加{{ getModuleTypeName(store.selectedModule.type) }}条目
-      </button>
+      </Button>
     </div>
 
     <!-- No selection -->
@@ -307,6 +318,8 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
+import Tip from './ui/Tip.vue'
 import { ref, computed } from 'vue'
 import draggable from 'vuedraggable'
 import { useResumeStore } from '../stores/resume'
@@ -323,6 +336,9 @@ import {
   SelectItem,
   SelectItemText,
   SelectItemIndicator,
+  CollapsibleRoot,
+  CollapsibleTrigger,
+  CollapsibleContent,
 } from 'reka-ui'
 
 // Available icons for personal fields

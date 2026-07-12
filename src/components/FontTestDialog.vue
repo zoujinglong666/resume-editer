@@ -11,17 +11,17 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
             <span>字体测试对比</span>
           </div>
-          <button class="cmp-close" @click="emit('update:open', false)">
+          <Button class="cmp-close" @click="emit('update:open', false)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+          </Button>
         </div>
 
         <!-- Toolbar -->
         <div class="ft-toolbar">
           <span class="cmp-toolbar-label">同一份简历用不同字体并排展示，挑出最合适的一款再「应用」。</span>
           <div class="ft-actions">
-            <button v-if="panels.length < 4" class="ft-action" @click="addPanel">+ 加一列</button>
-            <button v-if="panels.length > 2" class="ft-action" @click="removePanel">− 减一列</button>
+            <Button v-if="panels.length < 4" class="ft-action" @click="addPanel">+ 加一列</Button>
+            <Button v-if="panels.length > 2" class="ft-action" @click="removePanel">− 减一列</Button>
           </div>
         </div>
 
@@ -35,12 +35,12 @@
                 </select>
                 <svg class="sidebar-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              <button
+              <Button
                 class="ft-apply"
                 :class="{ active: store.config.fontFamily === p.font }"
                 @click="applyFont(p.font)"
-              >{{ store.config.fontFamily === p.font ? '已应用' : '应用' }}</button>
-              <button v-if="panels.length > 2" class="ft-remove" title="移除该列" @click="removePanelAt(i)">×</button>
+              >{{ store.config.fontFamily === p.font ? '已应用' : '应用' }}</Button>
+              <Button v-if="panels.length > 2" class="ft-remove" tip="移除该列" @click="removePanelAt(i)">×</Button>
             </div>
             <div class="cmp-pane" :style="paneVars(p.font)">
               <div class="cmp-preview" v-html="previewHtml" />
@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, computed } from 'vue'
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from 'reka-ui'
 import { useResumeStore, FONT_PRESETS, THEME_PRESETS, generateColorScale } from '../stores/resume'

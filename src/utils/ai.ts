@@ -3,8 +3,10 @@
  * 支持 OpenAI / Claude / 自定义端点
  */
 
+import type { ResumeModule } from '../types'
+
 export interface AiConfig {
-  provider: 'openai' | 'claude' | 'custom'
+  provider: 'deepseek' | 'openai' | 'claude' | 'custom'
   apiKey: string
   baseUrl: string
   model: string
@@ -28,6 +30,12 @@ export interface AiResponse {
 
 // Default configs per provider
 const PROVIDER_DEFAULTS: Record<string, Partial<AiConfig>> = {
+  deepseek: {
+    baseUrl: 'https://api.deepseek.com',
+    model: 'deepseek-v4-flash',
+    temperature: 0.7,
+    maxTokens: 2000,
+  },
   openai: {
     baseUrl: 'https://api.openai.com/v1',
     model: 'gpt-4o-mini',
@@ -74,27 +82,30 @@ export function getDefaultAiConfig(provider: AiConfig['provider']): AiConfig {
 }
 
 // Core chat completion function
+// 传入 onChunk 时启用流式输出（仅 OpenAI 兼容接口生效）
 export async function chatCompletion(
   config: AiConfig,
   messages: AiMessage[],
   signal?: AbortSignal,
+  onChunk?: (delta: string) => void,
 ): Promise<AiResponse> {
   if (!config.apiKey) {
     throw new Error('请先配置 AI API Key')
   }
 
   if (config.provider === 'claude') {
-    return claudeCompletion(config, messages, signal)
+    return claudeCompletion(config, messages, signal, onChunk)
   }
 
   // Default: OpenAI-compatible API (works with OpenAI, custom endpoints, etc.)
-  return openaiCompletion(config, messages, signal)
+  return openaiCompletion(config, messages, signal, onChunk)
 }
 
 async function openaiCompletion(
   config: AiConfig,
   messages: AiMessage[],
   signal?: AbortSignal,
+  onChunk?: (delta: string) => void,
 ): Promise<AiResponse> {
   const url = `${config.baseUrl.replace(/\/+$/, '')}/chat/completions`
   const res = await fetch(url, {
@@ -108,6 +119,7 @@ async function openaiCompletion(
       messages,
       temperature: config.temperature ?? 0.7,
       max_tokens: config.maxTokens ?? 2000,
+      stream: !!onChunk,
     }),
     signal,
   })
@@ -117,13 +129,57 @@ async function openaiCompletion(
     throw new Error(`AI API 请求失败 (${res.status}): ${err}`)
   }
 
-  const data = await res.json()
+  // 非流式：直接返回完整内容
+  if (!onChunk) {
+    const data = await res.json()
+    return {
+      content: data.choices?.[0]?.message?.content ?? '',
+      usage: data.usage ? {
+        promptTokens: data.usage.prompt_tokens,
+        completionTokens: data.usage.completion_tokens,
+        totalTokens: data.usage.total_tokens,
+      } : undefined,
+    }
+  }
+
+  // 流式：逐块读取 SSE（data: {...}），实时回调 delta
+  const reader = res.body!.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let full = ''
+  let usage: AiResponse['usage']
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+    for (const line of lines) {
+      const t = line.trim()
+      if (!t.startsWith('data:')) continue
+      const payload = t.slice(5).trim()
+      if (payload === '[DONE]') continue
+      try {
+        const json = JSON.parse(payload)
+        const delta: string = json.choices?.[0]?.delta?.content ?? ''
+        if (delta) {
+          full += delta
+          onChunk(delta)
+        }
+        if (json.usage) usage = json.usage
+      } catch {
+        // 忽略不完整分片
+      }
+    }
+  }
+
   return {
-    content: data.choices?.[0]?.message?.content ?? '',
-    usage: data.usage ? {
-      promptTokens: data.usage.prompt_tokens,
-      completionTokens: data.usage.completion_tokens,
-      totalTokens: data.usage.total_tokens,
+    content: full,
+    usage: usage ? {
+      promptTokens: usage.promptTokens,
+      completionTokens: usage.completionTokens,
+      totalTokens: usage.totalTokens,
     } : undefined,
   }
 }
@@ -132,6 +188,7 @@ async function claudeCompletion(
   config: AiConfig,
   messages: AiMessage[],
   signal?: AbortSignal,
+  _onChunk?: (delta: string) => void,
 ): Promise<AiResponse> {
   const url = `${config.baseUrl.replace(/\/+$/, '')}/messages`
 
@@ -183,6 +240,8 @@ export async function aiGenerateContent(
   config: AiConfig,
   prompt: string,
   context?: string,
+  signal?: AbortSignal,
+  onChunk?: (delta: string) => void,
 ): Promise<string> {
   const messages: AiMessage[] = [
     {
@@ -199,7 +258,7 @@ ${context ? `\n当前简历上下文：\n${context}` : ''}`,
     { role: 'user', content: prompt },
   ]
 
-  const response = await chatCompletion(config, messages)
+  const response = await chatCompletion(config, messages, signal, onChunk)
   return response.content
 }
 
@@ -208,6 +267,8 @@ export async function aiPolishContent(
   config: AiConfig,
   content: string,
   instruction?: string,
+  signal?: AbortSignal,
+  onChunk?: (delta: string) => void,
 ): Promise<string> {
   const messages: AiMessage[] = [
     {
@@ -224,7 +285,7 @@ ${instruction ? `\n用户特别要求：${instruction}` : ''}`,
     { role: 'user', content: `请润色以下内容：\n\n${content}` },
   ]
 
-  const response = await chatCompletion(config, messages)
+  const response = await chatCompletion(config, messages, signal, onChunk)
   return response.content
 }
 
@@ -234,6 +295,8 @@ export async function aiGenerateFromJD(
   jobTitle: string,
   company: string,
   jdText: string,
+  signal?: AbortSignal,
+  onChunk?: (delta: string) => void,
 ): Promise<string> {
   const messages: AiMessage[] = [
     {
@@ -253,7 +316,7 @@ export async function aiGenerateFromJD(
     },
   ]
 
-  const response = await chatCompletion(config, messages)
+  const response = await chatCompletion(config, messages, signal, onChunk)
   return response.content
 }
 
@@ -262,6 +325,7 @@ export async function aiScoreResume(
   config: AiConfig,
   resumeText: string,
   targetJob?: string,
+  signal?: AbortSignal,
 ): Promise<{ score: number; feedback: string; suggestions: string[] }> {
   const messages: AiMessage[] = [
     {
@@ -283,7 +347,7 @@ export async function aiScoreResume(
     },
   ]
 
-  const response = await chatCompletion(config, messages)
+  const response = await chatCompletion(config, messages, signal)
   try {
     // Try to parse JSON from response
     const jsonStr = response.content.replace(/```json?\s*|\s*```/g, '').trim()
@@ -294,5 +358,136 @@ export async function aiScoreResume(
       feedback: response.content.slice(0, 200),
       suggestions: [response.content],
     }
+  }
+}
+
+// 从简历模块提取纯文本（供 AI 分析 / 优化使用）
+export function buildResumeText(
+  modules: ResumeModule[],
+  withIds = false,
+): string {
+  return modules
+    .filter(m => m.type !== 'personal')
+    .map(m => {
+      const lines = m.items
+        .map((it, idx) => {
+          const rec = it as Record<string, unknown>
+          const text = (rec.description ?? rec.content ?? rec.title ?? rec.name ?? '') as string
+          return `${idx + 1}. ${text}`
+        })
+        .join('\n')
+      return withIds
+        ? `[MODULE:${m.id}|${m.title}]\n${lines}`
+        : `【${m.title}】\n${lines}`
+    })
+    .join('\n\n')
+}
+
+// 从模型返回中提取 JSON（兼容 ```json 代码块标记）
+function extractJson<T>(raw: string): T {
+  const s = raw.replace(/```json?\s*|\s*```/g, '').trim()
+  return JSON.parse(s) as T
+}
+
+/** AI 摘要 / 个人亮点句 */
+export async function aiSummarizeResume(
+  config: AiConfig,
+  resumeText: string,
+  targetJob?: string,
+  signal?: AbortSignal,
+): Promise<{ summary: string; highlight: string }> {
+  const messages: AiMessage[] = [
+    {
+      role: 'system',
+      content: `你是资深简历顾问。请根据用户简历内容生成两部分：
+1) summary：一段 2-4 句的专业个人简介（professional summary），突出核心竞争力与量化成果，语气专业可信。
+2) highlight：一句话亮点（不超过 30 字），高度凝练个人最大优势。
+仅返回 JSON（不要包含 markdown 代码块标记）：
+{"summary": "...", "highlight": "..."}`,
+    },
+    {
+      role: 'user',
+      content: `${targetJob ? `目标职位：${targetJob}\n\n` : ''}简历内容：\n${resumeText}`,
+    },
+  ]
+
+  const response = await chatCompletion(config, messages, signal)
+  try {
+    return extractJson<{ summary: string; highlight: string }>(response.content)
+  } catch {
+    return { summary: response.content.slice(0, 500), highlight: '' }
+  }
+}
+
+/** AI 简历与 JD 匹配度分析 */
+export async function aiAnalyzeJDMatch(
+  config: AiConfig,
+  resumeText: string,
+  jdText: string,
+  targetJob?: string,
+  signal?: AbortSignal,
+): Promise<{ score: number; matched: string[]; missing: string[]; suggestions: string[] }> {
+  const messages: AiMessage[] = [
+    {
+      role: 'system',
+      content: `你是资深招聘官与简历优化专家。请对比简历与职位描述（JD），评估匹配度。
+仅返回 JSON（不要包含 markdown 代码块标记）：
+{
+  "score": 0-100 的整数,
+  "matched": ["简历已具备且与 JD 相关的关键词/能力1", "..."],
+  "missing": ["JD 要求但简历缺失或偏弱的关键词/能力1", "..."],
+  "suggestions": ["针对性改进建议1", "..."]
+}`,
+    },
+    {
+      role: 'user',
+      content: `${targetJob ? `目标职位：${targetJob}\n\n` : ''}【简历】\n${resumeText}\n\n【职位描述 JD】\n${jdText}`,
+    },
+  ]
+
+  const response = await chatCompletion(config, messages, signal)
+  try {
+    return extractJson<{ score: number; matched: string[]; missing: string[]; suggestions: string[] }>(response.content)
+  } catch {
+    return { score: 0, matched: [], missing: [], suggestions: [response.content.slice(0, 300)] }
+  }
+}
+
+/** AI 一键优化整份简历（逐模块重写，保持条目数量与顺序） */
+export async function aiOptimizeResume(
+  config: AiConfig,
+  resumeText: string,
+  targetJob?: string,
+  signal?: AbortSignal,
+): Promise<{ modules: { id: string; items: string[] }[]; actionPlan: string[] }> {
+  const messages: AiMessage[] = [
+    {
+      role: 'system',
+      content: `你是简历优化专家。请通读整份简历，逐模块重写/润色所有描述，使其更专业、量化、有说服力。
+要求：
+- 输入中每个模块以 [MODULE:<模块id>|<标题>] 标记，请保持模块数量、id、顺序不变。
+- 每个模块的 items 数组长度与顺序必须与原模块一致，逐条优化。
+- 每条为一段纯文本（可含换行），不要加编号。
+- 突出量化成果，动词开头，适合 ATS。
+仅返回 JSON（不要包含 markdown 代码块标记）：
+{
+  "modules": [
+    { "id": "模块id（与输入一致）", "items": ["优化后的条目1文本", "优化后的条目2文本"] },
+    ...
+  ],
+  "actionPlan": ["整体改进行动建议1", "..."]
+}`,
+    },
+    {
+      role: 'user',
+      content: `${targetJob ? `目标职位：${targetJob}\n\n` : ''}简历内容（按模块给出）：\n${resumeText}`,
+    },
+  ]
+
+  const response = await chatCompletion(config, messages, signal)
+  try {
+    return extractJson<{ modules: { id: string; items: string[] }[]; actionPlan: string[] }>(response.content)
+  } catch {
+    return { modules: [], actionPlan: [response.content.slice(0, 300)] }
   }
 }

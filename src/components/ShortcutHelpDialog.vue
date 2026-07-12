@@ -8,9 +8,9 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10v4M10 10v4M14 10v4M18 10v4"/></svg>
             <span>快捷键</span>
           </div>
-          <button class="sc-close" @click="emit('update:open', false)" aria-label="关闭">
+          <Button class="sc-close" @click="emit('update:open', false)" aria-label="关闭">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+          </Button>
         </div>
 
         <p class="sc-hint">在编辑区使用以下快捷键，提升简历编辑效率。</p>
@@ -27,6 +27,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent } from 'reka-ui'
 
 const props = defineProps<{ open: boolean }>()

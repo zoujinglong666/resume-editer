@@ -6,11 +6,11 @@
         <input type="checkbox" v-model="store.useNewModel" @change="onModelToggle" />
         使用新模型 (useNewModel)
       </label>
-      <button
+      <Button
         v-if="!store.docRef"
         class="ui-btn ui-btn--primary ui-btn--sm"
         @click="store.migrateToNewModel()"
-      >迁移到新模型</button>
+      >迁移到新模型</Button>
     </div>
 
     <div ref="canvasEl" class="a4-canvas relative" id="resume-canvas">
@@ -52,9 +52,11 @@
                   />
 
                   <!-- Drag Handle -->
-                  <span class="drag-handle absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity z-20" title="拖拽排序" style="cursor: move;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
-                  </span>
+                  <Tip text="拖拽排序">
+                    <span class="drag-handle absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity z-20" style="cursor: move;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
+                    </span>
+                  </Tip>
 
                   <!-- Render Node -->
                   <RenderNode
@@ -126,9 +128,11 @@
 
               <!-- Module Header -->
               <div class="flex items-center relative z-10" style="gap: var(--tight-gap); margin-bottom: var(--space-2);">
-                <span class="drag-handle" title="拖拽排序">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
-                </span>
+                <Tip text="拖拽排序">
+                  <span class="drag-handle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
+                  </span>
+                </Tip>
                 <h2
                   v-show="!mod.hideTitle"
                   class="module-title flex-1 cursor-text"
@@ -138,24 +142,26 @@
                   @paste="onPaste($event)"
                   @click.stop
                 >{{ mod.title }}</h2>
-                <span
-                  class="title-toggle no-print"
-                  :class="{ hidden: mod.hideTitle }"
-                  :title="mod.hideTitle ? '显示标题' : '隐藏标题'"
-                  @click.stop="store.toggleModuleTitle(mod.id)"
-                >
+                <Tip :text="mod.hideTitle ? '显示标题' : '隐藏标题'">
+                  <span
+                    class="title-toggle no-print"
+                    :class="{ hidden: mod.hideTitle }"
+                    @click.stop="store.toggleModuleTitle(mod.id)"
+                  >
                   <svg v-if="!mod.hideTitle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M4 12h16"/></svg>
                   <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h6"/><path d="M14 7h6"/><path d="M4 12h16"/><line x1="4" y1="16" x2="20" y2="8" stroke-width="1.5"/></svg>
                 </span>
-                <span
-                  class="eye-toggle no-print"
-                  :class="{ hidden: !mod.visible }"
-                  title="显示/隐藏"
-                  @click.stop="store.toggleModuleVisibility(mod.id)"
-                >
+                </Tip>
+                <Tip text="显示/隐藏">
+                  <span
+                    class="eye-toggle no-print"
+                    :class="{ hidden: !mod.visible }"
+                    @click.stop="store.toggleModuleVisibility(mod.id)"
+                  >
                   <svg v-if="mod.visible" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                 </span>
+                </Tip>
               </div>
 
               <!-- Module Content by Type -->
@@ -170,26 +176,26 @@
               </div>
 
               <!-- Add Item Button -->
-              <button
+              <Button
                 v-if="mod.type === 'personal'"
                 class="add-item-btn no-print"
                 style="display: none;"
-              >+</button>
-              <button
+              >+</Button>
+              <Button
                 v-else-if="mod.type === 'skill'"
                 class="add-item-btn no-print"
                 @click.stop="store.addItem(mod.id)"
-              >+ 添加技能</button>
-              <button
+              >+ 添加技能</Button>
+              <Button
                 v-else-if="mod.type === 'strength'"
                 class="add-item-btn no-print"
                 @click.stop="store.addItem(mod.id)"
-              >+ 添加优势</button>
-              <button
+              >+ 添加优势</Button>
+              <Button
                 v-else
                 class="add-item-btn no-print"
                 @click.stop="store.addItem(mod.id)"
-              >+ 添加条目</button>
+              >+ 添加条目</Button>
                 </div>
               </ContextMenuTrigger>
               <ContextMenuPortal>
@@ -224,6 +230,8 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
+import Tip from './ui/Tip.vue'
 import { ref, watch, nextTick, computed, onMounted } from 'vue'
 import draggable from 'vuedraggable'
 import { useResumeStore } from '../stores/resume'

@@ -11,13 +11,13 @@
             <span>模板预览: {{ template.name }}</span>
           </div>
           <div class="tpl-preview-actions">
-            <button class="tpl-preview-btn tpl-preview-btn--primary" @click="handleLoad">
+            <Button class="tpl-preview-btn tpl-preview-btn--primary" @click="handleLoad">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
               加载此模板
-            </button>
-            <button class="tpl-preview-close" @click="emit('update:open', false)">
+            </Button>
+            <Button class="tpl-preview-close" @click="emit('update:open', false)">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -153,6 +153,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { computed } from 'vue'
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from 'reka-ui'
 import type { ResumeTemplate, ModuleType } from '../types'

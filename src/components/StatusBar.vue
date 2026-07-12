@@ -32,18 +32,18 @@
       <Transition name="flash">
         <span v-if="showUndoToast" class="undo-toast">
           已删除「{{ store.lastDeleted?.label }}」
-          <button class="undo-link" @click="onUndo">撤销</button>
+          <Button class="undo-link" @click="onUndo">撤销</Button>
         </span>
       </Transition>
-      <button
+      <Button
         class="ui-chip"
         :class="{ 'is-active': store.useNewModel }"
-        :title="store.useNewModel ? '当前：新模型（点击切换旧模型）' : '当前：旧模型（点击切换新模型）'"
+        :tip="store.useNewModel ? '当前：新模型（点击切换旧模型）' : '当前：旧模型（点击切换新模型）'"
         @click="store.toggleModel()"
       >
         <span class="status-dot" :class="store.useNewModel ? 'is-active' : 'is-todo'" />
         {{ store.useNewModel ? '新模型' : '旧模型' }}
-      </button>
+      </Button>
       <span>
         <template v-if="store.useNewModel && store.docRef">
           元素 {{ store.getElements.length }}
@@ -59,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, watch } from 'vue'
 import { useResumeStore } from '../stores/resume'
 

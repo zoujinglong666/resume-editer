@@ -1,7 +1,9 @@
 <template>
+  <TooltipProvider :delay-duration="300">
   <div class="app h-screen flex flex-col overflow-hidden">
     <!-- Header -->
     <PhaseBar
+      :ai-panel-open="rightView === 'ai'"
       @export-pdf="exportVectorPdf"
       @import-json="handleImport"
       @export-json="handleExport"
@@ -10,6 +12,7 @@
       @quick-export-pdf="handleQuickExportPdf"
       @export-image="handleExportImage"
       @ai-optimize="showAiOptimize = true"
+      @toggle-ai-panel="rightView = rightView === 'ai' ? 'edit' : 'ai'"
     />
 
     <!-- Main Content -->
@@ -20,7 +23,8 @@
         @import-json="handleImport"
       />
       <Canvas />
-      <EditorPanel />
+      <EditorPanel v-show="rightView === 'edit'" />
+      <AiPanel v-show="rightView === 'ai'" class="app-ai-dock" />
     </div>
 
     <!-- Status Bar -->
@@ -49,15 +53,18 @@
   <div class="resume-print-root" aria-hidden="true">
     <div class="resume-canvas-preview" :style="printStyle" v-html="printHtml" />
   </div>
+  </TooltipProvider>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { TooltipProvider } from 'reka-ui'
 import { useResumeStore } from './stores/resume'
 import PhaseBar from './components/PhaseBar.vue'
 import GuidePanel from './components/GuidePanel.vue'
 import Canvas from './components/Canvas.vue'
 import EditorPanel from './components/EditorPanel.vue'
+import AiPanel from './components/AiPanel.vue'
 import StatusBar from './components/StatusBar.vue'
 import ResumePreviewDialog from './components/ResumePreviewDialog.vue'
 import FloatingToolbar from './components/FloatingToolbar.vue'
@@ -70,6 +77,7 @@ import { showAlert, showConfirm } from './utils/confirm'
 const store = useResumeStore()
 const showPreview = ref(false)
 const showAiOptimize = ref(false)
+const rightView = ref<'edit' | 'ai'>('edit')
 const showShortcuts = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 

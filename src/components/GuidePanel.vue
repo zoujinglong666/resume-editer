@@ -1,10 +1,10 @@
 <template>
   <div class="app-sidebar no-print">
     <!-- Template Gallery Entry (persistent) -->
-    <button class="template-gallery-trigger" @click="templateGalleryOpen = true">
+    <Button class="template-gallery-trigger" @click="templateGalleryOpen = true">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       模板库 · 各行业专业简历
-    </button>
+    </Button>
 
     <!-- Phase 1: Fill mode -->
     <template v-if="store.currentPhase === 'fill'">
@@ -58,24 +58,25 @@
     <!-- Phase 2: Style mode -->
     <template v-if="store.currentPhase === 'style'">
       <div class="panel-section" style="border-bottom: none;">
-        <button class="reset-appearance-btn" @click="store.resetAppearance()" title="将主题、字体、间距等外观恢复为默认设置">
+        <Button class="reset-appearance-btn" @click="store.resetAppearance()" tip="将主题、字体、间距等外观恢复为默认设置">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
           恢复默认设置
-        </button>
+        </Button>
       </div>
 
       <!-- Theme -->
       <div class="panel-section">
         <div class="panel-section-title">主题</div>
         <div class="flex flex-wrap" style="gap: var(--normal-gap);">
-          <button
-            v-for="theme in themes" :key="theme.id"
-            class="theme-dot"
-            :class="{ active: store.config.theme === theme.id }"
-            :style="{ background: theme.primaryColor }"
-            :title="theme.name"
-            @click="store.applyTheme(theme.id)"
-          />
+          <template v-for="theme in themes" :key="theme.id">
+            <Button
+              class="theme-dot"
+              :class="{ active: store.config.theme === theme.id }"
+              :style="{ background: theme.primaryColor }"
+              :tip="theme.name"
+              @click="store.applyTheme(theme.id)"
+            />
+          </template>
         </div>
         <div class="theme-preview-bar">
           <span class="theme-preview-name">{{ themeNames[store.config.theme] || '自定义' }}</span>
@@ -94,17 +95,18 @@
       <div class="panel-section">
         <div class="panel-section-title">标题样式</div>
         <div class="title-style-grid">
-          <button
-            v-for="s in titleStyles" :key="s.id"
-            class="title-style-btn"
-            :class="{ active: store.config.titleStyle === s.id }"
-            :title="s.name"
-            @click="store.setTitleStyle(s.id)"
-          >
-            <div class="title-style-preview" :class="`preview-${s.id}`">
-              <span>{{ s.name }}</span>
-            </div>
-          </button>
+          <template v-for="s in titleStyles" :key="s.id">
+            <Button
+              class="title-style-btn"
+              :class="{ active: store.config.titleStyle === s.id }"
+              :tip="s.name"
+              @click="store.setTitleStyle(s.id)"
+            >
+              <div class="title-style-preview" :class="`preview-${s.id}`">
+                <span>{{ s.name }}</span>
+              </div>
+            </Button>
+          </template>
         </div>
       </div>
 
@@ -141,10 +143,10 @@
         </label>
 
         <!-- Font Test Entry -->
-        <button class="font-test-trigger" @click="fontTestOpen = true">
+        <Button class="font-test-trigger" @click="fontTestOpen = true">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
           字体测试对比
-        </button>
+        </Button>
 
         <!-- Font Size with Quick Presets -->
         <div class="font-control-group">
@@ -153,17 +155,20 @@
             <span class="font-control-hint">正文文字大小</span>
           </div>
           <div class="font-size-presets">
-            <button
-              v-for="size in fontSizePresets"
-              :key="size"
+          <template v-for="size in fontSizePresets" :key="size">
+            <Button
               class="font-preset-btn"
               :class="{ active: store.config.fontSize === size }"
               @click="updateFontSize(size)"
-            >{{ size }}</button>
+            >{{ size }}</Button>
+          </template>
           </div>
-          <input type="range" min="10" max="20" step="1" :value="store.config.fontSize"
-            @input="updateFontSize(Number(($event.target as HTMLInputElement).value))"
-            class="sidebar-slider" />
+          <Slider
+            :model-value="store.config.fontSize"
+            :min="10" :max="20" :step="1"
+            @update:model-value="updateFontSize"
+            class="sidebar-slider"
+          />
           <div class="sidebar-slider-hints">
             <span>紧凑 10</span>
             <span class="sidebar-slider-current">{{ store.config.fontSize }}px</span>
@@ -185,9 +190,12 @@
             </div>
             <span class="font-lh-value">{{ store.config.lineHeight }}</span>
           </div>
-          <input type="range" min="1.2" max="2.0" step="0.1" :value="store.config.lineHeight"
-            @input="updateLineHeight(Number(($event.target as HTMLInputElement).value))"
-            class="sidebar-slider" />
+          <Slider
+            :model-value="store.config.lineHeight"
+            :min="1.2" :max="2.0" :step="0.1"
+            @update:model-value="updateLineHeight"
+            class="sidebar-slider"
+          />
           <div class="sidebar-slider-hints">
             <span>紧凑 1.2</span>
             <span class="sidebar-slider-current">{{ store.config.lineHeight }}</span>
@@ -204,9 +212,12 @@
             <span class="sidebar-label" style="margin-bottom: 0;">页边距</span>
             <span class="sidebar-slider-value">{{ store.config.pageMargin }} px</span>
           </div>
-          <input type="range" min="8" max="40" step="2" :value="store.config.pageMargin"
-            @input="updatePageMargin(Number(($event.target as HTMLInputElement).value))"
-            class="sidebar-slider" />
+          <Slider
+            :model-value="store.config.pageMargin"
+            :min="8" :max="40" :step="2"
+            @update:model-value="updatePageMargin"
+            class="sidebar-slider"
+          />
           <div class="sidebar-slider-hints">
             <span>8</span>
             <span>40</span>
@@ -319,10 +330,10 @@
             class="ui-input ui-input--dark"
             @keydown.enter="handleSaveSnapshot"
           />
-          <button
+          <Button
             class="ui-btn ui-btn--primary ui-btn--block"
             @click="handleSaveSnapshot"
-          >保存为快照</button>
+          >保存为快照</Button>
         </div>
       </div>
 
@@ -357,6 +368,8 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
+import Slider from './ui/Slider.vue'
 import { ref, computed } from 'vue'
 import { useResumeStore, THEME_PRESETS, FONT_PRESETS } from '../stores/resume'
 import AvatarUpload from './AvatarUpload.vue'

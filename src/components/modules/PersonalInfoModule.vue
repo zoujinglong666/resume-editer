@@ -48,16 +48,16 @@
                 @paste="onPaste"
               >{{ item[field.key] }}</span>
               <!-- Hover Delete Button (edit mode only) -->
-              <button
+              <Button
                 class="personal-field-delete-btn no-print"
                 @click.stop="clearField(item.id, field.key)"
-                :title="'清除' + field.label"
+                :tip="'清除' + field.label"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
-              </button>
+              </Button>
             </span>
           </template>
         </div>
@@ -81,17 +81,17 @@
             @paste="onPaste"
           >{{ item[field.key] }}</span>
           <!-- Hover Delete Button for custom fields -->
-          <button
+          <Button
             v-if="item[field.key]"
             class="personal-field-delete-btn no-print"
             @click.stop="clearField(item.id, field.key)"
-            :title="'清除' + field.label"
+            :tip="'清除' + field.label"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-          </button>
+          </Button>
         </div>
 
         <!-- Summary -->
@@ -110,27 +110,30 @@
     <!-- Avatar Upload -->
     <div class="shrink-0 no-print">
       <input ref="avatarInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="onAvatarChange" />
-      <div
-        class="personal-avatar-wrapper cursor-pointer"
-        :class="store.avatar.shape === 'circle' ? 'avatar-circle' : 'avatar-rounded'"
-        @click="avatarInput?.click()"
-        :title="store.avatar.url ? '点击更换头像' : '点击上传头像'"
-      >
+      <Tip :text="store.avatar.url ? '点击更换头像' : '点击上传头像'">
+        <div
+          class="personal-avatar-wrapper cursor-pointer"
+          :class="store.avatar.shape === 'circle' ? 'avatar-circle' : 'avatar-rounded'"
+          @click="avatarInput?.click()"
+        >
         <img v-if="store.avatar.url" :src="store.avatar.url" class="personal-avatar-img" />
         <div v-else class="personal-avatar-placeholder">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
       </div>
+      </Tip>
       <div v-if="store.avatar.url" class="flex items-center justify-center" style="gap: 4px; margin-top: 4px;">
-        <button class="avatar-shape-btn text-xs" :class="{ active: store.avatar.shape === 'circle' }" @click="setShape('circle')">圆</button>
-        <button class="avatar-shape-btn text-xs" :class="{ active: store.avatar.shape === 'rounded' }" @click="setShape('rounded')">方</button>
-        <button class="avatar-shape-btn text-xs text-[var(--color-error)]" @click="removeAvatar">删</button>
+        <Button class="avatar-shape-btn text-xs" :class="{ active: store.avatar.shape === 'circle' }" @click="setShape('circle')">圆</Button>
+        <Button class="avatar-shape-btn text-xs" :class="{ active: store.avatar.shape === 'rounded' }" @click="setShape('rounded')">方</Button>
+        <Button class="avatar-shape-btn text-xs text-[var(--color-error)]" @click="removeAvatar">删</Button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import Button from '../ui/Button.vue'
+import Tip from '../ui/Tip.vue'
 import { ref } from 'vue'
 import { useResumeStore } from '../../stores/resume'
 import { showAlert } from '../../utils/confirm'

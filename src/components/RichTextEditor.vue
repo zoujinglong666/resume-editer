@@ -2,71 +2,71 @@
   <div class="rich-editor">
     <!-- Toolbar -->
     <div class="rich-editor-toolbar" @mousedown.prevent>
-      <button
+      <Button
         type="button"
         class="rte-btn"
         :class="{ active: states.bold }"
-        title="加粗 (Ctrl+B)"
+        tip="加粗 (Ctrl+B)"
         @click="exec('bold')"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z"/><path d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z"/></svg>
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         class="rte-btn"
         :class="{ active: states.italic }"
-        title="斜体 (Ctrl+I)"
+        tip="斜体 (Ctrl+I)"
         @click="exec('italic')"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         class="rte-btn"
         :class="{ active: states.underline }"
-        title="下划线 (Ctrl+U)"
+        tip="下划线 (Ctrl+U)"
         @click="exec('underline')"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a6 6 0 006 6 6 6 0 006-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         class="rte-btn"
         :class="{ active: states.strikeThrough }"
-        title="删除线"
+        tip="删除线"
         @click="exec('strikeThrough')"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.3 19c.58-.87.97-1.9.97-3 0-1.56-.6-2.97-1.58-4.05"/><path d="M4.7 19c.58-.87.97-1.9.97-3 0-1.56-.6-2.97-1.58-4.05"/><path d="M2 12h20"/><path d="M6.5 5c1.3-1.3 3.1-2 5-2 3.87 0 7 3.13 7 7 0 1.9-.7 3.7-2 5"/></svg>
-      </button>
+      </Button>
 
       <div class="rte-divider"></div>
 
-      <button
+      <Button
         type="button"
         class="rte-btn"
         :class="{ active: states.insertUnorderedList }"
-        title="无序列表"
+        tip="无序列表"
         @click="exec('insertUnorderedList')"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         class="rte-btn"
         :class="{ active: states.insertOrderedList }"
-        title="有序列表"
+        tip="有序列表"
         @click="exec('insertOrderedList')"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-      </button>
+      </Button>
 
       <div class="rte-divider"></div>
 
       <div class="rte-color-wrap">
-        <button type="button" class="rte-btn rte-color-btn" title="文字颜色" @click="openColorPicker('foreColor')">
+        <Button type="button" class="rte-btn rte-color-btn" tip="文字颜色" @click="openColorPicker('foreColor')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3L5 14h12l-4-11z"/><path d="M7 14l-1.5 4h11L15 14"/><path d="M5 21h13"/></svg>
           <span class="rte-color-bar" :style="{ background: foreColorDisplay }"></span>
-        </button>
+        </Button>
         <input
           ref="foreColorRef"
           type="color"
@@ -77,10 +77,10 @@
       </div>
 
       <div class="rte-color-wrap">
-        <button type="button" class="rte-btn rte-color-btn" title="背景高亮" @click="openColorPicker('hiliteColor')">
+        <Button type="button" class="rte-btn rte-color-btn" tip="背景高亮" @click="openColorPicker('hiliteColor')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/><path d="M15 3h6v6"/><path d="M16 2 22 8"/></svg>
           <span class="rte-color-bar" :style="{ background: hiliteColorDisplay }"></span>
-        </button>
+        </Button>
         <input
           ref="hiliteColorRef"
           type="color"
@@ -92,40 +92,40 @@
 
       <div class="rte-divider"></div>
 
-      <button
+      <Button
         type="button"
         class="rte-btn"
         :class="{ active: states.justifyLeft }"
-        title="左对齐"
+        tip="左对齐"
         @click="exec('justifyLeft')"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         class="rte-btn"
         :class="{ active: states.justifyCenter }"
-        title="居中"
+        tip="居中"
         @click="exec('justifyCenter')"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
-      </button>
+      </Button>
 
       <div class="rte-divider"></div>
 
-      <button type="button" class="rte-btn" :class="{ active: states.formatBlock === 'blockquote' }" title="引用块" @click="exec('formatBlock', 'blockquote')">
+      <Button type="button" class="rte-btn" :class="{ active: states.formatBlock === 'blockquote' }" tip="引用块" @click="exec('formatBlock', 'blockquote')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3"/></svg>
-      </button>
+      </Button>
 
       <div class="rte-divider"></div>
 
-      <button type="button" class="rte-btn" title="插入链接" @click="insertLink">
+      <Button type="button" class="rte-btn" tip="插入链接" @click="insertLink">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-      </button>
+      </Button>
 
-      <button type="button" class="rte-btn rte-btn-danger" title="清除格式" @click="exec('removeFormat')">
+      <Button type="button" class="rte-btn rte-btn-danger" tip="清除格式" @click="exec('removeFormat')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
-      </button>
+      </Button>
     </div>
 
     <!-- Editor Content -->
@@ -141,6 +141,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import {
   applyRichCommand,

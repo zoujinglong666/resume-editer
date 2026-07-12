@@ -52,10 +52,10 @@
           @focusin="store.selectItem(item.id)">
           <div class="flex items-center justify-between" style="margin-bottom: var(--tight-gap);">
             <span class="text-xs font-medium text-[var(--primary-color)]">条目 {{ idx + 1 }}</span>
-            <button
+            <Button
               class="text-xs text-[var(--color-error)] hover:opacity-80 opacity-0 group-hover/item:opacity-100 transition-all"
               @click="store.removeItem(selectedModule.id, item.id)"
-            >删除</button>
+            >删除</Button>
           </div>
           <div style="display: flex; flex-direction: column; gap: var(--tight-gap);">
             <template v-for="(val, key) in item" :key="key">
@@ -86,14 +86,14 @@
       </div>
 
       <!-- Add Item Button -->
-      <button
+      <Button
         v-if="selectedModule.type !== 'personal'"
         class="w-full text-sm border border-dashed border-[var(--border-color)] rounded-md text-[var(--text-secondary)] hover:border-[var(--primary-color)] hover:text-[var(--primary-color)] transition-all"
         style="margin-top: var(--normal-gap); padding: var(--tight-gap);"
         @click="store.addItem(selectedModule.id)"
       >
         + 添加{{ getModuleTypeName(selectedModule.type) }}条目
-      </button>
+      </Button>
     </div>
 
     <!-- No selection -->
@@ -104,6 +104,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, computed } from 'vue'
 import { useResumeStore } from '../stores/resume'
 import type { ModuleType } from '../types'

@@ -6,7 +6,7 @@
       :style="positionStyle"
       @mousedown.prevent
     >
-      <button
+      <Button
         type="button"
         class="floating-ai-btn"
         @click="handlePolishSelection"
@@ -15,12 +15,13 @@
         <svg v-if="!isPolishing" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14h.01"/><path d="M8 14h.01"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
         <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56" class="ai-spinner"/></svg>
         <span>{{ isPolishing ? '润色中...' : 'AI 润色' }}</span>
-      </button>
+      </Button>
     </div>
   </Teleport>
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { loadAiConfig, aiPolishContent, type AiConfig } from '../utils/ai'
 import { showToast } from '../utils/toast'

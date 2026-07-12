@@ -12,10 +12,11 @@
         >{{ item.name }}</span>
         <PopoverRoot>
           <PopoverTrigger as-child>
-            <span
-              class="item-date item-date-clickable"
-              :title="'点击编辑日期'"
-            >{{ item.dateRange || '点击设置时间' }}</span>
+            <Tip text="点击编辑日期">
+              <span
+                class="item-date item-date-clickable"
+              >{{ item.dateRange || '点击设置时间' }}</span>
+            </Tip>
           </PopoverTrigger>
           <PopoverPortal>
             <PopoverContent class="date-picker-popup" align="end" :side-offset="6">
@@ -38,10 +39,9 @@
                   <label>
                     <span>结束时间</span>
                     <label class="date-picker-present">
-                      <input
-                        type="checkbox"
-                        :checked="isPresent(item.dateRange)"
-                        @change="onPresentToggle(item.id, ($event.target as HTMLInputElement).checked)"
+                      <Switch
+                        :model-value="isPresent(item.dateRange)"
+                        @update:model-value="(v: boolean) => onPresentToggle(item.id, v)"
                       />
                       <span>至今</span>
                     </label>
@@ -110,6 +110,8 @@ import type { ResumeModule } from '../../types'
 import ItemContextMenu, { type ContextMenuItem } from '../ItemContextMenu.vue'
 import { handleListEnter, handlePaste } from '../../utils/smartPaste'
 import { PopoverRoot, PopoverTrigger, PopoverPortal, PopoverContent, PopoverClose } from 'reka-ui'
+import Switch from '../ui/Switch.vue'
+import Tip from '../ui/Tip.vue'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()

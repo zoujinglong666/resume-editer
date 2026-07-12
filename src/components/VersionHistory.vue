@@ -5,10 +5,10 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         版本历史
       </span>
-      <button class="version-save-btn" @click="saveSnapshot" title="保存当前快照">
+      <Button class="version-save-btn" @click="saveSnapshot" tip="保存当前快照">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         保存快照
-      </button>
+      </Button>
     </div>
 
     <!-- Auto-save info -->
@@ -40,14 +40,14 @@
           {{ snap.moduleCount }} 个模块 · {{ snap.charCount }} 字
         </div>
         <div v-if="selectedSnapshotId === snap.id" class="version-item-actions">
-          <button class="version-action-btn" @click.stop="restoreSnapshot(snap.id)">
+          <Button class="version-action-btn" @click.stop="restoreSnapshot(snap.id)">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
             恢复此版本
-          </button>
-          <button class="version-action-btn version-action-delete" @click.stop="deleteSnapshot(snap.id)">
+          </Button>
+          <Button class="version-action-btn version-action-delete" @click.stop="deleteSnapshot(snap.id)">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             删除
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -55,6 +55,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useResumeStore } from '../stores/resume'
 import { showToast } from '../utils/toast'

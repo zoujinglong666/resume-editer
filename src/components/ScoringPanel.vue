@@ -5,9 +5,9 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         简历评分
       </span>
-      <button class="scoring-refresh-btn" @click="recalculate" title="重新评分">
+      <Button class="scoring-refresh-btn" @click="recalculate" tip="重新评分">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      </button>
+      </Button>
     </div>
 
     <!-- Score Circle -->
@@ -68,6 +68,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { computed } from 'vue'
 import { useResumeStore } from '../stores/resume'
 import { scoreResume, getGradeColor, getGradeLabel } from '../utils/resumeScorer'

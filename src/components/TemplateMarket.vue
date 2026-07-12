@@ -9,13 +9,13 @@
 
     <!-- Category Filter -->
     <div class="tpl-categories">
-      <button
+      <Button
         v-for="cat in categories"
         :key="cat.key"
         class="tpl-cat-btn"
         :class="{ active: activeCategory === cat.key }"
         @click="activeCategory = cat.key"
-      >{{ cat.label }}</button>
+      >{{ cat.label }}</Button>
     </div>
 
     <!-- Template Grid -->
@@ -36,7 +36,7 @@
             <span v-for="tag in tpl.tags" :key="tag" class="tpl-tag">{{ tag }}</span>
           </div>
         </div>
-        <button class="tpl-card-btn" @click.stop="loadBuiltInTemplate(tpl)">使用</button>
+        <Button class="tpl-card-btn" @click.stop="loadBuiltInTemplate(tpl)">使用</Button>
       </div>
     </div>
 
@@ -44,10 +44,10 @@
     <div class="tpl-section">
       <div class="tpl-section-header">
         <span>我的模板</span>
-        <button class="tpl-save-btn" @click="showSaveDialog = true">
+        <Button class="tpl-save-btn" @click="showSaveDialog = true">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           保存为模板
-        </button>
+        </Button>
       </div>
 
       <div v-if="store.templates.length === 0" class="tpl-empty">
@@ -66,8 +66,8 @@
             <span class="tpl-user-time">{{ formatTime(tpl.updatedAt) }}</span>
           </div>
           <div class="tpl-user-actions">
-            <button class="tpl-action-btn" @click="store.loadTemplate(tpl.id)">加载</button>
-            <button class="tpl-action-btn tpl-action-del" @click="store.deleteTemplate(tpl.id)">删除</button>
+            <Button class="tpl-action-btn" @click="store.loadTemplate(tpl.id)">加载</Button>
+            <Button class="tpl-action-btn tpl-action-del" @click="store.deleteTemplate(tpl.id)">删除</Button>
           </div>
         </div>
       </div>
@@ -84,8 +84,8 @@
           @keyup.enter="handleSaveTemplate"
         />
         <div class="tpl-dialog-actions">
-          <button class="tpl-dialog-cancel" @click="showSaveDialog = false">取消</button>
-          <button class="tpl-dialog-confirm" @click="handleSaveTemplate">保存</button>
+          <Button class="tpl-dialog-cancel" @click="showSaveDialog = false">取消</Button>
+          <Button class="tpl-dialog-confirm" @click="handleSaveTemplate">保存</Button>
         </div>
       </div>
     </div>
@@ -93,6 +93,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, computed } from 'vue'
 import { useResumeStore } from '../stores/resume'
 import { showToast } from '../utils/toast'

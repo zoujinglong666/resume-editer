@@ -4,14 +4,15 @@
     <div class="panel-section">
       <div class="panel-section-title">🎨 主题</div>
       <div class="flex flex-wrap" style="gap: var(--tight-gap);">
-        <button
-          v-for="theme in themes" :key="theme.id"
-          class="theme-dot"
-          :class="{ active: store.config.theme === theme.id }"
-          :style="{ background: theme.primaryColor }"
-          :title="theme.name"
-          @click="store.applyTheme(theme.id)"
-        />
+        <template v-for="theme in themes" :key="theme.id">
+          <Button
+            class="theme-dot"
+            :class="{ active: store.config.theme === theme.id }"
+            :style="{ background: theme.primaryColor }"
+            :tip="theme.name"
+            @click="store.applyTheme(theme.id)"
+          />
+        </template>
       </div>
       <!-- Custom Color -->
       <div class="flex items-center" style="margin-top: var(--normal-gap); gap: var(--tight-gap);">
@@ -43,18 +44,18 @@
       </label>
       <label class="block" style="margin-bottom: var(--tight-gap);">
         <span class="text-xs text-[var(--text-secondary)] block" style="margin-bottom: var(--form-label-gap);">字号: {{ store.config.fontSize }}px</span>
-        <input
-          type="range" min="10" max="20" step="1" :value="store.config.fontSize"
-          @input="updateFontSize(Number(($event.target as HTMLInputElement).value))"
-          class="w-full accent-[var(--primary-color)]"
+        <Slider
+          :model-value="store.config.fontSize"
+          :min="10" :max="20" :step="1"
+          @update:model-value="updateFontSize"
         />
       </label>
       <label class="block" style="margin-bottom: var(--tight-gap);">
         <span class="text-xs text-[var(--text-secondary)] block" style="margin-bottom: var(--form-label-gap);">行高: {{ store.config.lineHeight }}</span>
-        <input
-          type="range" min="1.2" max="2.0" step="0.1" :value="store.config.lineHeight"
-          @input="updateLineHeight(Number(($event.target as HTMLInputElement).value))"
-          class="w-full accent-[var(--primary-color)]"
+        <Slider
+          :model-value="store.config.lineHeight"
+          :min="1.2" :max="2.0" :step="0.1"
+          @update:model-value="updateLineHeight"
         />
       </label>
     </div>
@@ -64,10 +65,10 @@
       <div class="panel-section-title">📐 间距</div>
       <label class="block">
         <span class="text-xs text-[var(--text-secondary)] block" style="margin-bottom: var(--form-label-gap);">页边距: {{ store.config.pageMargin }}px</span>
-        <input
-          type="range" min="8" max="40" step="2" :value="store.config.pageMargin"
-          @input="updatePageMargin(Number(($event.target as HTMLInputElement).value))"
-          class="w-full accent-[var(--primary-color)]"
+        <Slider
+          :model-value="store.config.pageMargin"
+          :min="8" :max="40" :step="2"
+          @update:model-value="updatePageMargin"
         />
       </label>
     </div>
@@ -76,21 +77,21 @@
     <div class="panel-section">
       <div class="panel-section-title">📤 导出</div>
       <div class="flex flex-col" style="gap: var(--tight-gap);">
-        <button
+        <Button
           @click="onExportHtml"
           class="w-full rounded-md text-sm font-medium transition-all hover:opacity-90"
           style="padding: var(--space-1_5) var(--space-2); background: var(--primary-color); color: #fff;"
-        >🌐 导出 HTML</button>
-        <button
+        >🌐 导出 HTML</Button>
+        <Button
           @click="onExportWord"
           class="w-full rounded-md text-sm font-medium transition-all hover:opacity-90"
           style="padding: var(--space-1_5) var(--space-2); background: #2b5797; color: #fff;"
-        >📄 导出 Word</button>
-        <button
+        >📄 导出 Word</Button>
+        <Button
           @click="onExportMarkdown"
           class="w-full rounded-md text-sm font-medium border border-[var(--border-color)] hover:bg-gray-50 transition-all"
           style="padding: var(--space-1_5) var(--space-2);"
-        >📝 导出 Markdown</button>
+        >📝 导出 Markdown</Button>
       </div>
     </div>
 
@@ -108,20 +109,20 @@
           style="padding: var(--space-1_5) var(--space-2);"
           @keydown.enter="handleSaveVersion"
         />
-        <button
+        <Button
           @click="handleSaveVersion"
           class="rounded-md text-sm text-white hover:opacity-90 transition-all shrink-0"
           style="padding: var(--space-1_5) var(--space-2); background: var(--primary-color);"
-        >存为新版本</button>
+        >存为新版本</Button>
       </div>
 
       <!-- Update active version -->
-      <button
+      <Button
         v-if="store.activeVersionId"
         @click="store.updateActiveVersion()"
         class="w-full rounded-md text-sm transition-all"
         style="padding: var(--space-1_5); margin-bottom: var(--space-1); border: 1px solid var(--border-color); color: var(--text-secondary);"
-      >💾 更新当前版本「{{ activeVersionName }}」</button>
+      >💾 更新当前版本「{{ activeVersionName }}」</Button>
 
       <!-- Version list -->
       <div style="display: flex; flex-direction: column; gap: var(--space-1);">
@@ -135,16 +136,16 @@
         >
           <span class="text-sm flex-1 truncate">{{ ver.name }}</span>
           <span class="text-xs text-[var(--text-muted)] shrink-0">{{ formatDate(ver.updatedAt) }}</span>
-          <button
+          <Button
             class="text-xs opacity-0 group-hover/ver:opacity-100 transition-all shrink-0"
             style="padding: 2px 4px; color: var(--primary-color); background: rgba(99,102,241,0.08); border-radius: 4px;"
             @click.stop="handleRenameVersion(ver)"
-          >改名</button>
-          <button
+          >改名</Button>
+          <Button
             class="text-xs text-[var(--color-error)] hover:opacity-80 opacity-0 group-hover/ver:opacity-100 transition-all shrink-0"
             style="padding: 2px 4px;"
             @click.stop="store.deleteVersion(ver.id)"
-          >删除</button>
+          >删除</Button>
         </div>
 
         <div v-if="store.versions.length === 0" class="text-xs text-[var(--text-muted)] text-center" style="padding: var(--space-2);">
@@ -157,11 +158,11 @@
     <div class="panel-section">
       <div class="flex items-center justify-between" style="margin-bottom: var(--normal-gap);">
         <div class="panel-section-title" style="margin: 0;">📁 模板管理</div>
-        <button
+        <Button
           class="text-xs rounded-md transition-all hover:opacity-90"
           style="padding: 3px 8px; color: #fff; background: var(--primary-color);"
           @click="compareOpen = true"
-        >并排对比</button>
+        >并排对比</Button>
       </div>
 
       <!-- Save current as template -->
@@ -174,11 +175,11 @@
           style="padding: var(--space-1_5) var(--space-2);"
           @keydown.enter="handleSaveTemplate"
         />
-        <button
+        <Button
           @click="handleSaveTemplate"
           class="rounded-md text-sm text-white hover:opacity-90 transition-all shrink-0"
           style="padding: var(--space-1_5) var(--space-2); background: var(--primary-color);"
-        >保存</button>
+        >保存</Button>
       </div>
 
       <!-- Template list -->
@@ -202,16 +203,16 @@
         >
           <span class="text-sm flex-1 truncate">{{ tpl.name }}</span>
           <span class="text-xs text-[var(--text-muted)] shrink-0">{{ formatDate(tpl.updatedAt) }}</span>
-          <button
+          <Button
             class="text-xs opacity-0 group-hover/tpl:opacity-100 transition-all shrink-0"
             style="padding: 2px 6px; color: var(--primary-color); background: rgba(99,102,241,0.08); border-radius: 4px;"
             @click.stop="previewTemplate = tpl; previewTemplateOpen = true"
-          >查看</button>
-          <button
+          >查看</Button>
+          <Button
             class="text-xs text-[var(--color-error)] hover:opacity-80 opacity-0 group-hover/tpl:opacity-100 transition-all shrink-0"
             style="padding: 2px 4px;"
             @click.stop="store.deleteTemplate(tpl.id)"
-          >删除</button>
+          >删除</Button>
         </div>
 
         <div v-if="store.templates.length === 0" class="text-xs text-[var(--text-muted)] text-center" style="padding: var(--space-2);">
@@ -234,6 +235,8 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
+import Slider from './ui/Slider.vue'
 import { ref, computed } from 'vue'
 import { useResumeStore, THEME_PRESETS } from '../stores/resume'
 import type { ResumeTemplate, ResumeVersion } from '../types'

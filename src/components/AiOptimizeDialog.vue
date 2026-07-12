@@ -6,7 +6,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L19 9.2l-4.3 2.4L13.8 16 12 20l-1.8-4-4.3-2.4L13 9.2z"/><path d="M19 14l.7 1.8L21.5 16.5 19.7 17.2 19 19l-.7-1.8L16.5 16.5 18.3 15.8z" transform="translate(-2 -1)"/></svg>
           AI 优化简历
         </div>
-        <button class="ai-opt-close" @click="close" aria-label="关闭">&times;</button>
+        <Button class="ai-opt-close" @click="close" aria-label="关闭">&times;</Button>
       </div>
 
       <div class="ai-opt-body">
@@ -26,12 +26,12 @@
         <textarea class="ai-opt-preview" :value="fullPrompt" readonly rows="10" />
 
         <div class="ai-opt-actions">
-          <button class="ai-opt-btn ai-opt-btn--primary" @click="copyFull">
+          <Button class="ai-opt-btn ai-opt-btn--primary" @click="copyFull">
             {{ copiedFull ? '已复制 ✓' : '复制「简历 + 优化指令」' }}
-          </button>
-          <button class="ai-opt-btn" @click="copyResume">
+          </Button>
+          <Button class="ai-opt-btn" @click="copyResume">
             {{ copiedResume ? '已复制 ✓' : '仅复制简历（Markdown）' }}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -39,6 +39,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, computed } from 'vue'
 import { useResumeStore } from '../stores/resume'
 import { buildMarkdown } from '../utils/exportResume'

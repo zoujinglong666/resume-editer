@@ -2,11 +2,11 @@
   <div class="ats-checker">
     <div class="ats-header">
       <span class="ats-title">🔍 ATS 优化检查</span>
-      <button class="ats-check-btn" :disabled="isChecking" @click="runAtsCheck">
+      <Button class="ats-check-btn" :disabled="isChecking" @click="runAtsCheck">
         <svg v-if="!isChecking" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56" class="ats-spinner"/></svg>
         {{ isChecking ? '检查中...' : '检查' }}
-      </button>
+      </Button>
     </div>
 
     <!-- Target Job Input -->
@@ -72,6 +72,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, computed } from 'vue'
 import { useResumeStore } from '../stores/resume'
 

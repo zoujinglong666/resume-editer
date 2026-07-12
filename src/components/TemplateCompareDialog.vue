@@ -11,27 +11,27 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg>
             <span>模板并排对比</span>
           </div>
-          <button class="cmp-close" @click="emit('update:open', false)">
+          <Button class="cmp-close" @click="emit('update:open', false)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+          </Button>
         </div>
 
         <!-- Target selector (right pane) -->
         <div class="cmp-toolbar">
           <span class="cmp-toolbar-label">对比对象（右）：</span>
-          <div class="cmp-tabs">
-            <button
-              class="cmp-tab"
-              :class="{ active: targetMode === 'template' }"
-              :disabled="store.templates.length === 0"
-              @click="targetMode = 'template'"
-            >已存模板</button>
-            <button
-              class="cmp-tab"
-              :class="{ active: targetMode === 'theme' }"
-              @click="targetMode = 'theme'"
-            >仅换主题样式</button>
-          </div>
+          <TabsRoot v-model="targetMode" class="cmp-tabs">
+            <TabsList class="cmp-tabs-list">
+              <TabsTrigger
+                value="template"
+                :disabled="store.templates.length === 0"
+                class="cmp-tab"
+              >已存模板</TabsTrigger>
+              <TabsTrigger
+                value="theme"
+                class="cmp-tab"
+              >仅换主题样式</TabsTrigger>
+            </TabsList>
+          </TabsRoot>
           <select v-if="targetMode === 'template'" v-model="targetTemplateId" class="cmp-select">
             <option v-for="t in store.templates" :key="t.id" :value="t.id">{{ t.name }}</option>
           </select>
@@ -64,6 +64,8 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
+import { TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import { ref, computed } from 'vue'
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from 'reka-ui'
 import { useResumeStore, THEME_PRESETS, generateColorScale } from '../stores/resume'

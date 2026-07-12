@@ -9,7 +9,7 @@
       >
         <img :src="store.avatar.url" alt="头像" style="width:100%;height:100%;" />
       </div>
-      <button @click="removeAvatar" class="text-xs text-[var(--color-error)] hover:underline">移除</button>
+      <Button @click="removeAvatar" class="text-xs text-[var(--color-error)] hover:underline">移除</Button>
     </div>
 
     <!-- Upload Button -->
@@ -30,21 +30,22 @@
     <!-- Shape Toggle -->
     <div v-if="store.avatar.url" class="flex items-center" style="margin-top: var(--space-2_5); gap: var(--tight-gap);">
       <span class="avatar-shape-label">形状</span>
-      <button
+      <Button
         @click="setShape('circle')"
         class="avatar-shape-btn"
         :class="{ active: store.avatar.shape === 'circle' }"
-      >圆形</button>
-      <button
+      >圆形</Button>
+      <Button
         @click="setShape('rounded')"
         class="avatar-shape-btn"
         :class="{ active: store.avatar.shape === 'rounded' }"
-      >圆角矩形</button>
+      >圆角矩形</Button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { useResumeStore } from '../stores/resume'
 import { showAlert } from '../utils/confirm'
 

@@ -4,41 +4,41 @@
     <div class="flex items-center" style="gap: var(--normal-gap);">
       <span class="text-lg font-bold" style="color: var(--primary-color)">📄 简历编辑器</span>
       <div class="flex items-center border-l border-[var(--border-color)]" style="gap: var(--space-1); padding-left: var(--normal-gap);">
-        <button
+        <Button
           @click="store.undo()"
           :disabled="!store.canUndo"
           class="rounded-md text-sm hover:bg-gray-100 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           style="padding: var(--space-1_5);"
-          title="撤销 (Ctrl+Z)"
+          tip="撤销 (Ctrl+Z)"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg>
-        </button>
-        <button
+        </Button>
+        <Button
           @click="store.redo()"
           :disabled="!store.canRedo"
           class="rounded-md text-sm hover:bg-gray-100 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
           style="padding: var(--space-1_5);"
-          title="重做 (Ctrl+Y)"
+          tip="重做 (Ctrl+Y)"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 019-9 9 9 0 016 2.3L21 13"/></svg>
-        </button>
+        </Button>
       </div>
     </div>
 
     <!-- Center: Actions -->
     <div class="flex items-center" style="gap: var(--tight-gap);">
-      <button @click="$emit('export-pdf')" class="rounded-md text-sm font-medium text-white transition-all hover:opacity-90" style="padding: var(--space-1_5) var(--normal-gap); background: var(--primary-color)">
+      <Button @click="$emit('export-pdf')" class="rounded-md text-sm font-medium text-white transition-all hover:opacity-90" style="padding: var(--space-1_5) var(--normal-gap); background: var(--primary-color)">
         导出
-      </button>
-      <button @click="$emit('export-json')" class="rounded-md text-sm border border-[var(--border-color)] hover:bg-gray-50 transition-all" style="padding: var(--space-1_5) var(--normal-gap);">
+      </Button>
+      <Button @click="$emit('export-json')" class="rounded-md text-sm border border-[var(--border-color)] hover:bg-gray-50 transition-all" style="padding: var(--space-1_5) var(--normal-gap);">
         导出 JSON
-      </button>
-      <button @click="$emit('import-json')" class="rounded-md text-sm border border-[var(--border-color)] hover:bg-gray-50 transition-all" style="padding: var(--space-1_5) var(--normal-gap);">
+      </Button>
+      <Button @click="$emit('import-json')" class="rounded-md text-sm border border-[var(--border-color)] hover:bg-gray-50 transition-all" style="padding: var(--space-1_5) var(--normal-gap);">
         导入 JSON
-      </button>
-      <button @click="$emit('reset')" class="rounded-md text-sm text-[var(--color-error)] border border-[var(--color-error-200)] hover:bg-[var(--color-error-50)] transition-all" style="padding: var(--space-1_5) var(--normal-gap);">
+      </Button>
+      <Button @click="$emit('reset')" class="rounded-md text-sm text-[var(--color-error)] border border-[var(--color-error-200)] hover:bg-[var(--color-error-50)] transition-all" style="padding: var(--space-1_5) var(--normal-gap);">
         重置
-      </button>
+      </Button>
     </div>
 
     <!-- Right: spacer -->
@@ -49,6 +49,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { useResumeStore } from '../stores/resume'
 
 const store = useResumeStore()

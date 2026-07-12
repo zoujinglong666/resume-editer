@@ -19,17 +19,17 @@
         />
 
         <div class="app-confirm-actions">
-          <button
+          <Button
             v-if="mode !== 'alert'"
             type="button"
             class="app-confirm-btn app-confirm-btn--ghost"
             @click="onCancel"
-          >{{ cancelText }}</button>
-          <button
+          >{{ cancelText }}</Button>
+          <Button
             type="button"
             class="app-confirm-btn app-confirm-btn--primary"
             @click="onConfirm"
-          >{{ confirmText }}</button>
+          >{{ confirmText }}</Button>
         </div>
       </AlertDialogContent>
     </AlertDialogPortal>
@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, watch, nextTick } from 'vue'
 import {
   AlertDialogRoot,

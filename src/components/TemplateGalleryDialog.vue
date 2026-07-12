@@ -11,9 +11,9 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
             <span>模板库 · 各行业专业简历</span>
           </div>
-          <button class="tpl-gallery-close" @click="emit('update:open', false)">
+          <Button class="tpl-gallery-close" @click="emit('update:open', false)">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+          </Button>
         </div>
 
         <!-- Hint -->
@@ -26,18 +26,18 @@
           <div class="tpl-search">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input v-model="search" class="tpl-search-input" type="text" placeholder="搜索模板 / 行业 / 关键词" />
-            <button v-if="search" class="tpl-search-clear" @click="search = ''" aria-label="清除">
+            <Button v-if="search" class="tpl-search-clear" @click="search = ''" aria-label="清除">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+            </Button>
           </div>
           <div class="tpl-cats">
-            <button
+            <Button
               v-for="c in categories"
               :key="c"
               class="tpl-cat"
               :class="{ 'is-active': activeCat === c }"
               @click="activeCat = c"
-            >{{ c }}</button>
+            >{{ c }}</Button>
           </div>
         </div>
 
@@ -71,8 +71,8 @@
               </div>
               <div class="tpl-card-desc">{{ tpl.description }}</div>
               <div class="tpl-card-actions">
-                <button class="tpl-card-btn tpl-card-btn--ghost" @click="openPreview(tpl)">预览</button>
-                <button class="tpl-card-btn tpl-card-btn--primary" :style="{ background: tpl.color }" @click="useTemplate(tpl)">使用模板</button>
+                <Button class="tpl-card-btn tpl-card-btn--ghost" @click="openPreview(tpl)">预览</Button>
+                <Button class="tpl-card-btn tpl-card-btn--primary" :style="{ background: tpl.color }" @click="useTemplate(tpl)">使用模板</Button>
               </div>
             </div>
           </div>
@@ -96,6 +96,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from './ui/Button.vue'
 import { ref, computed } from 'vue'
 import { DialogRoot, DialogPortal, DialogOverlay, DialogContent, DialogTitle } from 'reka-ui'
 import type { ResumeTemplate } from '../types'
