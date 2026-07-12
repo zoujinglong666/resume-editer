@@ -320,6 +320,39 @@
         </div>
       </div>
 
+      <!-- 导出页边距：上/右/下/左，单位 mm -->
+      <div class="panel-section">
+        <div class="panel-section-title">页面边距 (mm)</div>
+        <div class="margin-grid">
+          <label class="margin-field">
+            <span>上</span>
+            <input type="number" min="0" max="60" step="1" class="ui-input ui-input--dark margin-input" v-model.number="store.config.marginTop" />
+          </label>
+          <label class="margin-field">
+            <span>右</span>
+            <input type="number" min="0" max="60" step="1" class="ui-input ui-input--dark margin-input" v-model.number="store.config.marginRight" />
+          </label>
+          <label class="margin-field">
+            <span>下</span>
+            <input type="number" min="0" max="60" step="1" class="ui-input ui-input--dark margin-input" v-model.number="store.config.marginBottom" />
+          </label>
+          <label class="margin-field">
+            <span>左</span>
+            <input type="number" min="0" max="60" step="1" class="ui-input ui-input--dark margin-input" v-model.number="store.config.marginLeft" />
+          </label>
+        </div>
+        <div class="margin-presets">
+          <span class="margin-presets-label">快速设置</span>
+          <div class="margin-preset-btns">
+            <button type="button" class="margin-preset-btn" @click="applyPresetMargin(4)">4mm</button>
+            <button type="button" class="margin-preset-btn" @click="applyPresetMargin(8)">8mm</button>
+            <button type="button" class="margin-preset-btn" @click="applyPresetMargin(12)">12mm</button>
+            <button type="button" class="margin-preset-btn" @click="applyPresetMargin(16)">16mm</button>
+          </div>
+        </div>
+        <button type="button" class="margin-uniform-btn" @click="applyUniformMargin">四边统一为「上」的值</button>
+      </div>
+
       <div class="panel-section" style="border-bottom: none;">
         <div class="panel-section-title">保存快照</div>
         <div style="display: flex; flex-direction: column; gap: var(--tight-gap);">
@@ -499,5 +532,17 @@ function updateLineHeight(val: number) {
 function updatePageMargin(val: number) {
   store.config.pageMargin = val
   document.documentElement.style.setProperty('--page-margin', `${val}px`)
+}
+function applyUniformMargin() {
+  const v = store.config.marginTop
+  store.config.marginRight = v
+  store.config.marginBottom = v
+  store.config.marginLeft = v
+}
+function applyPresetMargin(mm: number) {
+  store.config.marginTop = mm
+  store.config.marginRight = mm
+  store.config.marginBottom = mm
+  store.config.marginLeft = mm
 }
 </script>

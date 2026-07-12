@@ -63,6 +63,10 @@ export interface ResumeConfig {
   fontSize: number
   lineHeight: number
   pageMargin: number
+  marginTop: number
+  marginRight: number
+  marginBottom: number
+  marginLeft: number
   moduleGap: number
   itemGap: number
   titleStyle: TitleStyle

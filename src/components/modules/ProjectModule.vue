@@ -10,15 +10,12 @@
           @blur="updateField(item.id, 'name', $event)"
           @paste="onPaste"
         >{{ item.name }}</span>
-        <PopoverRoot>
-          <PopoverTrigger as-child>
-            <Tip text="点击编辑日期">
-              <span
-                class="item-date item-date-clickable"
-              >{{ item.dateRange || '点击设置时间' }}</span>
-            </Tip>
-          </PopoverTrigger>
-          <PopoverPortal>
+        <Tip text="点击编辑日期">
+          <PopoverRoot>
+            <PopoverTrigger as-child>
+              <span class="item-date item-date-clickable">{{ item.dateRange || '点击设置时间' }}</span>
+            </PopoverTrigger>
+            <PopoverPortal>
             <PopoverContent class="date-picker-popup" align="end" :side-offset="6">
               <div class="date-picker-header">
                 <span>选择时间范围</span>
@@ -59,6 +56,7 @@
             </PopoverContent>
           </PopoverPortal>
         </PopoverRoot>
+        </Tip>
       </div>
 
       <div class="mt-1">
@@ -200,15 +198,31 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 // ---- Date Picker (Reka Popover) ----
-function getStartMonth(dateRange?: string): string {
+// 存储格式为 yyyy.MM（如 2018.09）；<input type="month"> 仅接受 yyyy-MM
+function toInputMonth(s: string): string {
+  const m = s.trim().match(/^(\d{4})[.\-](\d{1,2})$/)
+  if (!m) return ''
+  return `${m[1]}-${m[2].padStart(2, '0')}`
+}
+function fromInputMonth(s: string): string {
+  const m = s.match(/^(\d{4})-(\d{1,2})$/)
+  if (!m) return s
+  return `${m[1]}.${m[2].padStart(2, '0')}`
+}
+function rawStart(dateRange?: string): string {
   if (!dateRange) return ''
   return dateRange.split(' ~ ')[0] || ''
 }
-function getEndMonth(dateRange?: string): string {
+function rawEnd(dateRange?: string): string {
   if (!dateRange) return ''
-  const parts = dateRange.split(' ~ ')
-  if (!parts[1] || parts[1] === '至今') return ''
-  return parts[1]
+  const end = dateRange.split(' ~ ')[1]
+  return !end || end === '至今' ? '' : end
+}
+function getStartMonth(dateRange?: string): string {
+  return toInputMonth(rawStart(dateRange))
+}
+function getEndMonth(dateRange?: string): string {
+  return toInputMonth(rawEnd(dateRange))
 }
 function isPresent(dateRange?: string): boolean {
   if (!dateRange) return true
@@ -217,19 +231,19 @@ function isPresent(dateRange?: string): boolean {
 function onStartDateChange(itemId: string, value: string) {
   const item = props.module.items.find(i => i.id === itemId)
   if (!item) return
-  const end = isPresent(item.dateRange) ? '至今' : (getEndMonth(item.dateRange) || '')
-  store.updateItem(props.module.id, itemId, 'dateRange', `${value} ~ ${end}`)
+  const end = isPresent(item.dateRange) ? '至今' : (rawEnd(item.dateRange) || '')
+  store.updateItem(props.module.id, itemId, 'dateRange', `${fromInputMonth(value)} ~ ${end}`)
 }
 function onEndDateChange(itemId: string, value: string) {
   const item = props.module.items.find(i => i.id === itemId)
   if (!item) return
-  const start = getStartMonth(item.dateRange) || ''
-  store.updateItem(props.module.id, itemId, 'dateRange', `${start} ~ ${value}`)
+  const start = rawStart(item.dateRange) || ''
+  store.updateItem(props.module.id, itemId, 'dateRange', `${start} ~ ${fromInputMonth(value)}`)
 }
 function onPresentToggle(itemId: string, checked: boolean) {
   const item = props.module.items.find(i => i.id === itemId)
   if (!item) return
-  const start = getStartMonth(item.dateRange) || ''
+  const start = rawStart(item.dateRange) || ''
   store.updateItem(props.module.id, itemId, 'dateRange', checked ? `${start} ~ 至今` : `${start} ~ `)
 }
 </script>

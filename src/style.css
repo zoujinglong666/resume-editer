@@ -815,6 +815,7 @@ a:focus-visible,
    ═══════════════════════════════════════════════════════════════ */
 .a4-canvas {
   width: 210mm;
+  max-width: 100%;
   min-height: 297mm;
   background: var(--surface-color);
   box-shadow:
@@ -3546,6 +3547,81 @@ html { scroll-behavior: smooth; }
   color: var(--primary-400);
 }
 
+/* ===== 导出页边距（上/右/下/左） ===== */
+.margin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+.margin-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1_5);
+  font-size: 12px;
+  color: var(--sidebar-muted);
+}
+.margin-field > span {
+  width: 14px;
+  flex-shrink: 0;
+  text-align: center;
+}
+.margin-input {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  font-size: 13px;
+  text-align: center;
+}
+.margin-uniform-btn {
+  margin-top: var(--space-2);
+  width: 100%;
+  padding: var(--space-1_5) var(--space-2);
+  font-size: 12px;
+  color: var(--sidebar-text);
+  background: var(--surface-hover, rgba(255,255,255,0.04));
+  border: 1px solid var(--sidebar-border, rgba(255,255,255,0.12));
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+}
+.margin-uniform-btn:hover {
+  border-color: var(--primary-400);
+  color: var(--primary-400);
+}
+
+/* 导出页边距预设（4 的倍数） */
+.margin-presets {
+  margin-top: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.margin-presets-label {
+  font-size: 11px;
+  color: var(--sidebar-muted);
+  opacity: 0.8;
+}
+.margin-preset-btns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-1_5);
+}
+.margin-preset-btn {
+  padding: var(--space-1) 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--sidebar-text);
+  background: var(--surface-hover, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.12));
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+}
+.margin-preset-btn:hover {
+  border-color: var(--primary-400);
+  color: var(--primary-400);
+  background: rgba(45, 95, 124, 0.15);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Avatar Upload Zone (Dark Sidebar)
    ═══════════════════════════════════════════════════════════════ */
@@ -3828,6 +3904,7 @@ html { scroll-behavior: smooth; }
     0 4px 16px -8px rgba(0,0,0,0.1);
   padding: var(--space-4);
   min-width: 280px;
+  max-width: 92vw;
   z-index: 2001;
   animation: menu-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -5358,7 +5435,8 @@ html { scroll-behavior: smooth; }
     background: #ffffff;
   }
   .resume-print-root .resume-canvas-preview {
-    padding: 12mm 12mm !important;
+    /* 兜底默认值；实际由 App.vue 的 printStyle inline 四边距覆盖 */
+    padding: 12mm;
     color: var(--text-primary) !important;
   }
   /* 关键：确保主题色、头像底色等被打印出来 */

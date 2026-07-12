@@ -137,8 +137,8 @@ export function renderItemHtml(type: string, item: any): string {
     }
     case 'strength': {
       let h = '<div class="preview-item">'
-      if (item.title) h += `<strong>${item.title}：</strong>`
-      if (item.content) h += `<span>${item.content}</span>`
+      if (item.title) h += `<strong class="preview-item-title">${item.title}</strong>：`
+      if (item.content) h += `<span class="preview-item-desc">${item.content}</span>`
       return h + '</div>'
     }
     default: {
@@ -192,12 +192,15 @@ export function generatePreviewHtml(
 export async function exportResumeImage(
   modules: ResumeModule[],
   avatar: AvatarConfig,
-  config: { fontFamily: string; fontSize: number; lineHeight: number; pageMargin: number; primaryColor: string },
+  config: { fontFamily: string; fontSize: number; lineHeight: number; pageMargin: number; primaryColor: string; marginTop?: number; marginRight?: number; marginBottom?: number; marginLeft?: number },
 ): Promise<void> {
   const html = generatePreviewHtml(modules, avatar)
   // A4 宽度（96dpi ≈ 210mm）
   const pageWidth = 794
-  const padding = config.pageMargin
+  const mt = config.marginTop ?? config.pageMargin ?? 12
+  const mr = config.marginRight ?? config.pageMargin ?? 12
+  const mb = config.marginBottom ?? config.pageMargin ?? 12
+  const ml = config.marginLeft ?? config.pageMargin ?? 12
 
   const wrapper = document.createElement('div')
   wrapper.style.position = 'fixed'
@@ -209,7 +212,7 @@ export async function exportResumeImage(
   wrapper.style.fontFamily = config.fontFamily
   wrapper.style.fontSize = `${config.fontSize}px`
   wrapper.style.lineHeight = String(config.lineHeight)
-  wrapper.style.padding = `${padding}px`
+  wrapper.style.padding = `${mt}mm ${mr}mm ${mb}mm ${ml}mm`
   wrapper.style.boxSizing = 'border-box'
   wrapper.innerHTML = html
   document.body.appendChild(wrapper)

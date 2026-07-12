@@ -89,6 +89,8 @@ const printStyle = computed(() => ({
   fontSize: `${store.config.fontSize}px`,
   lineHeight: String(store.config.lineHeight),
   color: 'var(--text-primary)',
+  // 四周边距（mm），由导出面板动态控制，覆盖 style.css 的兜底值
+  padding: `${store.config.marginTop}mm ${store.config.marginRight}mm ${store.config.marginBottom}mm ${store.config.marginLeft}mm`,
 }))
 
 function exportVectorPdf() {
@@ -223,6 +225,10 @@ async function handleExportImage() {
       lineHeight: store.config.lineHeight,
       pageMargin: store.config.pageMargin,
       primaryColor: store.config.primaryColor,
+      marginTop: store.config.marginTop,
+      marginRight: store.config.marginRight,
+      marginBottom: store.config.marginBottom,
+      marginLeft: store.config.marginLeft,
     })
   } catch (err) {
     console.error('导出图片失败', err)

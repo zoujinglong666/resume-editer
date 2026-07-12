@@ -672,6 +672,7 @@ export const useResumeStore = defineStore('resume', () => {
   const config = ref<ResumeConfig>({
     theme: 'default', primaryColor: '#2D5F7C', fontFamily: 'system-ui, -apple-system, sans-serif',
     fontSize: 14, lineHeight: 1.6, pageMargin: 20, titleStyle: 'underline',
+    marginTop: 12, marginRight: 12, marginBottom: 12, marginLeft: 12,
     moduleGap: 16, itemGap: 8, underlineWidth: 2
   })
   const avatar = ref<AvatarConfig>({ url: '', shape: 'circle' })
@@ -915,6 +916,7 @@ export const useResumeStore = defineStore('resume', () => {
   const DEFAULT_APPEARANCE: ResumeConfig = {
     theme: 'default', primaryColor: '#2D5F7C', fontFamily: 'system-ui, -apple-system, sans-serif',
     fontSize: 14, lineHeight: 1.6, pageMargin: 20, titleStyle: 'underline',
+    marginTop: 12, marginRight: 12, marginBottom: 12, marginLeft: 12,
     moduleGap: 16, itemGap: 8, underlineWidth: 2
   }
 
@@ -927,6 +929,10 @@ export const useResumeStore = defineStore('resume', () => {
     config.value.fontSize = d.fontSize
     config.value.lineHeight = d.lineHeight
     config.value.pageMargin = d.pageMargin
+    config.value.marginTop = d.marginTop
+    config.value.marginRight = d.marginRight
+    config.value.marginBottom = d.marginBottom
+    config.value.marginLeft = d.marginLeft
     config.value.titleStyle = d.titleStyle
     config.value.moduleGap = d.moduleGap
     config.value.itemGap = d.itemGap
@@ -1157,6 +1163,12 @@ export const useResumeStore = defineStore('resume', () => {
 
   function importData(data: ResumeData) {
     config.value = data.config
+    // 旧数据可能缺少四边距字段，统一兜底为 12mm
+    const c = config.value as ResumeConfig
+    if (typeof c.marginTop !== 'number') c.marginTop = 12
+    if (typeof c.marginRight !== 'number') c.marginRight = 12
+    if (typeof c.marginBottom !== 'number') c.marginBottom = 12
+    if (typeof c.marginLeft !== 'number') c.marginLeft = 12
     avatar.value = data.avatar
     modules.value = data.modules
     lastSaved.value = data.meta.lastSaved

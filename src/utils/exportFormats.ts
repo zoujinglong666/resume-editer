@@ -106,6 +106,10 @@ export function exportToHtml(modules: ResumeModule[], config?: ResumeConfig): st
   const fontSize = config?.fontSize || 14
   const lineHeight = config?.lineHeight || 1.6
   const primaryColor = config?.primaryColor || '#2D5F7C'
+  const mt = config?.marginTop ?? 12
+  const mr = config?.marginRight ?? 12
+  const mb = config?.marginBottom ?? 12
+  const ml = config?.marginLeft ?? 12
 
   let bodyHtml = ''
 
@@ -194,7 +198,7 @@ export function exportToHtml(modules: ResumeModule[], config?: ResumeConfig): st
       color: #333;
       max-width: 800px;
       margin: 0 auto;
-      padding: 40px;
+      padding: ${mt}mm ${mr}mm ${mb}mm ${ml}mm;
     }
     .resume-section { margin-bottom: 20px; }
     .section-title {
@@ -234,6 +238,14 @@ export async function exportToDocx(modules: ResumeModule[], config?: ResumeConfi
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle } = await import('docx')
 
   const primaryColor = (config?.primaryColor || '#2D5F7C').replace('#', '')
+  // mm → twips（1mm ≈ 56.6929 twips）
+  const mmToTwips = (mm?: number) => Math.round((mm ?? 12) * 56.6929)
+  const pageMargin = {
+    top: mmToTwips(config?.marginTop),
+    right: mmToTwips(config?.marginRight),
+    bottom: mmToTwips(config?.marginBottom),
+    left: mmToTwips(config?.marginLeft),
+  }
 
   const children: InstanceType<typeof Paragraph>[] = []
 
@@ -426,10 +438,10 @@ export async function exportToDocx(modules: ResumeModule[], config?: ResumeConfi
         properties: {
           page: {
             margin: {
-              top: 720,
-              right: 720,
-              bottom: 720,
-              left: 720,
+              top: pageMargin.top,
+              right: pageMargin.right,
+              bottom: pageMargin.bottom,
+              left: pageMargin.left,
             },
           },
         },
