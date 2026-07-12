@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, nextTick } from 'vue'
-import { smartPasteText, handleListEnter, isCursorInListItem } from '../../utils/smartPaste'
+import { handleListEnter, isCursorInListItem, handlePaste } from '../../utils/smartPaste'
 
 const props = defineProps<{
   modelValue: string
@@ -183,15 +183,7 @@ function emitValue() {
 }
 
 function onPaste(e: ClipboardEvent) {
-  e.preventDefault()
-  const text = e.clipboardData?.getData('text/plain') || ''
-  const html = smartPasteText(text)
-  if (html) {
-    document.execCommand('insertHTML', false, html)
-  } else {
-    document.execCommand('insertText', false, text)
-  }
-  setTimeout(emitValue, 0)
+  handlePaste(e, emitValue)
 }
 
 function onKeydown(e: KeyboardEvent) {

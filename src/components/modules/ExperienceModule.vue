@@ -2,7 +2,7 @@
   <div>
     <ItemContextMenu v-for="item in module.items" :key="item.id" :items="menuItemsFor(item.id)">
         <div class="module-item">
-      <div class="item-header">
+      <div class="item-header" style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
         <span
           class="item-title"
           contenteditable="true"
@@ -90,7 +90,7 @@ import { useResumeStore } from '../../stores/resume'
 import type { ResumeModule, ModuleItem } from '../../types'
 import ItemContextMenu, { type ContextMenuItem } from '../ItemContextMenu.vue'
 import { PopoverRoot, PopoverTrigger, PopoverPortal, PopoverContent, PopoverClose } from 'reka-ui'
-import { smartPasteText, handleListEnter } from '../../utils/smartPaste'
+import { handleListEnter, handlePaste } from '../../utils/smartPaste'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
@@ -194,15 +194,7 @@ function updateField(itemId: string, field: string, e: FocusEvent) {
 }
 
 function onPaste(e: ClipboardEvent) {
-  e.preventDefault()
-  const text = e.clipboardData?.getData('text/plain') || ''
-  // Smart paste: auto-convert numbered/bulleted text into HTML lists
-  const html = smartPasteText(text)
-  if (html) {
-    document.execCommand('insertHTML', false, html)
-  } else {
-    document.execCommand('insertText', false, text)
-  }
+  handlePaste(e)
 }
 
 function onKeydown(e: KeyboardEvent) {

@@ -49,6 +49,39 @@ export function smartPasteText(text: string): string | null {
   }
 }
 
+/** Escape HTML special chars so pasted text can never inject markup/styles. */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+/**
+ * Unified paste handler for ALL contenteditable fields.
+ *
+ * Strips every external style (font-size / color / background / etc.) by reading
+ * ONLY `text/plain` from the clipboard — `text/html` is never touched, so dirty
+ * formatting from web pages can never enter the document. Numbered/bulleted text
+ * is still converted into clean <ol>/<ul> lists (list item text is HTML-escaped).
+ *
+ * @param e        the paste event (will be preventDefault'd)
+ * @param onAfter  optional callback to sync content back to the store after insert
+ */
+export function handlePaste(e: ClipboardEvent, onAfter?: () => void): void {
+  e.preventDefault()
+  const text = e.clipboardData?.getData('text/plain') || ''
+  const html = smartPasteText(text)
+  if (html) {
+    // escape list content to avoid injecting any markup from pasted text
+    const safe = html.replace(/<li>(.*?)<\/li>/gs, (_m, c) => `<li>${escapeHtml(String(c))}</li>`)
+    document.execCommand('insertHTML', false, safe)
+  } else {
+    document.execCommand('insertText', false, text)
+  }
+  if (onAfter) setTimeout(onAfter, 0)
+}
+
 /**
  * Check if the cursor is currently inside a <li> element.
  */

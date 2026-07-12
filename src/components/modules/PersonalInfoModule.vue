@@ -135,6 +135,7 @@ import { ref } from 'vue'
 import { useResumeStore } from '../../stores/resume'
 import { showAlert } from '../../utils/confirm'
 import type { ResumeModule, ModuleItem, PersonalFieldConfig } from '../../types'
+import { handlePaste } from '../../utils/smartPaste'
 import {
   Phone, Mail, MapPin, Globe, Link, Briefcase, User, MessageCircle,
   Github, Linkedin, Calendar, Heart, Star, Award, BookOpen, Code,
@@ -229,9 +230,7 @@ function clearField(itemId: string, fieldKey: string) {
 }
 
 function onPaste(e: ClipboardEvent) {
-  e.preventDefault()
-  const text = e.clipboardData?.getData('text/plain') || ''
-  document.execCommand('insertText', false, text)
+  handlePaste(e)
 }
 
 async function onAvatarChange(e: Event) {

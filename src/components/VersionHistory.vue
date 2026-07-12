@@ -57,6 +57,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useResumeStore } from '../stores/resume'
+import { showToast } from '../utils/toast'
 
 const store = useResumeStore()
 
@@ -138,7 +139,7 @@ function restoreSnapshot(id: string) {
     const data = JSON.parse(snap.data)
     store.importData(data)
   } catch {
-    alert('恢复失败：数据解析错误')
+    showToast({ type: 'error', title: '恢复失败', description: '数据解析错误' })
   }
 }
 

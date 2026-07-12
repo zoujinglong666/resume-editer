@@ -14,25 +14,36 @@
 
     <!-- Module List -->
     <div class="panel-section">
-      <div class="panel-section-title">模块列表</div>
-      <div style="display: flex; flex-direction: column; gap: var(--space-0_5);">
-        <div
-          v-for="mod in store.modules"
-          :key="mod.id"
-          class="flex items-center transition-all text-sm cursor-pointer rounded"
-          style="gap: var(--tight-gap); padding: var(--list-item-padding-y) var(--list-item-padding-x);"
-          :style="store.selectedModuleId === mod.id
-            ? 'background: var(--primary-50); color: var(--primary-600);'
-            : ''"
-          @mouseenter="store.selectedModuleId !== mod.id && (($event.target as HTMLElement).style.background = 'var(--border-light)')"
-          @mouseleave="store.selectedModuleId !== mod.id && (($event.target as HTMLElement).style.background = '')"
-          @click="store.selectModule(mod.id)"
-        >
-          <span
-            class="eye-toggle shrink-0"
-            :class="{ hidden: !mod.visible }"
-            @click.stop="store.toggleModuleVisibility(mod.id)"
+      <div class="panel-section-title">模块列表 <span style="font-weight:400; color: var(--text-muted); text-transform: none; letter-spacing: 0; font-size: var(--font-size-xs);">（拖拽排序）</span></div>
+      <draggable
+        :list="moduleList"
+        item-key="id"
+        handle=".mod-drag-handle"
+        animation="200"
+        ghost-class="sortable-ghost"
+        class="flex flex-col"
+        style="gap: var(--space-0_5);"
+        @end="onModulesReordered"
+      >
+        <template #item="{ element: mod }">
+          <div
+            class="flex items-center transition-all text-sm cursor-pointer rounded group/mod"
+            style="gap: var(--tight-gap); padding: var(--list-item-padding-y) var(--list-item-padding-x);"
+            :style="store.selectedModuleId === mod.id
+              ? 'background: var(--primary-50); color: var(--primary-600);'
+              : ''"
+            @mouseenter="store.selectedModuleId !== mod.id && (($event.target as HTMLElement).style.background = 'var(--border-light)')"
+            @mouseleave="store.selectedModuleId !== mod.id && (($event.target as HTMLElement).style.background = '')"
+            @click="store.selectModule(mod.id)"
           >
+            <span class="mod-drag-handle cursor-move shrink-0" title="拖拽排序" style="opacity: 0.45;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
+            </span>
+            <span
+              class="eye-toggle shrink-0"
+              :class="{ hidden: !mod.visible }"
+              @click.stop="store.toggleModuleVisibility(mod.id)"
+            >
             <svg v-if="mod.visible" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
           </span>
@@ -46,8 +57,9 @@
             {{ store.completionByModule[mod.id].filled }}/{{ store.completionByModule[mod.id].total }}
           </span>
           <span v-else class="text-xs text-[var(--text-muted)]">#{{ mod.order + 1 }}</span>
-        </div>
-      </div>
+          </div>
+        </template>
+      </draggable>
     </div>
 
     <!-- Selected Module Detail -->
@@ -175,9 +187,20 @@
           <ItemContextMenu :items="menuItemsFor(item.id)">
           <div
             class="editor-card relative group/item"
+            :data-item-id="item.id"
+            :data-module-id="store.selectedModule!.id"
+            @focusin="store.selectItem(item.id)"
           >
-            <div class="flex items-center justify-between" style="margin-bottom: var(--normal-gap);">
+            <div class="flex items-center justify-between">
               <div class="flex items-center" style="gap: var(--tight-gap);">
+                <button
+                  class="item-collapse-btn"
+                  type="button"
+                  :title="isCollapsed(item.id) ? '展开' : '折叠'"
+                  @click="toggleCollapse(item.id)"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" :style="isCollapsed(item.id) ? 'transform: rotate(-90deg);' : ''"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
                 <span class="item-drag-handle cursor-move opacity-0 group-hover/item:opacity-100 transition-opacity" title="拖拽排序">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
                 </span>
@@ -185,12 +208,11 @@
                 <span class="text-xs font-semibold" style="color: var(--primary-600);">条目</span>
               </div>
               <button
-                class="text-xs font-medium transition-all opacity-0 group-hover/item:opacity-100 px-2 py-1 rounded hover:bg-[var(--color-error-50)]"
-                style="color: var(--color-error);"
+                class="ui-btn ui-btn--danger ui-btn--sm opacity-0 group-hover/item:opacity-100"
                 @click="store.removeItem(store.selectedModule!.id, item.id)"
               >删除</button>
             </div>
-            <div style="display: flex; flex-direction: column; gap: var(--form-field-gap);">
+            <div v-show="!isCollapsed(item.id)" style="display: flex; flex-direction: column; gap: var(--form-field-gap); margin-top: var(--normal-gap);">
               <template v-for="(val, key) in item" :key="String(key)">
                 <label
                   v-if="String(key) !== 'id' && String(key) !== 'personalFields' && typeof val === 'string'"
@@ -332,6 +354,28 @@ const AVAILABLE_ICONS = [
 ]
 
 const store = useResumeStore()
+
+// ---- Item Collapse ----
+const collapsedItems = ref<Set<string>>(new Set())
+function isCollapsed(id: string) {
+  return collapsedItems.value.has(id)
+}
+function toggleCollapse(id: string) {
+  const next = new Set(collapsedItems.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  collapsedItems.value = next
+}
+
+// ---- Module List Drag Reorder ----
+const moduleList = computed({
+  get: () => store.modules,
+  set: () => {} // drag mutation handled by draggable list mode; sync in @end
+})
+
+function onModulesReordered() {
+  store.reorderModules(moduleList.value)
+}
 
 // ---- Personal Field Management ----
 const newFieldLabel = ref('')

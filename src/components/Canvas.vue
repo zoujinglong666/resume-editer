@@ -8,7 +8,7 @@
       </label>
       <button
         v-if="!store.docRef"
-        class="text-sm px-2 py-1 bg-[var(--primary-500)] text-white rounded"
+        class="ui-btn ui-btn--primary ui-btn--sm"
         @click="store.migrateToNewModel()"
       >迁移到新模型</button>
     </div>

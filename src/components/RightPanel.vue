@@ -46,7 +46,10 @@
       <div v-if="selectedModule.items.length > 0" style="display: flex; flex-direction: column; gap: var(--normal-gap);">
         <div v-for="(item, idx) in selectedModule.items" :key="item.id"
           class="border border-[var(--border-color)] rounded-md relative group/item"
-          style="padding: var(--normal-gap);">
+          style="padding: var(--normal-gap);"
+          :data-item-id="item.id"
+          :data-module-id="selectedModule.id"
+          @focusin="store.selectItem(item.id)">
           <div class="flex items-center justify-between" style="margin-bottom: var(--tight-gap);">
             <span class="text-xs font-medium text-[var(--primary-color)]">条目 {{ idx + 1 }}</span>
             <button

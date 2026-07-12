@@ -4,6 +4,9 @@
     <div class="flex items-center" style="gap: var(--card-gap);">
       <span>完成度 {{ store.overallCompletion }}%</span>
       <span class="save-status-dot" :class="store.saveStatus" style="display: inline-block;" />
+      <Transition name="flash">
+        <span v-if="showSavedFlash" class="save-flash">已保存到本地 ✓</span>
+      </Transition>
     </div>
 
     <!-- Center -->
@@ -11,11 +14,11 @@
       <template v-for="(phase, idx) in phases" :key="phase.key">
         <span class="flex items-center" style="gap: var(--list-gap);">
           <span
-            class="inline-block w-2 h-2 rounded-full"
+            class="status-dot"
             :class="{
-              'bg-green-500': phaseOrder.indexOf(store.currentPhase) > idx,
-              'bg-[var(--primary-500)]': store.currentPhase === phase.key,
-              'bg-gray-600': phaseOrder.indexOf(store.currentPhase) < idx
+              'is-done': phaseOrder.indexOf(store.currentPhase) > idx,
+              'is-active': store.currentPhase === phase.key,
+              'is-todo': phaseOrder.indexOf(store.currentPhase) < idx
             }"
           />
           {{ phase.label }}
@@ -26,18 +29,26 @@
 
     <!-- Right -->
     <span class="flex items-center" style="gap: var(--normal-gap);">
+      <Transition name="flash">
+        <span v-if="showUndoToast" class="undo-toast">
+          已删除「{{ store.lastDeleted?.label }}」
+          <button class="undo-link" @click="onUndo">撤销</button>
+        </span>
+      </Transition>
       <button
-        class="model-toggle-btn"
+        class="ui-chip"
+        :class="{ 'is-active': store.useNewModel }"
         :title="store.useNewModel ? '当前：新模型（点击切换旧模型）' : '当前：旧模型（点击切换新模型）'"
         @click="store.toggleModel()"
       >
-        {{ store.useNewModel ? '⚡ 新模型' : '📄 旧模型' }}
+        <span class="status-dot" :class="store.useNewModel ? 'is-active' : 'is-todo'" />
+        {{ store.useNewModel ? '新模型' : '旧模型' }}
       </button>
       <span>
         <template v-if="store.useNewModel && store.docRef">
           元素 {{ store.getElements.length }}
           <template v-if="store.recycleBin.length > 0">
-            · <span style="color: #fbbf24;">回收站 {{ store.recycleBin.length }}</span>
+            · <span style="color: var(--accent-500);">回收站 {{ store.recycleBin.length }}</span>
           </template>
           ·
         </template>
@@ -48,10 +59,33 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import { useResumeStore } from '../stores/resume'
 
 defineProps<{ charCount: number }>()
 const store = useResumeStore()
+
+const showSavedFlash = ref(false)
+let flashTimer: ReturnType<typeof setTimeout> | null = null
+watch(() => store.saveFlashAt, (ts) => {
+  if (!ts) return
+  showSavedFlash.value = true
+  if (flashTimer) clearTimeout(flashTimer)
+  flashTimer = setTimeout(() => { showSavedFlash.value = false }, 2000)
+})
+
+const showUndoToast = ref(false)
+let undoTimer: ReturnType<typeof setTimeout> | null = null
+watch(() => store.undoToastAt, (ts) => {
+  if (!ts) return
+  showUndoToast.value = true
+  if (undoTimer) clearTimeout(undoTimer)
+  undoTimer = setTimeout(() => { showUndoToast.value = false }, 5000)
+})
+function onUndo() {
+  store.undoLastDelete()
+  showUndoToast.value = false
+}
 
 const phases = [
   { key: 'fill' as const, label: '填写' },

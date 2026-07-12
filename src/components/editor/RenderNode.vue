@@ -645,6 +645,12 @@ function onItemInput(_e: InputEvent) {
   border-radius: 2px;
 }
 
+/* 姓名 / 大标题：使用相对全局字号的刻度，使全局字号滑块对其也生效 */
+.element-type-heading .node-text-content {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-tight);
+}
+
 .node-text-content:empty::before {
   content: attr(data-placeholder);
   color: var(--text-muted);

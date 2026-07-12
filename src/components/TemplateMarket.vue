@@ -95,6 +95,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useResumeStore } from '../stores/resume'
+import { showToast } from '../utils/toast'
 
 const store = useResumeStore()
 
@@ -206,7 +207,7 @@ async function loadBuiltInTemplate(tpl: BuiltInTemplate) {
     const data = await res.json()
     store.importData(data)
   } catch {
-    alert('模板加载失败，请检查网络连接')
+    showToast({ type: 'error', title: '模板加载失败', description: '请检查网络连接' })
   }
 }
 

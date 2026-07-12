@@ -27,6 +27,7 @@
 import { useResumeStore } from '../../stores/resume'
 import type { ResumeModule } from '../../types'
 import ItemContextMenu, { type ContextMenuItem } from '../ItemContextMenu.vue'
+import { handlePaste } from '../../utils/smartPaste'
 
 const props = defineProps<{ module: ResumeModule }>()
 const store = useResumeStore()
@@ -105,8 +106,6 @@ function updateField(itemId: string, field: string, e: FocusEvent) {
 }
 
 function onPaste(e: ClipboardEvent) {
-  e.preventDefault()
-  const text = e.clipboardData?.getData('text/plain') || ''
-  document.execCommand('insertText', false, text)
+  handlePaste(e)
 }
 </script>

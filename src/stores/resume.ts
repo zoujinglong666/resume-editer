@@ -5,7 +5,6 @@ import type {
   ResumeDocument, ResumePage, ResumeElement, ElementType, ResumeTemplate, ResumeVersion, PersonalFieldConfig,
 } from '../types'
 import { migrateResumeDataToDocument } from '../types'
-import { showConfirm } from '../utils/confirm'
 
 // ===== Helper: generate UUID =====
 function uuid(): string {
@@ -243,7 +242,7 @@ function createDefaultDocument(): ResumeDocument {
     // ── Name & Position (Heading) ──
     el('heading', {
       content: d.name,
-      style: { fontSize: 28, fontWeight: 'bold', color: '#1a1a2e', marginBottom: 0 },
+      style: { fontWeight: 'bold', color: '#1a1a2e', marginBottom: 0 },
     }),
     el('text', {
       content: d.position,
@@ -261,18 +260,18 @@ function createDefaultDocument(): ResumeDocument {
 
     // ── Personal Summary ──
     ...mod('个人总结', 'custom', [
-      itemHtml(`<div style="font-size:14px;line-height:1.7;color:#444">${d.summary}</div>`),
+      itemHtml(`<div style="font-size:var(--font-size-base);line-height:1.7;color:#444">${d.summary}</div>`),
     ]),
 
     // ── Education ──
     ...mod('教育经历', 'education', d.education.map(edu => itemHtml(
       `<div style="margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
-          <strong style="font-size:15px;color:#1a1a2e">${edu.school}</strong>
-          <span style="font-size:12px;color:#888">${edu.dateRange}</span>
+          <strong style="font-size:var(--font-size-lg);color:#1a1a2e">${edu.school}</strong>
+          <span style="font-size:var(--font-size-sm);color:#888">${edu.dateRange}</span>
         </div>
-        <div style="font-size:13px;color:#555;margin:2px 0">${edu.degree} · ${edu.major}</div>
-        <ul style="font-size:13px;color:#555;line-height:1.7;margin-top:6px;padding-left:18px">
+        <div style="font-size:var(--font-size-sm);color:#555;margin:2px 0">${edu.degree} · ${edu.major}</div>
+        <ul style="font-size:var(--font-size-sm);color:#555;line-height:1.7;margin-top:6px;padding-left:18px">
           ${edu.description.split('\n').map(line => `<li>${line.replace(/^•\s*/, '')}</li>`).join('')}
         </ul>
       </div>`
@@ -282,10 +281,10 @@ function createDefaultDocument(): ResumeDocument {
     ...mod('工作经历', 'experience', d.experience.map(exp => itemHtml(
       `<div style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
-          <div><strong style="font-size:15px;color:#1a1a2e">${exp.company}</strong><span style="font-size:13px;color:#666;margin-left:8px">${exp.position}</span></div>
-          <span style="font-size:12px;color:#888">${exp.dateRange}</span>
+          <div><strong style="font-size:var(--font-size-lg);color:#1a1a2e">${exp.company}</strong><span style="font-size:var(--font-size-sm);color:#666;margin-left:8px">${exp.position}</span></div>
+          <span style="font-size:var(--font-size-sm);color:#888">${exp.dateRange}</span>
         </div>
-        <ul style="font-size:13px;color:#444;line-height:1.75;margin-top:8px;padding-left:18px">
+        <ul style="font-size:var(--font-size-sm);color:#444;line-height:1.75;margin-top:8px;padding-left:18px">
           ${exp.description.split('\n\n').map(block => `<li>${block.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('')}
         </ul>
       </div>`
@@ -295,11 +294,11 @@ function createDefaultDocument(): ResumeDocument {
     ...mod('项目经历', 'project', d.projects.map(prj => itemHtml(
       `<div style="margin-bottom:14px">
         <div style="display:flex;justify-content:space-between;align-items:baseline">
-          <strong style="font-size:15px;color:#1a1a2e">${prj.name}</strong>
-          <span style="font-size:12px;color:#888">${prj.dateRange}</span>
+          <strong style="font-size:var(--font-size-lg);color:#1a1a2e">${prj.name}</strong>
+          <span style="font-size:var(--font-size-sm);color:#888">${prj.dateRange}</span>
         </div>
-        <div style="font-size:12px;color:#6366f1;margin:2px 0">${prj.role}</div>
-        <ul style="font-size:13px;color:#444;line-height:1.7;margin-top:6px;padding-left:18px">
+        <div style="font-size:var(--font-size-sm);color:#6366f1;margin:2px 0">${prj.role}</div>
+        <ul style="font-size:var(--font-size-sm);color:#444;line-height:1.7;margin-top:6px;padding-left:18px">
           ${prj.description.split('\n\n').pop()?.split('\n').map(line => line.startsWith('•') ? `<li>${line.slice(1).trim()}</li>` : '').filter(Boolean).join('') || ''}
         </ul>
       </div>`
@@ -307,21 +306,21 @@ function createDefaultDocument(): ResumeDocument {
 
     // ── Skills (list mode: 类别：关键词) ──
     ...mod('专业技能', 'skill', d.skills.map(sk => itemHtml(
-      `<div style="font-size:13px;line-height:1.7;color:#444;margin-bottom:4px">
+      `<div style="font-size:var(--font-size-sm);line-height:1.7;color:#444;margin-bottom:4px">
         <strong style="color:#1a1a2e">${sk.name}：</strong>${sk.content}
       </div>`
     ))),
 
     // ── Other Works (compact list) ──
     ...mod('其他个人作品', 'custom', d.otherWorks.map(w => itemHtml(
-      `<div style="font-size:13px;line-height:1.7;color:#444;margin-bottom:3px">
+      `<div style="font-size:var(--font-size-sm);line-height:1.7;color:#444;margin-bottom:3px">
         <strong style="color:#1a1a2e">${w.name}</strong> · ${w.content}
       </div>`
     ))),
 
     // ── Strengths (能力标签：量化事实) ──
     ...mod('个人优势', 'strength', d.strengths.map(s => itemHtml(
-      `<div style="font-size:13px;line-height:1.7;color:#444;margin-bottom:4px">
+      `<div style="font-size:var(--font-size-sm);line-height:1.7;color:#444;margin-bottom:4px">
         <strong style="color:#1a1a2e">${s.title}：</strong>${s.content}
       </div>`
     ))),
@@ -523,6 +522,116 @@ export const THEME_PRESETS: ThemePreset[] = [
     primaryColor: '#14532D', accentColor: '#15803D',
     bgColor: '#F1F8F3', surfaceColor: '#FFFFFF',
     textPrimary: '#333333', textSecondary: '#5D7A66', borderColor: '#C9E2D0'
+  },
+
+  // ===== 中国传统色（国色） =====
+  {
+    name: '胭脂', id: 'guose-yanzhi',
+    primaryColor: '#9D2933', accentColor: '#C03A4B',
+    bgColor: '#FBF4F5', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A676C', borderColor: '#EFD7DB'
+  },
+  {
+    name: '海棠红', id: 'guose-haitang',
+    primaryColor: '#DB5A6B', accentColor: '#E87C8C',
+    bgColor: '#FEF5F7', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A6B73', borderColor: '#F2D8DE'
+  },
+  {
+    name: '殷红', id: 'guose-yanhong',
+    primaryColor: '#BD1A2D', accentColor: '#D6444F',
+    bgColor: '#FBF3F4', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A666B', borderColor: '#EFD4D7'
+  },
+  {
+    name: '茜色', id: 'guose-qianse',
+    primaryColor: '#CB3A56', accentColor: '#DD5E77',
+    bgColor: '#FBF4F6', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A6B73', borderColor: '#F0D8DF'
+  },
+  {
+    name: '妃色', id: 'guose-feise',
+    primaryColor: '#CC4B2C', accentColor: '#E2683F',
+    bgColor: '#FBF5F2', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A6E65', borderColor: '#EFD8CE'
+  },
+  {
+    name: '橘红', id: 'guose-juhong',
+    primaryColor: '#C75E00', accentColor: '#E87A1E',
+    bgColor: '#FBF6F1', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A7360', borderColor: '#EFDBCA'
+  },
+  {
+    name: '杏黄', id: 'guose-xinghuang',
+    primaryColor: '#C8901E', accentColor: '#E2A63F',
+    bgColor: '#FBF8F1', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A7A60', borderColor: '#EFE3CA'
+  },
+  {
+    name: '缃色', id: 'guose-xiangse',
+    primaryColor: '#B8920E', accentColor: '#D6B238',
+    bgColor: '#FBF9F0', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#8A8260', borderColor: '#EFE7C6'
+  },
+  {
+    name: '黛', id: 'guose-dai',
+    primaryColor: '#4A4266', accentColor: '#6A5F8C',
+    bgColor: '#F5F4FA', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6E6A8A', borderColor: '#DCDAEA'
+  },
+  {
+    name: '黛紫', id: 'guose-daizi',
+    primaryColor: '#574266', accentColor: '#75618A',
+    bgColor: '#F6F4F9', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#746A82', borderColor: '#E0D7E8'
+  },
+  {
+    name: '青莲', id: 'guose-qinglian',
+    primaryColor: '#801DAE', accentColor: '#9B50C4',
+    bgColor: '#FAF4FC', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#806A8A', borderColor: '#ECD8F2'
+  },
+  {
+    name: '雪青', id: 'guose-xueqing',
+    primaryColor: '#6F5FA8', accentColor: '#9183D4',
+    bgColor: '#F5F4FB', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6E6A8E', borderColor: '#DCD7EE'
+  },
+  {
+    name: '石青', id: 'guose-shiqing',
+    primaryColor: '#1685A9', accentColor: '#2BA3C9',
+    bgColor: '#F0F8FB', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#5F8693', borderColor: '#C6E2EC'
+  },
+  {
+    name: '群青', id: 'guose-qunqing',
+    primaryColor: '#3A6EA5', accentColor: '#5C8CC2',
+    bgColor: '#F2F6FB', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#607A9A', borderColor: '#CAD9ED'
+  },
+  {
+    name: '靛蓝', id: 'guose-dianlan',
+    primaryColor: '#065279', accentColor: '#1C7BA6',
+    bgColor: '#F0F6FA', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#5F7E93', borderColor: '#C6DEEC'
+  },
+  {
+    name: '竹青', id: 'guose-zhuqing',
+    primaryColor: '#4E7A4A', accentColor: '#6E9A68',
+    bgColor: '#F2F8F2', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#5F7E5F', borderColor: '#CDE0CD'
+  },
+  {
+    name: '水色', id: 'guose-shuise',
+    primaryColor: '#5E847C', accentColor: '#7FA69E',
+    bgColor: '#F2F8F7', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#6A857F', borderColor: '#CDE3E0'
+  },
+  {
+    name: '紫檀', id: 'guose-zitan',
+    primaryColor: '#4C221B', accentColor: '#6E3A2E',
+    bgColor: '#FAF5F4', surfaceColor: '#FFFFFF',
+    textPrimary: '#333333', textSecondary: '#7A665E', borderColor: '#EAD8D4'
   }
 ]
 
@@ -572,8 +681,10 @@ export const useResumeStore = defineStore('resume', () => {
 
   // ---- New: Panel Coordination State ----
   const selectedModuleId = ref<string | null>(null)
+  const selectedItemId = ref<string | null>(null)
   const currentPhase = ref<'fill' | 'style' | 'export'>('fill')
   const saveStatus = ref<'saved' | 'saving' | 'unsaved'>('saved')
+  const saveFlashAt = ref(0)
   let saveTimer: ReturnType<typeof setTimeout> | null = null
 
   // ---- New: Document Model (Phase 1 Refactor) ----
@@ -800,6 +911,29 @@ export const useResumeStore = defineStore('resume', () => {
     document.documentElement.style.setProperty('--font-family', font)
   }
 
+  // 外观默认配置（用于「恢复默认设置」）
+  const DEFAULT_APPEARANCE: ResumeConfig = {
+    theme: 'default', primaryColor: '#2D5F7C', fontFamily: 'system-ui, -apple-system, sans-serif',
+    fontSize: 14, lineHeight: 1.6, pageMargin: 20, titleStyle: 'underline',
+    moduleGap: 16, itemGap: 8, underlineWidth: 2
+  }
+
+  // 恢复外观默认设置：主题 / 标题样式 / 字体排版 / 间距全部回到初始状态
+  function resetAppearance() {
+    const d = DEFAULT_APPEARANCE
+    config.value.theme = d.theme
+    config.value.primaryColor = d.primaryColor
+    config.value.fontFamily = d.fontFamily
+    config.value.fontSize = d.fontSize
+    config.value.lineHeight = d.lineHeight
+    config.value.pageMargin = d.pageMargin
+    config.value.titleStyle = d.titleStyle
+    config.value.moduleGap = d.moduleGap
+    config.value.itemGap = d.itemGap
+    config.value.underlineWidth = d.underlineWidth
+    applyCssVarsFromConfig()
+  }
+
   function updateModule(moduleId: string, patch: Partial<ResumeModule>) {
     const mod = modules.value.find(m => m.id === moduleId)
     if (mod) Object.assign(mod, patch)
@@ -812,7 +946,7 @@ export const useResumeStore = defineStore('resume', () => {
     if (item) item[field] = value
   }
 
-  function addItem(moduleId: string) {
+  function addItem(moduleId: string, afterItemId?: string) {
     const mod = modules.value.find(m => m.id === moduleId)
     if (!mod) return
     const defaults: Record<string, string> = {
@@ -828,12 +962,66 @@ export const useResumeStore = defineStore('resume', () => {
     if (mod.type === 'personal') {
       newItem.personalFields = createDefaultPersonalFields()
     }
+    if (afterItemId) {
+      const idx = mod.items.findIndex(i => i.id === afterItemId)
+      if (idx >= 0) {
+        mod.items.splice(idx + 1, 0, newItem)
+        return
+      }
+    }
     mod.items.push(newItem)
+  }
+
+  // ---- Delete Undo (status-bar toast) ----
+  interface LastDeleted {
+    kind: 'module' | 'item'
+    label: string
+    moduleId: string
+    snapshot: ResumeModule | ModuleItem
+    index?: number
+  }
+  const lastDeleted = ref<LastDeleted | null>(null)
+  const undoToastAt = ref(0)
+
+  function itemTitle(item: ModuleItem): string {
+    return item.name || item.title || item.school || item.company || item.position || ''
   }
 
   function removeItem(moduleId: string, itemId: string) {
     const mod = modules.value.find(m => m.id === moduleId)
-    if (mod) mod.items = mod.items.filter(i => i.id !== itemId)
+    if (!mod) return
+    const idx = mod.items.findIndex(i => i.id === itemId)
+    if (idx < 0) return
+    const item = mod.items[idx]
+    lastDeleted.value = {
+      kind: 'item',
+      label: itemTitle(item) || '条目',
+      moduleId,
+      snapshot: JSON.parse(JSON.stringify(item)),
+      index: idx,
+    }
+    mod.items = mod.items.filter(i => i.id !== itemId)
+    undoToastAt.value = Date.now()
+  }
+
+  function undoLastDelete() {
+    const d = lastDeleted.value
+    if (!d) return
+    if (d.kind === 'module') {
+      const mod = d.snapshot as ResumeModule
+      if (!modules.value.some(m => m.id === mod.id)) {
+        modules.value = [...modules.value, mod]
+        modules.value.sort((a, b) => a.order - b.order)
+      }
+    } else {
+      const mod = modules.value.find(m => m.id === d.moduleId)
+      if (mod) {
+        const item = d.snapshot as ModuleItem
+        const at = Math.min(d.index ?? mod.items.length, mod.items.length)
+        mod.items.splice(at, 0, item)
+      }
+    }
+    lastDeleted.value = null
   }
 
   function duplicateItem(moduleId: string, itemId: string) {
@@ -858,14 +1046,18 @@ export const useResumeStore = defineStore('resume', () => {
     mod.items[targetIdx] = temp
   }
 
-  async function removeModule(moduleId: string) {
-    const ok = await showConfirm({
-      title: '删除模块',
-      description: '确定要删除整个模块吗？此操作不可撤销。',
-    })
-    if (!ok) return
+  function removeModule(moduleId: string) {
+    const mod = modules.value.find(m => m.id === moduleId)
+    if (!mod) return
+    lastDeleted.value = {
+      kind: 'module',
+      label: mod.title || '模块',
+      moduleId,
+      snapshot: JSON.parse(JSON.stringify(mod)),
+    }
     modules.value = modules.value.filter(m => m.id !== moduleId)
     if (selectedModuleId.value === moduleId) selectedModuleId.value = null
+    undoToastAt.value = Date.now()
   }
 
   function addModule(type: ModuleType, title?: string): string | null {
@@ -922,6 +1114,10 @@ export const useResumeStore = defineStore('resume', () => {
   // ---- New: Panel Coordination Actions ----
   function selectModule(moduleId: string | null) {
     selectedModuleId.value = moduleId
+    selectedItemId.value = null
+  }
+  function selectItem(itemId: string | null) {
+    selectedItemId.value = itemId
   }
 
   function setPhase(phase: 'fill' | 'style' | 'export') {
@@ -934,6 +1130,19 @@ export const useResumeStore = defineStore('resume', () => {
     saveTimer = setTimeout(() => {
       saveStatus.value = 'saved'
     }, 800)
+  }
+
+  // 立即保存到本地（Ctrl/Cmd + S），并触发状态栏提示
+  function saveNow() {
+    saveStatus.value = 'saving'
+    try {
+      ;(useResumeStore() as any).$persist?.()
+    } catch {
+      // persist 失败时退回到自动保存节拍
+    }
+    lastSaved.value = new Date().toISOString()
+    saveStatus.value = 'saved'
+    saveFlashAt.value = Date.now()
   }
 
   // ---- Data Persistence ----
@@ -1207,15 +1416,16 @@ export const useResumeStore = defineStore('resume', () => {
     // Phase 1 新文档模型状态
     config, avatar, modules, lastSaved,
     docRef, useNewModel, selectedElementId, recycleBin,
-    selectedModuleId, currentPhase, saveStatus,
+    lastDeleted, undoToastAt, undoLastDelete,
+    selectedModuleId, selectedItemId, currentPhase, saveStatus, saveFlashAt,
     selectedModule,
     // Phase 1 新 computed
     currentPage, getElements, selectedElement,
     visibleModules, charCount,
     completionByModule, overallCompletion, emptyModuleCount,
     canUndo, canRedo,
-    selectModule, setPhase, markSaving,
-    applyTheme, applyCssVars, applyCssVarsFromConfig, setPrimaryColor, setTitleStyle, setFontFamily,
+    selectModule, selectItem, setPhase, markSaving, saveNow,
+    applyTheme, applyCssVars, applyCssVarsFromConfig, setPrimaryColor, setTitleStyle, setFontFamily, resetAppearance,
     updateModule, updateItem, addItem, removeItem,
     duplicateItem, moveItem, removeModule, addModule,
     toggleModuleVisibility, toggleModuleTitle, reorderModules, setAvatar,

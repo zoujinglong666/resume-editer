@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { loadAiConfig, aiPolishContent, type AiConfig } from '../utils/ai'
+import { showToast } from '../utils/toast'
 const visible = ref(false)
 const isPolishing = ref(false)
 const positionStyle = ref<Record<string, string>>({})
@@ -38,7 +39,7 @@ function handlePolishSelection() {
 
   const config = getAiConfig()
   if (!config) {
-    alert('请先配置 AI API Key')
+    showToast({ type: 'warning', title: '请先配置 AI API Key' })
     isPolishing.value = false
     return
   }
@@ -56,7 +57,7 @@ function handlePolishSelection() {
       selection.addRange(range)
     }
   }).catch(err => {
-    alert(`AI 润色失败: ${err instanceof Error ? err.message : String(err)}`)
+    showToast({ type: 'error', title: 'AI 润色失败', description: err instanceof Error ? err.message : String(err) })
   }).finally(() => {
     isPolishing.value = false
   })

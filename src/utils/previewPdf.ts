@@ -223,9 +223,13 @@ export async function exportResumeImage(
 
   try {
     const { default: html2canvas } = await import('html2canvas')
+    // 清晰度：scale 直接决定输出像素密度。
+    // 基础 3（≈300 DPI @ A4），高 DPI 屏取更高值，上限 4 避免内存过大。
+    const dpr = window.devicePixelRatio || 1
+    const scale = Math.min(4, Math.max(3, Math.ceil(dpr * 2)))
     const canvas = await html2canvas(wrapper, {
       backgroundColor: '#ffffff',
-      scale: 2,
+      scale,
       useCORS: true,
       logging: false,
     })

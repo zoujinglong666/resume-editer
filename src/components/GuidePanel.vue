@@ -20,7 +20,7 @@
         <div class="panel-section-title">填写提示</div>
         <div class="text-xs leading-relaxed" style="color: var(--sidebar-muted); display: flex; flex-direction: column; gap: var(--normal-gap);">
           <p>点击左侧模块列表，或直接在画布上点击要编辑的模块。</p>
-          <p>标题带 <span style="color: #f87171;">*</span> 的字段建议必填。</p>
+          <p>标题带 <span style="color: var(--color-error);">*</span> 的字段建议必填。</p>
           <p class="flex items-center" style="gap: var(--tight-gap);">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/></svg>
             拖拽模块可调整顺序
@@ -57,6 +57,13 @@
 
     <!-- Phase 2: Style mode -->
     <template v-if="store.currentPhase === 'style'">
+      <div class="panel-section" style="border-bottom: none;">
+        <button class="reset-appearance-btn" @click="store.resetAppearance()" title="将主题、字体、间距等外观恢复为默认设置">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          恢复默认设置
+        </button>
+      </div>
+
       <!-- Theme -->
       <div class="panel-section">
         <div class="panel-section-title">主题</div>
@@ -309,13 +316,11 @@
             v-model="snapshotName"
             type="text"
             placeholder="给当前简历起个名，如：字节内推"
-            class="flex-1 text-sm border border-[var(--border-color)] rounded-md"
-            style="padding: var(--space-1_5) var(--space-2); background: rgba(255,255,255,0.04); color: var(--sidebar-text);"
+            class="ui-input ui-input--dark"
             @keydown.enter="handleSaveSnapshot"
           />
           <button
-            class="rounded-md text-sm text-white hover:opacity-90 transition-all"
-            style="padding: var(--space-1_5) var(--space-2); background: var(--primary-color);"
+            class="ui-btn ui-btn--primary ui-btn--block"
             @click="handleSaveSnapshot"
           >保存为快照</button>
         </div>
@@ -335,7 +340,7 @@
           <div class="flex justify-between">
             <span>完成度</span>
             <span style="font-family: var(--font-mono);"
-                  :style="{ color: store.overallCompletion === 100 ? 'var(--color-success)' : '#fbbf24' }">
+                  :style="{ color: store.overallCompletion === 100 ? 'var(--color-success)' : 'var(--accent-500)' }">
               {{ store.overallCompletion }}%
             </span>
           </div>
@@ -427,10 +432,10 @@ const previewStyle = computed(() => ({
   lineHeight: String(store.config.lineHeight),
 }))
 
-const themeNames: Record<string, string> = {
-  default: '青瓦', green: '松烟', wine: '朱砂', dark: '墨石', orange: '暮橘',
-  indigo: '鸢尾', teal: '竹青', rose: '胭脂', navy: '藏蓝', brown: '檀木'
-}
+// 由 THEME_PRESETS 自动生成，避免新增主题后预览条显示「自定义」
+const themeNames: Record<string, string> = Object.fromEntries(
+  THEME_PRESETS.map(t => [t.id, t.name])
+)
 
 const titleStyles = [
   { id: 'underline', name: '下划线' },
